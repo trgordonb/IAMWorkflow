@@ -1,0 +1,31 @@
+{
+  "name": "iamtest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "engines": {
+    "node": "16.x"
+  },
+  "scripts": {
+    "dev": "nodemon -r dotenv/config index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@adminjs/design-system": "^2.1.0",
+    "@adminjs/express": "^4.0.2",
+    "@adminjs/mongoose": "^2.0.1",
+    "adminjs": "^5.6.2",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "express-formidable": "^1.2.0",
+    "mongoose": "^6.2.2",
+    "mongoose-plugin-autoinc-fix": "^1.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
