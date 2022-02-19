@@ -29,6 +29,9 @@ const DemandNoteModel = require('./models/demand-note.model')
 const adminJs = new AdminJS({
     databases: [mongoose],
     rootPath: '/admin',
+    dashboard: {
+        component: AdminJS.bundle('./components/CustomDashboard')
+    },
     resources: [
         { 
             resource: CustodianModel, options: { 
@@ -64,6 +67,14 @@ const adminJs = new AdminJS({
         },
         {
             resource: AccountLedgerBalanceModel, options: {
+                properties: {
+                    accountopendate: {
+                        type: 'date'
+                    },
+                    accountenddate: {
+                        type: 'date'
+                    }
+                },
                 listProperties: ['client', 'accountnumber', 'accountstatus'],
                 editProperties: ['client', 'accountnumber', 'accountstatus', 'accountopendate', 'accountenddate', 'discretionarymanage',
                 'aum_USD', 'aum_HKD', 'aum_EUR', 'estimatedfee', 'advisorfee', 'retrocession'],
@@ -106,6 +117,11 @@ const adminJs = new AdminJS({
         },
         { 
             resource: CurrencyHistoryModel, options: { 
+                properties: {
+                    date: {
+                        type: 'date'
+                    }
+                },
                 listProperties: ['currency','date','rate'],
                 editProperties: ['currency','date','rate'],
                 filterProperties: ['currency','date','rate'],
@@ -165,6 +181,14 @@ const adminJs = new AdminJS({
         },
         {
             resource: AccountFeeModel, options: {
+                properties: {
+                    startDate: {
+                        type: 'date'
+                    },
+                    endDate: {
+                        type: 'date'
+                    }
+                },
                 listProperties: ['accountnumber','startDate','endDate','feeSharingScheme'],
                 editProperties: ['accountnumber','startDate','endDate','feeSharingScheme'],
                 filterProperties: ['accountnumber','startDate','endDate','feeSharingScheme'],
@@ -181,6 +205,7 @@ const adminJs = new AdminJS({
                         isVisible: { list: true, filter: true, show: true, edit: true },
                     },
                     date: {
+                        type: 'date',
                         isVisible: { list: true, filter: true, show: true, edit: true },
                     },
                     providerStatement: {
@@ -193,12 +218,15 @@ const adminJs = new AdminJS({
                         isVisible: { list: false, filter: false, show: true, edit: true },
                     },
                     serviceFeeStartDate: {
+                        type: 'date',
                         isVisible: { list: false, filter: false, show: true, edit: true },
                     },
                     serviceFeeEndDate: {
+                        type: 'date',
                         isVisible: { list: false, filter: false, show: true, edit: true },
                     },
                     receivedDate: {
+                        type: 'date',
                         isVisible: { list: false, filter: false, show: true, edit: true },
                     },
                     receivedPayee: {
@@ -221,7 +249,7 @@ const adminJs = new AdminJS({
     branding: {
         logo: false,
         companyName: 'IAM Legacy',
-        softwareBrothers: false
+        softwareBrothers: false,
     },
     locale: {
         translations: {
