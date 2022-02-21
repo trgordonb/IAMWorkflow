@@ -21,6 +21,7 @@ const CurrencyHistoryModel = require('./models/currency-history.model')
 const FeeSharingSchemeModel = require('./models/fee-sharing.model')
 const AccountFeeModel = require('./models/account-fee.model')
 const DemandNoteModel = require('./models/demand-note.model')
+const PolicyFeeSettingModel = require('./models/policyfee-setting.model')
 
 //const menu = {
 //    Master: { name: 'Master', icon: 'SpineLabel' },
@@ -68,19 +69,70 @@ const adminJs = new AdminJS({
         {
             resource: AccountLedgerBalanceModel, options: {
                 properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    },
+                    accountnumber: {
+                        isVisible: { list: true, filter: true, show: true, edit: true },
+                    },
+                    NAVDate: {
+                        type: 'date',
+                        isVisible: { list: true, filter: true, show: true, edit: true },
+                    },
+                    AUM: {
+                        isVisible: { list: true, filter: false, show: true, edit: true },
+                    },
+                    currency: {
+                        isVisible: { list: true, filter: true, show: true, edit: true },
+                    },
+                    estimatedfee: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    overrideAdvisorFee: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    advisorfee: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    retrocession: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    }
+                }
+            }
+        },
+        {
+            resource: PolicyFeeSettingModel, options: {
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    },
+                    accountnumber: {
+                        isVisible: { list: true, filter: true, show: true, edit: true },
+                    },
+                    custodian: {
+                        isVisible: { list: true, filter: true, show: true, edit: true },
+                    },
                     accountopendate: {
-                        type: 'date'
+                        type: 'date',
+                        isVisible: { list: false, filter: false, show: true, edit: true },
                     },
                     accountenddate: {
-                        type: 'date'
+                        type: 'date',
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    accountstatus: {
+                        isVisible: { list: true, filter: true, show: true, edit: true },
+                    },
+                    discretionarymanage: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    advisorfee: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    retrocession: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
                     }
-                },
-                listProperties: ['client', 'accountnumber', 'accountstatus'],
-                editProperties: ['client', 'accountnumber', 'accountstatus', 'accountopendate', 'accountenddate', 'discretionarymanage',
-                'aum_USD', 'aum_HKD', 'aum_EUR', 'estimatedfee', 'advisorfee', 'retrocession'],
-                filterProperties: ['client', 'accountnumber', 'accountstatus', 'accountopendate', 'accountenddate', 'discretionarymanage'],
-                showProperties: ['client', 'accountnumber', 'accountstatus', 'accountopendate', 'accountenddate', 'discretionarymanage',
-                'aum_USD', 'aum_HKD', 'aum_EUR', 'estimatedfee', 'advisorfee', 'retrocession'],
+                }
             }
         },
         {
@@ -189,10 +241,10 @@ const adminJs = new AdminJS({
                         type: 'date'
                     }
                 },
-                listProperties: ['accountnumber','startDate','endDate','feeSharingScheme'],
-                editProperties: ['accountnumber','startDate','endDate','feeSharingScheme'],
-                filterProperties: ['accountnumber','startDate','endDate','feeSharingScheme'],
-                showProperties: ['accountnumber','startDate','endDate','feeSharingScheme']
+                listProperties: ['accountnumber','statementCode','startDate','endDate','feeSharingScheme'],
+                editProperties: ['accountnumber','statementCode','startDate','endDate','feeSharingScheme'],
+                filterProperties: ['accountnumber','statementCode','startDate','endDate','feeSharingScheme'],
+                showProperties: ['accountnumber','statementCode','startDate','endDate','feeSharingScheme']
             }
         },
         {
@@ -267,6 +319,7 @@ const adminJs = new AdminJS({
                 AccountFee: {
                     properties: {
                         accountnumber: 'Account Number',
+                        statementCode: 'Statement Particular Code'
                     }
                 },
                 FeeCode: {
@@ -284,19 +337,23 @@ const adminJs = new AdminJS({
                         accountPolicyNumber: 'Account Number / Policy Number'
                     }
                 },
-                AccountLedgerBalance: {
+                PolicyFeeSetting: {
                     properties: {
                         accountnumber: 'Account Number / Policy Number',
                         accountstatus: 'Account Status',
                         accountopendate: 'Account Opening Date',
                         accountenddate: 'Account Ending Date',
                         discretionarymanage: 'Discretionary Management',
-                        aum_USD: 'AUM (USD)',
-                        aum_HKD: 'AUM (HKD)',
-                        aum_EUR: 'AUM (EUR)',
-                        estimatedfee: 'Estimated Fees',
                         advisorfee: 'Mgt/Advisory p.a. Fee (%)',
                         retrocession: 'Retrocession p.a. (%)'
+                    }
+                },
+                AccountLedgerBalance: {
+                    properties: {
+                        accountnumber: 'Account Number / Policy Number',
+                        estimatedfee: 'Estimated Fees (%)',
+                        advisorfee: 'Mgt/Advisory Fee p.a',
+                        retrocession: 'Retrocession p.a.'
                     }
                 },
                 FeeSharingScheme: {

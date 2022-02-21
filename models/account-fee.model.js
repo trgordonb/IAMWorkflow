@@ -6,6 +6,10 @@ const AccountFeeSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'AccountPolicy'
     },
+    statementCode : {
+        type: Schema.Types.ObjectId,
+        ref: 'StatementParticular'
+    },
     startDate: Date,
     endDate: Date,
     feeSharingScheme: {
