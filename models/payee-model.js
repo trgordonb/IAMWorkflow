@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const PayeeSchema = new Schema({
-    name: String
+    name: String,
 })
 
 const Payee = mongoose.model('Payee', PayeeSchema, 'Payees')

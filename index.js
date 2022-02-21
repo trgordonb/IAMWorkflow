@@ -12,6 +12,7 @@ const CustodianModel = require('./models/custodian.model')
 const AccountCustodianModel = require('./models/account-custodian.model')
 const AccountPolicyModel = require('./models/account-policy')
 const CustomerModel = require('./models/customer-model')
+const RoleModel = require('./models/role.model')
 const AccountLedgerBalanceModel = require('./models/account-ledger-balance.model')
 const FeeCodeModel = require('./models/fee-code.model')
 const PayeeModel = require('./models/payee-model')
@@ -22,10 +23,12 @@ const FeeSharingSchemeModel = require('./models/fee-sharing.model')
 const AccountFeeModel = require('./models/account-fee.model')
 const DemandNoteModel = require('./models/demand-note.model')
 const PolicyFeeSettingModel = require('./models/policyfee-setting.model')
+const EstablishmentFeeShareModel = require('./models/establishment-feeshare.model')
 
-//const menu = {
-//    Master: { name: 'Master', icon: 'SpineLabel' },
-//}
+const menu = {
+    Master: { name: 'Main', icon: 'SpineLabel' },
+    Report: { name: 'Reports' }
+}
 
 const adminJs = new AdminJS({
     databases: [mongoose],
@@ -36,6 +39,7 @@ const adminJs = new AdminJS({
     resources: [
         { 
             resource: CustodianModel, options: { 
+                parent: menu.Master,
                 listProperties: ['name'],
                 editProperties: ['name'],
                 filterProperties: ['name'],
@@ -44,6 +48,7 @@ const adminJs = new AdminJS({
         },
         {
             resource: AccountPolicyModel, options: {
+                parent: menu.Master,
                 listProperties: ['number'],
                 editProperties: ['number'],
                 filterProperties: ['number'],
@@ -52,6 +57,7 @@ const adminJs = new AdminJS({
         },
         {
             resource: AccountCustodianModel, options: {
+                parent: menu.Master,
                 listProperties: ['accountPolicyNumber', 'custodian'],
                 editProperties: ['accountPolicyNumber', 'custodian'],
                 filterProperties: ['accountPolicyNumber', 'custodian'],
@@ -60,6 +66,7 @@ const adminJs = new AdminJS({
         },
         {
             resource: CustomerModel, options: {
+                parent: menu.Master,
                 listProperties: ['clientId', 'name'],
                 editProperties: ['clientId', 'name'],
                 filterProperties: ['clientId', 'name'],
@@ -67,7 +74,18 @@ const adminJs = new AdminJS({
             }
         },
         {
+            resource: RoleModel, options: {
+                parent: menu.Master,
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    }
+                }
+            }
+        },
+        {
             resource: AccountLedgerBalanceModel, options: {
+                parent: menu.Master,
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -102,6 +120,7 @@ const adminJs = new AdminJS({
         },
         {
             resource: PolicyFeeSettingModel, options: {
+                parent: menu.Master,
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -137,6 +156,7 @@ const adminJs = new AdminJS({
         },
         {
             resource: FeeCodeModel, options: {
+                parent: menu.Master,
                 listProperties: ['code', 'value', 'comment'],
                 editProperties: ['code', 'value', 'comment'],
                 filterProperties:  ['code', 'value', 'comment'],
@@ -145,14 +165,17 @@ const adminJs = new AdminJS({
         },
         { 
             resource: PayeeModel, options: { 
-                listProperties: ['name'],
-                editProperties: ['name'],
-                filterProperties: ['name'],
-                showProperties: ['name']
+                parent: menu.Master,
+                properties: {
+                    _id : {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    }
+                }
             }
         },
         { 
             resource: StatementParticularModel, options: { 
+                parent: menu.Master,
                 listProperties: ['name'],
                 editProperties: ['name'],
                 filterProperties: ['name'],
@@ -161,6 +184,7 @@ const adminJs = new AdminJS({
         },
         { 
             resource: CurrencyModel, options: { 
+                parent: menu.Master,
                 listProperties: ['name'],
                 editProperties: ['name'],
                 filterProperties: ['name'],
@@ -169,6 +193,7 @@ const adminJs = new AdminJS({
         },
         { 
             resource: CurrencyHistoryModel, options: { 
+                parent: menu.Master,
                 properties: {
                     date: {
                         type: 'date'
@@ -182,57 +207,20 @@ const adminJs = new AdminJS({
         },
         {
             resource: FeeSharingSchemeModel, options: {
+                parent: menu.Master,
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
                     },
-                    introducer: {
-                        isVisible: { list: false, filter: true, show: true, edit: true },
-                    },
-                    introducerRebate: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
-                    },
-                    marketingManager: {
-                        isVisible: { list: false, filter: true, show: true, edit: true },
-                    },
-                    marketingManagerRebate: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
-                    },
-                    relationshipManager: {
-                        isVisible: { list: false, filter: true, show: true, edit: true },
-                    },
-                    relationshipManagerRebate: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
-                    },
-                    teamLeader: {
-                        isVisible: { list: false, filter: true, show: true, edit: true },
-                    },
-                    teamLeaderRebate: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
-                    },
-                    assistant: {
-                        isVisible: { list: false, filter: true, show: true, edit: true },
-                    },
-                    assistantRebate: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
-                    },
-                    teamAdviser: {
-                        isVisible: { list: false, filter: true, show: true, edit: true },
-                    },
-                    teamAdviserRebate: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
-                    },
-                    companyWealth: {
-                        isVisible: { list: false, filter: true, show: true, edit: true },
-                    },
-                    companyWealthRebate: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    feerecipients: {
+                        isVisible: { list: false, filter: false, show: true, edit: true }
                     }
                 }
             }
         },
         {
             resource: AccountFeeModel, options: {
+                parent: menu.Master,
                 properties: {
                     startDate: {
                         type: 'date'
@@ -249,6 +237,15 @@ const adminJs = new AdminJS({
         },
         {
             resource: DemandNoteModel, options: {
+                parent: menu.Master,
+                actions: {
+                    delete: {
+                        isVisible: false
+                    },
+                    bulkDelete: {
+                        isVisible: false
+                    }
+                },
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -291,6 +288,57 @@ const adminJs = new AdminJS({
                         isVisible: { list: false, filter: false, show: true, edit: true },
                     }
                 }
+            }
+        },
+        {
+            resource: EstablishmentFeeShareModel, options: {
+                actions: {
+                    edit: {
+                        isVisible: false
+                    },
+                    delete: {
+                        isVisible: false
+                    },
+                    new: {
+                        isVisible: false
+                    },
+                    bulkDelete: {
+                        isVisible: false
+                    }
+                },
+                parent: menu.Report,
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    },
+                    demandnote: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    },
+                    accountnumber: {
+                        isVisible: { list: true, filter: true, show: true, edit: false },
+                    },
+                    date: {
+                        type: 'date',
+                        isVisible: { list: true, filter: true, show: true, edit: false },
+                    },
+                    providerStatement: {
+                        isVisible: { list: true, filter: false, show: true, edit: false },
+                    },
+                    particulars: {
+                        isVisible: { list: false, filter: false, show: true, edit: false },
+                    },
+                    receivedDate: {
+                        type: 'date',
+                        isVisible: { list: true, filter: false, show: true, edit: false },
+                    },
+                    currency: {
+                        isVisible: { list: false, filter: true, show: true, edit: false },
+                    },
+                    recipientRecords: {
+                        isVisible: { list: false, filter: false, show: true, edit: false },
+                    }
+                },
+
             }
         }
     ],
@@ -359,15 +407,20 @@ const adminJs = new AdminJS({
                 FeeSharingScheme: {
                     properties: {
                         code: 'Fee Sharing Code',
-                        introducerRebate: 'Introducer Rebate (%)',
-                        teamLeader: 'Team Leader / PM / Backup RM',
-                        teamLeaderRebate: 'Team Leader / PM / Backup RM Rebate (%)',
-                        marketingManagerRebate: 'Marketing Manager Rebate (%)',
-                        relationshipManagerRebate: 'Relationship Manager Rebate (%)',
-                        assistant: 'Portfolio/Support Assistant',
-                        assistantRebate: 'Portfolio/Support Assistant Rebate (%)',
-                        teamAdviserRebate: 'Team Adviser Rebate (%)',
-                        companyWealthRebate: 'Company Wealth Rebate (%)'
+                        feerecipients: 'Fee Recipients',
+                        'feerecipients.recipient': 'Name',
+                        'feerecipients.percentage': 'Share (%)',
+                        'feerecipients.role': 'Role'
+                    }
+                },
+                EstablishmentFeeShare: {
+                    properties: {
+                        accountnumber: 'Account Number',
+                        providerStatement: 'Demand Note No. /Provider Statement',
+                        recipientRecords: 'Paid to:',
+                        'recipientRecords.recipient': 'Name',
+                        'recipientRecords.amount': 'Amount',
+                        'recipientRecords.role': 'as'
                     }
                 }
             }

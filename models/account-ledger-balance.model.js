@@ -24,7 +24,7 @@ AccountLedgerBalanceSchema.pre('save', async function() {
         const policyfee = await PolicyFeeSetting.findOne({accountnumber : this.accountnumber}).populate('advisorfee')
         if (policyfee && policyfee.advisorfee && policyfee.advisorfee.value) {
             const percentage = policyfee.advisorfee.value / 100
-            this.advisorfee = Math.round(percentage * this.AUM,2)
+            this.advisorfee = (percentage * this.AUM).toFixed(2)
         }
     }
 })
@@ -34,7 +34,7 @@ AccountLedgerBalanceSchema.pre('findOneAndUpdate', async function() {
         const policyfee = await PolicyFeeSetting.findOne({accountnumber : this._update.$set.accountnumber}).populate('advisorfee')
         if (policyfee && policyfee.advisorfee && policyfee.advisorfee.value) {
             const percentage = policyfee.advisorfee.value / 100
-            this._update.$set.advisorfee = Math.round(percentage * this._update.$set.AUM)
+            this._update.$set.advisorfee = (percentage * this._update.$set.AUM).toFixed(2)
         }
     }
 })
