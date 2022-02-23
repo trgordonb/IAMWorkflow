@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 const Schema = mongoose.Schema
-const PolicyFeeSetting = require('./policyfee-setting.model')
+import PolicyFeeSetting from './policyfee-setting.model.mjs'
 
 const AccountLedgerBalanceSchema = new Schema({
     accountnumber: {
@@ -8,6 +8,7 @@ const AccountLedgerBalanceSchema = new Schema({
         ref: 'AccountPolicy'
     },
     NAVDate: Date,
+    tag: String,
     AUM: Number,
     currency: {
         type: Schema.Types.ObjectId,
@@ -41,4 +42,4 @@ AccountLedgerBalanceSchema.pre('findOneAndUpdate', async function() {
 
 const AccountLedgerBalance = mongoose.model('AccountLedgerBalance', AccountLedgerBalanceSchema, 'AccountLedgerBalances')
 
-module.exports = AccountLedgerBalance
+export default AccountLedgerBalance

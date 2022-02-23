@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
 const EstablishmentFeeShareSchema = new Schema({
@@ -33,4 +33,4 @@ const EstablishmentFeeShareSchema = new Schema({
 
 const EstablishmentFeeShare = mongoose.model('EstablishmentFeeShare', EstablishmentFeeShareSchema, 'EstablishmentFeeShares')
 
-module.exports = EstablishmentFeeShare
+export default EstablishmentFeeShare

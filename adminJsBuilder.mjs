@@ -1,42 +1,116 @@
-const AdminJS = require('adminjs')
-const AdminJSExpress = require('@adminjs/express')
-const AdminJsMongoose = require('@adminjs/mongoose')
-AdminJS.registerAdapter(AdminJsMongoose)
+import mongoose from 'mongoose'
+import AdminJS from 'adminjs'
+import AdminJsMongoose from '@adminjs/mongoose'
+import CustodianModel from './models/custodian.model.mjs'
+import AccountCustodianModel from './models/account-custodian.model.mjs'
+import AccountPolicyModel from './models/account-policy.mjs'
+import CustomerModel from './models/customer-model.mjs'
+import RoleModel from './models/role.model.mjs'
+import AccountLedgerBalanceModel from './models/account-ledger-balance.model.mjs'
+import FeeCodeModel from './models/fee-code.model.mjs'
+import PayeeModel from './models/payee-model.mjs'
+import StatementParticularModel from './models/statement-particular.model.mjs'
+import CurrencyModel from './models/currency.model.mjs'
+import CurrencyHistoryModel from './models/currency-history.model.mjs'
+import FeeSharingSchemeModel from './models/fee-sharing.model.mjs'
+import AccountFeeModel from './models/account-fee.model.mjs'
+import DemandNoteModel from './models/demand-note.model.mjs'
+import PolicyFeeSettingModel from './models/policyfee-setting.model.mjs'
+import EstablishmentFeeShareModel from './models/establishment-feeshare.model.mjs'
+import ReportModel from './models/report.model.mjs'
 
-const mongoose = require('mongoose')
 const MONGO_URL = process.env.MONGO_URL
-const express = require('express')
-const app = express()
+AdminJS.registerAdapter(AdminJsMongoose)
+await mongoose.connect(MONGO_URL, { useNewUrlParser: true })
 
-const CustodianModel = require('./models/custodian.model')
-const AccountCustodianModel = require('./models/account-custodian.model')
-const AccountPolicyModel = require('./models/account-policy')
-const CustomerModel = require('./models/customer-model')
-const RoleModel = require('./models/role.model')
-const AccountLedgerBalanceModel = require('./models/account-ledger-balance.model')
-const FeeCodeModel = require('./models/fee-code.model')
-const PayeeModel = require('./models/payee-model')
-const StatementParticularModel = require('./models/statement-particular.model')
-const CurrencyModel = require('./models/currency.model')
-const CurrencyHistoryModel = require('./models/currency-history.model')
-const FeeSharingSchemeModel = require('./models/fee-sharing.model')
-const AccountFeeModel = require('./models/account-fee.model')
-const DemandNoteModel = require('./models/demand-note.model')
-const PolicyFeeSettingModel = require('./models/policyfee-setting.model')
-const EstablishmentFeeShareModel = require('./models/establishment-feeshare.model')
+const ManagementFeesSchema = new mongoose.Schema({
+    accountnumber: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'AccountPolicy'
+    },
+    NAVDate: Date,
+    tag: String,
+    AUM: Number,
+    currency: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Currency',
+    },
+    advisorfee: Number,
+})
+
+const RetrocessionFeeSchema = new mongoose.Schema({
+    accountnumber: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'AccountPolicy'
+    },
+    NAVDate: Date,
+    tag: String,
+    AUM: Number,
+    currency: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Currency',
+    },
+    retrocession: Number,
+})
 
 const menu = {
     Master: { name: 'Main', icon: 'SpineLabel' },
-    Report: { name: 'Reports' }
+    Reports: { name: 'Report' }
 }
+
+const reports = await ReportModel.find({})
+const reportTranslations = reports.map(report => (
+    {
+        [report.name] : {
+            properties: {
+                accountnumber: 'Account Number / Policy Number',
+                advisorfee: 'Mgt/Advisory Fee p.a',
+            }
+        }
+    }
+))
+
+console.log(reportTranslations)
+
+const reportResources = reports.map(report => (
+    {
+        resource: mongoose.model(report.name, report.display === 'Management Fees' ? ManagementFeesSchema : RetrocessionFeeSchema, report.name),
+        options: {
+            parent: menu.Reports,
+            actions: {
+                edit: {
+                    isVisible: false
+                },
+                delete: {
+                    isVisible: false
+                },
+                new: {
+                    isVisible: false
+                },
+                bulkDelete: {
+                    isVisible: false
+                }
+            },
+            properties: {
+                _id: {
+                    isVisible: { list: false, filter: false, show: false, edit: false },
+                },
+                tag: {
+                    isVisible: { list: false, filter: false, show: false, edit: false },
+                },
+                NAVDate: {
+                    type: 'date'
+                }
+            }
+        }
+    }
+))
 
 const adminJs = new AdminJS({
     databases: [mongoose],
     rootPath: '/admin',
-    dashboard: {
-        component: AdminJS.bundle('./components/CustomDashboard')
-    },
     resources: [
+        ...reportResources,
         { 
             resource: CustodianModel, options: { 
                 parent: menu.Master,
@@ -56,6 +130,16 @@ const adminJs = new AdminJS({
             }
         },
         {
+            resource: ReportModel, options: {
+                parent: menu.Master,
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    }
+                }
+            }
+        },
+        {
             resource: AccountCustodianModel, options: {
                 parent: menu.Master,
                 listProperties: ['accountPolicyNumber', 'custodian'],
@@ -67,10 +151,23 @@ const adminJs = new AdminJS({
         {
             resource: CustomerModel, options: {
                 parent: menu.Master,
-                listProperties: ['clientId', 'name'],
-                editProperties: ['clientId', 'name'],
-                filterProperties: ['clientId', 'name'],
-                showProperties: ['clientId', 'Name'],
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    },
+                    bankaccountnumber: {
+                        isVisible: { list: false, filter: true, show: true, edit: true },
+                    },
+                    address: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    mobile: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    email: {
+                        isVisible: { list: false, filter: true, show: true, edit: true },
+                    }
+                }
             }
         },
         {
@@ -95,6 +192,9 @@ const adminJs = new AdminJS({
                     },
                     NAVDate: {
                         type: 'date',
+                        isVisible: { list: true, filter: true, show: true, edit: true },
+                    },
+                    tag: {
                         isVisible: { list: true, filter: true, show: true, edit: true },
                     },
                     AUM: {
@@ -306,7 +406,7 @@ const adminJs = new AdminJS({
                         isVisible: false
                     }
                 },
-                parent: menu.Report,
+                parent: menu.Reports,
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -331,14 +431,10 @@ const adminJs = new AdminJS({
                         type: 'date',
                         isVisible: { list: true, filter: false, show: true, edit: false },
                     },
-                    currency: {
-                        isVisible: { list: false, filter: true, show: true, edit: false },
-                    },
                     recipientRecords: {
                         isVisible: { list: false, filter: false, show: true, edit: false },
                     }
                 },
-
             }
         }
     ],
@@ -348,12 +444,13 @@ const adminJs = new AdminJS({
     },
     branding: {
         logo: false,
-        companyName: 'IAM Legacy',
+        companyName: 'Asset Management CRM',
         softwareBrothers: false,
     },
     locale: {
         translations: {
             resources: {
+                ...reportTranslations,
                 DemandNote: {
                     properties: {
                         accountnumber: 'Account Number',
@@ -362,6 +459,11 @@ const adminJs = new AdminJS({
                         serviceFeeStartDate: 'Particular Service Fee Start Date',
                         serviceFeeEndDate: 'Particular Service Fee End Date',
                         receivedPayee: 'Received By Payee',
+                    }
+                },
+                Customer: {
+                    properties: {
+                        bankaccountnumber: 'Bank Account #'
                     }
                 },
                 AccountFee: {
@@ -422,28 +524,10 @@ const adminJs = new AdminJS({
                         'recipientRecords.amount': 'Amount',
                         'recipientRecords.role': 'as'
                     }
-                }
+                },
             }
         }
     }
 })
 
-const ADMIN = {
-    email: process.env.ADMIN_EMAIL || 'admin@example.com',
-    password: process.env.ADMIN_PASSWORD || 'lovejs',
-}
-
-const router = AdminJSExpress.buildRouter(adminJs)
-
-app.use(adminJs.options.rootPath, router)
-
-const run = async () => {
-    await mongoose.connect(MONGO_URL, {
-        useNewUrlParser: true
-    })
-    await app.listen(process.env.PORT, () => {
-        console.log('AdminJS is at localhost:8080/admin')
-    })
-}
-
-run()
+export default adminJs

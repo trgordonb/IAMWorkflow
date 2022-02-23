@@ -1,8 +1,8 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 const Schema = mongoose.Schema
-const FeeSharing = require('./fee-sharing.model')
-const CurrenyHistory = require('./currency-history.model')
-const EstablishmentFeeShare = require('./establishment-feeshare.model')
+import FeeSharing from './fee-sharing.model.mjs'
+import CurrenyHistory from './currency-history.model.mjs'
+import EstablishmentFeeShare from './establishment-feeshare.model.mjs'
 
 const DemandNoteSchema = new Schema({
     accountnumber: {
@@ -84,4 +84,4 @@ DemandNoteSchema.pre('findOneAndUpdate', async function() {
 
 const DemandNote = mongoose.model('DemandNote', DemandNoteSchema, 'DemandNotes')
 
-module.exports = DemandNote
+export default DemandNote

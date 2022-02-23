@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
 const AccountFeeSchema = new Schema({
@@ -20,4 +20,4 @@ const AccountFeeSchema = new Schema({
 
 const AccountFee = mongoose.model('AccountFee', AccountFeeSchema, 'AccountFees')
 
-module.exports = AccountFee
+export default AccountFee

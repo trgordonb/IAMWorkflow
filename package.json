@@ -2,14 +2,14 @@
   "name": "iamtest",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.mjs",
   "engines": {
     "node": "16.x"
   },
   "scripts": {
-    "dev": "nodemon -r dotenv/config index.js",
+    "dev": "nodemon -r dotenv/config index.mjs",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.mjs"
   },
   "keywords": [],
   "author": "",

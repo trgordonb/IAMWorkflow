@@ -1,4 +1,5 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
+
 const Schema = mongoose.Schema
 
 const CustodianSchema = new Schema({
@@ -7,4 +8,4 @@ const CustodianSchema = new Schema({
 
 const Custodian = mongoose.model('Custodian', CustodianSchema, 'Custodians')
 
-module.exports = Custodian
+export default Custodian
