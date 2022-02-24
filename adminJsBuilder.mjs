@@ -16,17 +16,58 @@ import FeeSharingSchemeModel from './models/fee-sharing.model.mjs'
 import AccountFeeModel from './models/account-fee.model.mjs'
 import DemandNoteModel from './models/demand-note.model.mjs'
 import PolicyFeeSettingModel from './models/policyfee-setting.model.mjs'
-import EstablishmentFeeShareModel from './models/establishment-feeshare.model.mjs'
 import ReportModel from './models/report.model.mjs'
+import EstablishmentFeeShareModel from './models/establishment-feeshare.model.mjs'
 
 const MONGO_URL = process.env.MONGO_URL
 AdminJS.registerAdapter(AdminJsMongoose)
 await mongoose.connect(MONGO_URL, { useNewUrlParser: true })
 
+const EstablishmentFeeShareSchema = new mongoose.Schema({
+    demandnote : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'DemandNote'
+    },
+    accountnumber: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'AccountPolicy'
+    },
+    custodian: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Custodian'
+    },
+    totalAmount: Number,
+    date: Date,
+    providerStatement: String,
+    particulars: String,
+    receivedDate: Date,
+    tag: String,
+    currency: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Currency',
+    },
+    recipientRecords: [{
+        recipient: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Payee'
+        },
+        share: Number,
+        amount: Number,
+        role: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Role'
+        }
+    }]
+})
+
 const ManagementFeesSchema = new mongoose.Schema({
     accountnumber: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'AccountPolicy'
+    },
+    custodian: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Custodian'
     },
     NAVDate: Date,
     tag: String,
@@ -42,6 +83,10 @@ const RetrocessionFeeSchema = new mongoose.Schema({
     accountnumber: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'AccountPolicy'
+    },
+    custodian: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Custodian'
     },
     NAVDate: Date,
     tag: String,
@@ -70,11 +115,12 @@ const reportTranslations = reports.map(report => (
     }
 ))
 
-console.log(reportTranslations)
-
 const reportResources = reports.map(report => (
     {
-        resource: mongoose.model(report.name, report.display === 'Management Fees' ? ManagementFeesSchema : RetrocessionFeeSchema, report.name),
+        resource: mongoose.model(
+            report.name, 
+            report.display === 'Management Fees' ? ManagementFeesSchema : report.display === 'Retrocession' ? RetrocessionFeeSchema: EstablishmentFeeShareSchema, 
+            report.name),
         options: {
             parent: menu.Reports,
             actions: {
@@ -98,8 +144,20 @@ const reportResources = reports.map(report => (
                 tag: {
                     isVisible: { list: false, filter: false, show: false, edit: false },
                 },
+                custodian: {
+                    isVisible: { list: true, filter: true, show: true, edit: false },
+                },
+                demandnote: {
+                    isVisible: { list: false, filter: false, show: false, edit: false },
+                },
+                date: {
+                    isVisible: { list: false, filter: false, show: false, edit: false },
+                },
+                receivedDate: {
+                    isVisible: { list: false, filter: false, show: false, edit: false },
+                },
                 NAVDate: {
-                    type: 'date'
+                    isVisible: { list: false, filter: false, show: false, edit: false },
                 }
             }
         }
@@ -154,6 +212,10 @@ const adminJs = new AdminJS({
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
+                    },
+                    clientId: {
+                        isTitle: true,
+                        isVisible: { list: true, filter: true, show: true, edit: false },
                     },
                     bankaccountnumber: {
                         isVisible: { list: false, filter: true, show: true, edit: true },
@@ -273,6 +335,27 @@ const adminJs = new AdminJS({
                 }
             }
         },
+        {
+            resource: EstablishmentFeeShareModel, options: {
+                actions: {
+                    list: {
+                        isAccessible: false
+                    },
+                    new: {
+                        isAccessible: false
+                    },
+                    edit: {
+                        isAccessible: false
+                    },
+                    filter: {
+                        isAccessible: false
+                    },
+                    show: {
+                        isAccessible: false
+                    }
+                }
+            }
+        },
         { 
             resource: StatementParticularModel, options: { 
                 parent: menu.Master,
@@ -366,6 +449,9 @@ const adminJs = new AdminJS({
                     comment: {
                         isVisible: { list: false, filter: false, show: true, edit: true },
                     },
+                    tag: {
+                        isVisible: { list: true, filter: true, show: true, edit: true },
+                    },
                     serviceFeeStartDate: {
                         type: 'date',
                         isVisible: { list: false, filter: false, show: true, edit: true },
@@ -390,56 +476,6 @@ const adminJs = new AdminJS({
                 }
             }
         },
-        {
-            resource: EstablishmentFeeShareModel, options: {
-                actions: {
-                    edit: {
-                        isVisible: false
-                    },
-                    delete: {
-                        isVisible: false
-                    },
-                    new: {
-                        isVisible: false
-                    },
-                    bulkDelete: {
-                        isVisible: false
-                    }
-                },
-                parent: menu.Reports,
-                properties: {
-                    _id: {
-                        isVisible: { list: false, filter: false, show: false, edit: false },
-                    },
-                    demandnote: {
-                        isVisible: { list: false, filter: false, show: false, edit: false },
-                    },
-                    accountnumber: {
-                        isVisible: { list: true, filter: true, show: true, edit: false },
-                    },
-                    currency: {
-                        isVisible: { list: false, filter: false, show: false, edit: false },
-                    },
-                    date: {
-                        type: 'date',
-                        isVisible: { list: true, filter: true, show: true, edit: false },
-                    },
-                    providerStatement: {
-                        isVisible: { list: true, filter: false, show: true, edit: false },
-                    },
-                    particulars: {
-                        isVisible: { list: false, filter: false, show: true, edit: false },
-                    },
-                    receivedDate: {
-                        type: 'date',
-                        isVisible: { list: true, filter: false, show: true, edit: false },
-                    },
-                    recipientRecords: {
-                        isVisible: { list: false, filter: false, show: true, edit: false },
-                    }
-                },
-            }
-        }
     ],
     version: {
         admin: false,
@@ -516,16 +552,6 @@ const adminJs = new AdminJS({
                         'feerecipients.recipient': 'Name',
                         'feerecipients.percentage': 'Share (%)',
                         'feerecipients.role': 'Role'
-                    }
-                },
-                EstablishmentFeeShare: {
-                    properties: {
-                        accountnumber: 'Account Number',
-                        providerStatement: 'Demand Note No. /Provider Statement',
-                        recipientRecords: 'Paid to:',
-                        'recipientRecords.recipient': 'Name',
-                        'recipientRecords.amount': 'Amount',
-                        'recipientRecords.role': 'as'
                     }
                 },
             }

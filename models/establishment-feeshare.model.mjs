@@ -10,10 +10,12 @@ const EstablishmentFeeShareSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'AccountPolicy'
     },
+    totalAmount: Number,
     date: Date,
     providerStatement: String,
     particulars: String,
     receivedDate: Date,
+    tag: String,
     currency: {
         type: Schema.Types.ObjectId,
         ref: 'Currency',
@@ -23,6 +25,7 @@ const EstablishmentFeeShareSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Payee'
         },
+        share: Number,
         amount: Number,
         role: {
             type: Schema.Types.ObjectId,

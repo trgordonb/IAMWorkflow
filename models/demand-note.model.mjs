@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 import FeeSharing from './fee-sharing.model.mjs'
+import Currency from './currency.model.mjs'
 import CurrenyHistory from './currency-history.model.mjs'
 import EstablishmentFeeShare from './establishment-feeshare.model.mjs'
 
@@ -19,6 +20,7 @@ const DemandNoteSchema = new Schema({
     serviceFeeStartDate: Date,
     serviceFeeEndDate: Date,
     receivedDate: Date,
+    tag: String,
     receivedPayee: {
         type: Schema.Types.ObjectId,
         ref: 'Payee'
@@ -36,12 +38,14 @@ const DemandNoteSchema = new Schema({
 
 DemandNoteSchema.post('save', async function() {
     const feeSharingRaw = await FeeSharing.findById(this.feesharing).populate('feerecipients')
+    const currenycRaw = await Currency.findOne({name: 'HKD'})
     const exchRateRaw = await CurrenyHistory.findOne({currency: this.currency, date: this.serviceFeeEndDate})
     const feeSharingCalculated = [] 
     feeSharingRaw.feerecipients.forEach(item => {
         const amount = (this.amount * ( item.percentage / 100 ) * exchRateRaw.rate).toFixed(2)
         feeSharingCalculated.push({
             recipient: item.recipient,
+            share: item.percentage,
             role: item.role,
             amount: amount
         })
@@ -52,8 +56,10 @@ DemandNoteSchema.post('save', async function() {
         date: this.date,
         providerStatement: this.providerStatement,
         particulars: this.comment,
+        tag: this.tag,
         receivedDate: this.receivedDate,
-        currency: this.currency,
+        currency: currenycRaw._id,
+        totalAmount: (this.amount * exchRateRaw.rate).toFixed(2),
         recipientRecords: feeSharingCalculated
     })
     await establishmentFeeShare.save()
@@ -61,6 +67,7 @@ DemandNoteSchema.post('save', async function() {
 
 DemandNoteSchema.pre('findOneAndUpdate', async function() {
     const feeSharingRaw = await FeeSharing.findById(this._update.$set.feesharing).populate('feerecipients')
+    const currenycRaw = await Currency.findOne({name: 'HKD'})
     const exchRateRaw = await CurrenyHistory.findOne({currency: this._update.$set.currency, date: this._update.$set.serviceFeeEndDate})
     const feeSharingCalculated = [] 
     feeSharingRaw.feerecipients.forEach(item => {
@@ -76,8 +83,10 @@ DemandNoteSchema.pre('findOneAndUpdate', async function() {
         date: this._update.$set.date,
         providerStatement: this._update.$set.providerStatement,
         particulars: this._update.$set.comment,
+        tag: this._update.$set.tag,
         receivedDate: this._update.$set.receivedDate,
-        currency: this._update.$set.currency,
+        totalAmount: (this._update.$set.amount * exchRateRaw.rate).toFixed(2),
+        currency: currenycRaw._id,
         recipientRecords: feeSharingCalculated
     })
 })

@@ -6,7 +6,7 @@ const ReportSchema = new Schema({
     name: String,
     source: {
         type: String,
-        enum : ['AccountLedgerBalances',],
+        enum : ['AccountLedgerBalances','EstablishmentFeeShares'],
     },
     filters: [{
         fieldname: {
@@ -17,20 +17,34 @@ const ReportSchema = new Schema({
     }],
     display: {
         type: String,
-        enum: ['Management Fees', 'Retrocession']
+        enum: ['Management Fees', 'Retrocession','All']
     }
 })
 
 ReportSchema.post('save', async function() {
+    let filterStages = this.filters.map(filter => (
+        {
+            "$match" : { [filter.fieldname] : filter.value }
+        }
+    ))
+    let lookupStage = {
+        '$lookup': {
+            from: 'AccountCustodians', 
+            localField: 'accountnumber', 
+            foreignField: 'accountPolicyNumber', 
+            as: 'custodian'
+        }
+    }
+    let transformStage = {
+        '$set': {
+            custodian: {
+                '$arrayElemAt': ['$custodian.custodian', 0]
+            }
+        }
+    }
     Currency.db.createCollection(this.name, {
         viewOn: this.source,
-        pipeline: this.filters.map(filter => (
-            {
-                "$match" : {
-                    [filter.fieldname] : filter.value
-                }
-            }
-        ))
+        pipeline: [...filterStages, lookupStage, transformStage]
     })
 })
 
