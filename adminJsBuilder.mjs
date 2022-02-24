@@ -417,6 +417,9 @@ const adminJs = new AdminJS({
                     accountnumber: {
                         isVisible: { list: true, filter: true, show: true, edit: false },
                     },
+                    currency: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    },
                     date: {
                         type: 'date',
                         isVisible: { list: true, filter: true, show: true, edit: false },
