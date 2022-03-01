@@ -232,18 +232,40 @@ const adminJsStatic = {
                 actions: {
                     import: {
                         actionType: 'resource',
-                        handler: async (request, response, data) => {
-                            const records = JSON.parse(request.payload.payload)
-                            records.forEach(async (record) => {
-                                const currency = new CurrencyModel({name: record.name})
-                                await currency.save()
-                            })
-                            return {
-                                notice: {
-                                    message: 'OK',
-                                    type: 'success'
+                        handler: async(request, response, data) => {
+                            try {
+                                const records = JSON.parse(request.payload.payload)
+                                let hasRequiredFields = true
+                                records.forEach(record => {
+                                    if (!record.hasOwnProperty('name')) {
+                                        hasRequiredFields = false
+                                    }
+                                })
+                                if (records.length > 0 && hasRequiredFields) {
+                                    await CurrencyModel.insertMany(records)
+                                    return {
+                                        notice: {
+                                            message: 'OK',
+                                            type: 'success'
+                                        }
+                                    } 
+                                } else {
+                                    return {
+                                        notice: {
+                                            message: 'Fail',
+                                            type: 'error'
+                                        }
+                                    } 
+                                }
+                            } catch (err) {
+                                return {
+                                    notice: {
+                                        message: 'Fail',
+                                        type: 'error'
+                                    }
                                 }
                             }
+                                                  
                         }
                     }
                 },
