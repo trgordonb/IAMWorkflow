@@ -1,0 +1,69 @@
+import React, { useState } from 'react';
+import { ApiClient, useNotice } from 'adminjs';
+import { Box, Button, Loader, Text } from '@adminjs/design-system';
+import { saveAs } from 'file-saver';
+import format from 'date-fns/format';
+
+export const mimeTypes = {
+  json: 'application/json',
+  csv: 'text/csv',
+};
+
+export const getExportedFileName = (extension) =>
+  `export-${format(Date.now(), 'yyyy-MM-dd_HH-mm')}.${extension}`;
+
+const Exporters = ['csv', 'json'] ;
+
+const ExportComponent = ({ resource }) => {
+  const [isFetching, setFetching] = useState();
+  const sendNotice = useNotice();
+
+  const exportData = async (type) => {
+    setFetching(true);
+    try {
+      const {
+        data: { exportedData },
+      } = await new ApiClient().resourceAction({
+        method: 'post',
+        resourceId: resource.id,
+        actionName: 'export',
+        params: {
+          type,
+        },
+      });
+
+      const blob = new Blob([exportedData], { type: mimeTypes[type] });
+      saveAs(blob, getExportedFileName(type));
+      sendNotice({ message: 'Exported successfully', type: 'success' });
+    } catch (e) {
+      sendNotice({ message: e.message, type: 'error' });
+    }
+    setFetching(false);
+  };
+
+  if (isFetching) {
+    return <Loader />;
+  }
+
+  return (
+    <Box>
+      <Box display="flex" justifyContent="center">
+        <Text variant="lg">Choose export format:</Text>
+      </Box>
+      <Box display="flex" justifyContent="center">
+        {Exporters.map(parserType => (
+          <Box key={parserType} m={2}>
+            <Button
+              onClick={() => exportData(parserType)}
+              disabled={isFetching}
+            >
+              {parserType.toUpperCase()}
+            </Button>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+};
+
+export default ExportComponent;

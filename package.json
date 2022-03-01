@@ -2,14 +2,14 @@
   "name": "iamtest",
   "version": "1.0.0",
   "description": "",
-  "main": "index.mjs",
+  "main": "index.js",
   "engines": {
     "node": "16.x"
   },
   "scripts": {
-    "dev": "nodemon -r dotenv/config index.mjs",
+    "dev": "nodemon -r dotenv/config index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.mjs"
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
@@ -18,10 +18,14 @@
     "@adminjs/design-system": "^2.1.0",
     "@adminjs/express": "^4.0.2",
     "@adminjs/mongoose": "^2.0.1",
-    "adminjs": "^5.6.2",
+    "adminjs": "^5.7.2",
+    "csvtojson": "^2.0.10",
+    "date-fns": "^2.28.0",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "express-formidable": "^1.2.0",
+    "file-saver": "^2.0.5",
+    "json2csv": "^5.0.7",
     "mongoose": "^6.2.2",
     "mongoose-plugin-autoinc-fix": "^1.2.1"
   },

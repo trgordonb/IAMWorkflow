@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const AccountPolicySchema = new Schema({
@@ -7,4 +7,4 @@ const AccountPolicySchema = new Schema({
 
 const AccountPolicy = mongoose.model('AccountPolicy', AccountPolicySchema, 'AccountPolicies' )
 
-export default AccountPolicy
+module.exports = AccountPolicy

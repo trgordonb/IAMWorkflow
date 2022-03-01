@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const StatementParticularSchema = new Schema({
@@ -7,4 +7,4 @@ const StatementParticularSchema = new Schema({
 
 const StatementParticular = mongoose.model('StatementParticular', StatementParticularSchema, 'StatementParticulars')
 
-export default StatementParticular
+module.exports = StatementParticular

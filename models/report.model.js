@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
-import Currency from './currency.model.mjs'
+const mongoose = require('mongoose')
+const Currency = require('./currency.model')
 const Schema = mongoose.Schema
 
 const ReportSchema = new Schema({
@@ -50,4 +50,4 @@ ReportSchema.post('save', async function() {
 
 const Report = mongoose.model('Report', ReportSchema, 'Reports')
 
-export default Report
+module.exports = Report

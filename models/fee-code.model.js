@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const FeeCodeSchema = new Schema({
@@ -9,4 +9,4 @@ const FeeCodeSchema = new Schema({
 
 const FeeCode = mongoose.model('FeeCode', FeeCodeSchema, 'FeeCodes' )
 
-export default FeeCode
+module.exports = FeeCode

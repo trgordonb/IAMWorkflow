@@ -1,174 +1,36 @@
-import mongoose from 'mongoose'
-import AdminJS from 'adminjs'
-import AdminJsMongoose from '@adminjs/mongoose'
-import CustodianModel from './models/custodian.model.mjs'
-import AccountCustodianModel from './models/account-custodian.model.mjs'
-import AccountPolicyModel from './models/account-policy.mjs'
-import CustomerModel from './models/customer-model.mjs'
-import RoleModel from './models/role.model.mjs'
-import AccountLedgerBalanceModel from './models/account-ledger-balance.model.mjs'
-import FeeCodeModel from './models/fee-code.model.mjs'
-import PayeeModel from './models/payee-model.mjs'
-import StatementParticularModel from './models/statement-particular.model.mjs'
-import CurrencyModel from './models/currency.model.mjs'
-import CurrencyHistoryModel from './models/currency-history.model.mjs'
-import FeeSharingSchemeModel from './models/fee-sharing.model.mjs'
-import AccountFeeModel from './models/account-fee.model.mjs'
-import DemandNoteModel from './models/demand-note.model.mjs'
-import PolicyFeeSettingModel from './models/policyfee-setting.model.mjs'
-import ReportModel from './models/report.model.mjs'
-import EstablishmentFeeShareModel from './models/establishment-feeshare.model.mjs'
-
-const MONGO_URL = process.env.MONGO_URL
-AdminJS.registerAdapter(AdminJsMongoose)
-await mongoose.connect(MONGO_URL, { useNewUrlParser: true })
-
-const EstablishmentFeeShareSchema = new mongoose.Schema({
-    demandnote : {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'DemandNote'
-    },
-    accountnumber: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'AccountPolicy'
-    },
-    custodian: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Custodian'
-    },
-    totalAmount: Number,
-    date: Date,
-    providerStatement: String,
-    particulars: String,
-    receivedDate: Date,
-    tag: String,
-    currency: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Currency',
-    },
-    recipientRecords: [{
-        recipient: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Payee'
-        },
-        share: Number,
-        amount: Number,
-        role: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Role'
-        }
-    }]
-})
-
-const ManagementFeesSchema = new mongoose.Schema({
-    accountnumber: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'AccountPolicy'
-    },
-    custodian: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Custodian'
-    },
-    NAVDate: Date,
-    tag: String,
-    AUM: Number,
-    currency: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Currency',
-    },
-    advisorfee: Number,
-})
-
-const RetrocessionFeeSchema = new mongoose.Schema({
-    accountnumber: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'AccountPolicy'
-    },
-    custodian: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Custodian'
-    },
-    NAVDate: Date,
-    tag: String,
-    AUM: Number,
-    currency: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Currency',
-    },
-    retrocession: Number,
-})
+const mongoose = require('mongoose')
+const AdminJS = require('adminjs')
+const CustodianModel = require('./models/custodian.model')
+const AccountCustodianModel = require('./models/account-custodian.model')
+const AccountPolicyModel = require('./models/account-policy')
+const CustomerModel = require('./models/customer-model')
+const RoleModel = require('./models/role.model')
+const AccountLedgerBalanceModel = require('./models/account-ledger-balance.model')
+const FeeCodeModel = require('./models/fee-code.model')
+const PayeeModel = require('./models/payee-model')
+const StatementParticularModel = require('./models/statement-particular.model')
+const CurrencyModel = require('./models/currency.model')
+const CurrencyHistoryModel = require('./models/currency-history.model')
+const FeeSharingSchemeModel = require('./models/fee-sharing.model')
+const AccountFeeModel = require('./models/account-fee.model')
+const DemandNoteModel = require('./models/demand-note.model')
+const PolicyFeeSettingModel = require('./models/policyfee-setting.model')
+const ReportModel = require('./models/report.model')
+const EstablishmentFeeShareModel = require('./models/establishment-feeshare.model')
+const importExportFeature = require('./features/import-export/index')
 
 const menu = {
     Master: { name: 'Main', icon: 'SpineLabel' },
     Reports: { name: 'Report' }
 }
-
-const reports = await ReportModel.find({})
-const reportTranslations = reports.map(report => (
-    {
-        [report.name] : {
-            properties: {
-                accountnumber: 'Account Number / Policy Number',
-                advisorfee: 'Mgt/Advisory Fee p.a',
-            }
-        }
-    }
-))
-
-const reportResources = reports.map(report => (
-    {
-        resource: mongoose.model(
-            report.name, 
-            report.display === 'Management Fees' ? ManagementFeesSchema : report.display === 'Retrocession' ? RetrocessionFeeSchema: EstablishmentFeeShareSchema, 
-            report.name),
-        options: {
-            parent: menu.Reports,
-            actions: {
-                edit: {
-                    isVisible: false
-                },
-                delete: {
-                    isVisible: false
-                },
-                new: {
-                    isVisible: false
-                },
-                bulkDelete: {
-                    isVisible: false
-                }
-            },
-            properties: {
-                _id: {
-                    isVisible: { list: false, filter: false, show: false, edit: false },
-                },
-                tag: {
-                    isVisible: { list: false, filter: false, show: false, edit: false },
-                },
-                custodian: {
-                    isVisible: { list: true, filter: true, show: true, edit: false },
-                },
-                demandnote: {
-                    isVisible: { list: false, filter: false, show: false, edit: false },
-                },
-                date: {
-                    isVisible: { list: false, filter: false, show: false, edit: false },
-                },
-                receivedDate: {
-                    isVisible: { list: false, filter: false, show: false, edit: false },
-                },
-                NAVDate: {
-                    isVisible: { list: false, filter: false, show: false, edit: false },
-                }
-            }
-        }
-    }
-))
-
-const adminJs = new AdminJS({
+    
+const adminJsStatic = {
     databases: [mongoose],
     rootPath: '/admin',
+    dashboard: {
+        component: AdminJS.bundle('./components/CustomDashboard')
+    },
     resources: [
-        ...reportResources,
         { 
             resource: CustodianModel, options: { 
                 parent: menu.Master,
@@ -367,12 +229,34 @@ const adminJs = new AdminJS({
         },
         { 
             resource: CurrencyModel, options: { 
+                actions: {
+                    import: {
+                        actionType: 'resource',
+                        handler: async (request, response, data) => {
+                            const records = JSON.parse(request.payload.payload)
+                            records.forEach(async (record) => {
+                                const currency = new CurrencyModel({name: record.name})
+                                await currency.save()
+                            })
+                            return {
+                                notice: {
+                                    message: 'OK',
+                                    type: 'success'
+                                }
+                            }
+                        }
+                    }
+                },
+                properties: {
+                    mimeType: {}
+                },
                 parent: menu.Master,
                 listProperties: ['name'],
                 editProperties: ['name'],
                 filterProperties: ['name'],
-                showProperties: ['name']
-            }
+                showProperties: ['name'],
+            },
+            features: [importExportFeature()]
         },
         { 
             resource: CurrencyHistoryModel, options: { 
@@ -489,7 +373,6 @@ const adminJs = new AdminJS({
     locale: {
         translations: {
             resources: {
-                ...reportTranslations,
                 DemandNote: {
                     properties: {
                         accountnumber: 'Account Number',
@@ -557,6 +440,6 @@ const adminJs = new AdminJS({
             }
         }
     }
-})
+}
 
-export default adminJs
+module.exports = { adminJsStatic, menu }

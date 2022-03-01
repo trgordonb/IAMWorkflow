@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const PayeeSchema = new Schema({
@@ -7,4 +7,4 @@ const PayeeSchema = new Schema({
 
 const Payee = mongoose.model('Payee', PayeeSchema, 'Payees')
 
-export default Payee
+module.exports = Payee

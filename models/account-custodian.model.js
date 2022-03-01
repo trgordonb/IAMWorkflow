@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const AccountCustodianSchema = new Schema({
@@ -14,4 +14,4 @@ const AccountCustodianSchema = new Schema({
 
 const AccountCustodian = mongoose.model('AccountCustodian', AccountCustodianSchema, 'AccountCustodians')
 
-export default AccountCustodian
+module.exports = AccountCustodian

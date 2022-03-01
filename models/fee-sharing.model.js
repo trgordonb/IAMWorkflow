@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const FeeSharingSchemeSchema = new Schema({
@@ -18,4 +18,4 @@ const FeeSharingSchemeSchema = new Schema({
 
 const FeeSharingScheme = mongoose.model('FeeSharingScheme', FeeSharingSchemeSchema, 'FeeSharingSchemes')
 
-export default FeeSharingScheme
+module.exports = FeeSharingScheme

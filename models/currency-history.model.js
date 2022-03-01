@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const CurrencyHistorySchema = new Schema({
@@ -12,4 +12,4 @@ const CurrencyHistorySchema = new Schema({
 
 const CurrencyHistory = mongoose.model('CurrencyHistory', CurrencyHistorySchema, 'CurrencyHistories')
 
-export default CurrencyHistory
+module.exports = CurrencyHistory

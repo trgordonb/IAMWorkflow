@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const PolicyFeeSettingSchema = new Schema({
@@ -34,4 +34,4 @@ const PolicyFeeSettingSchema = new Schema({
 
 const PolicyFeeSetting = mongoose.model('PolicyFeeSetting', PolicyFeeSettingSchema, 'PolicyFeeSettings')
 
-export default PolicyFeeSetting
+module.exports = PolicyFeeSetting
