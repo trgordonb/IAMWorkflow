@@ -3,6 +3,7 @@ const Schema = mongoose.Schema
 const FeeSharing = require('./fee-sharing.model')
 const Currency = require('./currency.model')
 const CurrenyHistory = require('./currency-history.model')
+const AccountPolicy = require('./account-policy')
 const EstablishmentFeeShare = require('./establishment-feeshare.model')
 
 const DemandNoteSchema = new Schema({
@@ -33,6 +34,13 @@ const DemandNoteSchema = new Schema({
     feesharing: {
         type: Schema.Types.ObjectId,
         ref: 'FeeSharingScheme'
+    }
+})
+
+DemandNoteSchema.pre('save', async function() {
+    const accountPolicy = await AccountPolicy.findOne({accountnumber: this.accountnumber})
+    if (accountPolicy) {
+        this.currency = accountPolicy.currency
     }
 })
 
@@ -67,6 +75,10 @@ DemandNoteSchema.post('save', async function() {
 
 DemandNoteSchema.pre('findOneAndUpdate', async function() {
     const feeSharingRaw = await FeeSharing.findById(this._update.$set.feesharing).populate('feerecipients')
+    const accountPolicy = await AccountPolicy.findOne({accountnumber: this._update.$set.accountnumber})
+    if (accountPolicy) {
+        this._update.$set.currency = accountPolicy.currency
+    }
     const currenycRaw = await Currency.findOne({name: 'HKD'})
     const exchRateRaw = await CurrenyHistory.findOne({currency: this._update.$set.currency, date: this._update.$set.serviceFeeEndDate})
     const feeSharingCalculated = [] 

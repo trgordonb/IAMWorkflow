@@ -43,10 +43,11 @@ const adminJsStatic = {
         {
             resource: AccountPolicyModel, options: {
                 parent: menu.Master,
-                listProperties: ['number'],
-                editProperties: ['number'],
-                filterProperties: ['number'],
-                showProperties: ['number']
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    }
+                }
             }
         },
         {
@@ -107,6 +108,40 @@ const adminJsStatic = {
         {
             resource: AccountLedgerBalanceModel, options: {
                 parent: menu.Master,
+                actions: {
+                    import: {
+                        actionType: 'resource',
+                        isVisible: true,
+                        handler: async(request, response, data) => {
+                            try {
+                                let records = JSON.parse(request.payload.payload)
+                                records.forEach(record => {
+                                    AccountPolicyModel.findOne({number: record.accountnumber}, async (err, doc) => {
+                                        record.accountnumber = doc._id,
+                                        record.AUM = parseFloat(record.AUM),
+                                        record.NAVDate = new Date(record.NAVDate)
+                                        record.currency = doc.currency
+                                        const ledgerRecord = new AccountLedgerBalanceModel(record)
+                                        await ledgerRecord.save()
+                                    })                  
+                                })
+                                return {
+                                    notice: {
+                                        message: 'OK',
+                                        type: 'success'
+                                    }
+                                }
+                            } catch (err) {
+                                return {
+                                    notice: {
+                                        message: 'Fail',
+                                        type: 'error'
+                                    }
+                                }
+                            }                                       
+                        }
+                    }
+                },
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -125,7 +160,7 @@ const adminJsStatic = {
                         isVisible: { list: true, filter: false, show: true, edit: true },
                     },
                     currency: {
-                        isVisible: { list: true, filter: true, show: true, edit: true },
+                        isVisible: { list: true, filter: true, show: true, edit: false },
                     },
                     estimatedfee: {
                         isVisible: { list: false, filter: false, show: true, edit: true },
@@ -139,8 +174,9 @@ const adminJsStatic = {
                     retrocession: {
                         isVisible: { list: false, filter: false, show: true, edit: true },
                     }
-                }
-            }
+                },
+            },
+            features: [importExportFeature()]
         },
         {
             resource: PolicyFeeSettingModel, options: {
@@ -377,7 +413,7 @@ const adminJsStatic = {
                         isVisible: { list: false, filter: false, show: true, edit: true },
                     },
                     currency: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
+                        isVisible: { list: false, filter: false, show: true, edit: false },
                     }
                 }
             }
