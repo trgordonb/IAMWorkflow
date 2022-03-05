@@ -38,7 +38,7 @@ const MiniExport = (props) => {
         <Box justifyContent="center">
             <Box>
                 <Button style={{marginBottom: 20}} onClick={() => exportData()}>
-                    Output to CSV file
+                    {`Output to ${record.params.reportType.toUpperCase()} file`}
                 </Button>
             </Box>
             { isPDF &&

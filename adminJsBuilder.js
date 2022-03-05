@@ -23,6 +23,7 @@ const ReportModel = require('./models/report.model')
 const EstablishmentFeeShareModel = require('./models/establishment-feeshare.model')
 const importExportFeature = require('./features/import-export/index')
 const { jsPDF } = require('jspdf/dist/jspdf.node')
+const { customRound } = require('./lib/utils')
 
 const menu = {
     Master: { name: 'Main', icon: 'SpineLabel' },
@@ -121,7 +122,7 @@ const adminJsStatic = {
                 actions: {
                     export: {
                         actionType: 'record',
-                        icon: 'Csv',
+                        icon: 'Report',
                         component: AdminJS.bundle('./components/MiniExport.jsx'),
                         handler: async (request, response, context) => {
                             const { record, resource, currentAdmin } = context
@@ -129,6 +130,9 @@ const adminJsStatic = {
                             let parsed = null
                             let transformedRecords = []
                             let pdfData = null
+                            let pdfDoc = null
+                            let accumulateTotal = 0
+                            let feeShareTotals = {}
                             let reportType = 'csv'
                             let docs = await exportModel.find({[record.params['filters.0.fieldname']]: record.params['filters.0.value']})
                             await Promise.all(docs.map(async (doc) => {
@@ -156,8 +160,10 @@ const adminJsStatic = {
                                     await Promise.all(doc.recipientRecords.map(async (recipient) => {
                                         let resultRole = await RoleModel.findById(recipient.role)
                                         let resultRecipient = await PayeeModel.findById(recipient.recipient)
-                                        recipients.push([resultRecipient.name, resultRole.name, recipient.share.toFixed(2), recipient.amount.toFixed(2)])
+                                        feeShareTotals[resultRecipient.name] = feeShareTotals.hasOwnProperty(resultRecipient.name) ? feeShareTotals[resultRecipient.name] + recipient.amount : recipient.amount
+                                        recipients.push([resultRecipient.name, resultRole.name, customRound(recipient.share), customRound(recipient.amount)])
                                     }))
+                                    accumulateTotal = accumulateTotal + doc.totalAmount
                                     let transformedRecord = {
                                         accountnumber: resultAccountPolicy? resultAccountPolicy.number: '',
                                         providerStatement: doc.providerStatement,
@@ -170,7 +176,7 @@ const adminJsStatic = {
                                     transformedRecords.push(transformedRecord)
                                     const { applyPlugin } = require('./lib/jspdf.plugin.autotable')
                                     applyPlugin(jsPDF)
-                                    const pdfDoc = new jsPDF()
+                                    pdfDoc = new jsPDF()
                                     pdfDoc.text('Establishment Fees Report', 14, 20)
                                     transformedRecords.forEach(record => {
                                         pdfDoc.autoTable({
@@ -179,7 +185,7 @@ const adminJsStatic = {
                                             },
                                             startY: pdfDoc.lastAutoTable.finalY + 10 || 30,
                                             head: [['Policy#','Provider Statement','Date','Amount']],
-                                            body: [[record.accountnumber, `${record.providerStatement} (${record.particulars})`, moment(record.recordDate).format('YYYY-MM-DD'), record.totalAmount.toFixed(2)]]
+                                            body: [[record.accountnumber, `${record.providerStatement} (${record.particulars})`, moment(record.recordDate).format('YYYY-MM-DD'), customRound(record.totalAmount)]]
                                         })
                                         pdfDoc.autoTable({
                                             styles: {
@@ -193,12 +199,31 @@ const adminJsStatic = {
                                             body: record.recipientRecords
                                         })
                                     })
-                                    pdfData = pdfDoc.output()
                                 }                            
                             }))
                             if (reportType === 'csv') {
                                 parsed = parse(transformedRecords)          
                             } 
+                            if (reportType === 'pdf') {
+                                let feeShareList = []
+                                for (key in feeShareTotals) {
+                                    feeShareList.push([key, customRound(feeShareTotals[key])])
+                                }
+                                pdfDoc.text('Summary', 14, pdfDoc.lastAutoTable.finalY + 15)
+                                pdfDoc.autoTable({
+                                    startY: pdfDoc.lastAutoTable.finalY + 25,
+                                    styles: {
+                                        fontSize: 10
+                                    },
+                                    headStyles: {
+                                        fillColor: '#5E5E5E'
+                                    },
+                                    head: [['Name','Total']],
+                                    body: feeShareList
+                                })
+                                pdfDoc.text('Total Amount: ' + customRound(accumulateTotal), 14, pdfDoc.lastAutoTable.finalY + 10)
+                                pdfData = pdfDoc.output()
+                            }
                             return { 
                                 record: new AdminJS.BaseRecord({data: parsed? parsed : pdfData, reportType: reportType}, resource).toJSON(currentAdmin)
                             }
