@@ -133,10 +133,11 @@ const adminJsStatic = {
                             let pdfDoc = null
                             let accumulateTotal = 0
                             let feeShareTotals = {}
-                            let reportType = 'csv'
+                            let reportTypes = []
                             let docs = await exportModel.find({[record.params['filters.0.fieldname']]: record.params['filters.0.value']})
                             await Promise.all(docs.map(async (doc) => {
                                 if (record.params.source === 'AccountLedgerBalances') {
+                                    reportTypes = ['csv','pdf']
                                     let resultAccountPolicy = await AccountPolicyModel.findById(doc.accountnumber)
                                     let resultCurrency = await CurrencyModel.findById(doc.currency)
                                     let resultCustodian = await CustodianModel.findById(doc.custodian)
@@ -153,7 +154,7 @@ const adminJsStatic = {
                                     }
                                     transformedRecords.push(transformedRecord)
                                 } else if (record.params.source === 'EstablishmentFeeShares') {
-                                    reportType = 'pdf'
+                                    reportTypes = ['pdf']
                                     let resultAccountPolicy = await AccountPolicyModel.findById(doc.accountnumber)
                                     let resultCurrency = await CurrencyModel.findById(doc.currency)
                                     let recipients = []
@@ -185,6 +186,9 @@ const adminJsStatic = {
                                             },
                                             startY: pdfDoc.lastAutoTable.finalY + 10 || 30,
                                             head: [['Policy#','Provider Statement','Date','Amount']],
+                                            columnStyles: {
+                                                3: { halign: 'left' }
+                                            },
                                             body: [[record.accountnumber, `${record.providerStatement} (${record.particulars})`, moment(record.recordDate).format('YYYY-MM-DD'), customRound(record.totalAmount)]]
                                         })
                                         pdfDoc.autoTable({
@@ -196,15 +200,36 @@ const adminJsStatic = {
                                             },
                                             startY: pdfDoc.lastAutoTable.finalY + 10,
                                             head: [['Name','Role','Share(%)','Amount']],
+                                            columnStyles: {
+                                                3: { halign: 'left' }
+                                            },
                                             body: record.recipientRecords
                                         })
                                     })
                                 }                            
                             }))
-                            if (reportType === 'csv') {
+                            if (reportTypes.includes('csv')) {
                                 parsed = parse(transformedRecords)          
                             } 
-                            if (reportType === 'pdf') {
+                            if (reportTypes.includes('pdf') && record.params.source === 'AccountLedgerBalances') {
+                                const { applyPlugin } = require('./lib/jspdf.plugin.autotable')
+                                applyPlugin(jsPDF)
+                                pdfDoc = new jsPDF()
+                                pdfDoc.text('Advisor Fees Report', 14, 20)
+                                pdfDoc.autoTable({
+                                    startY: 35,
+                                    head: [['Policy Number', 'Advisor Fees Amount']],
+                                    body: transformedRecords.map(rec => [rec.accountnumber, customRound(rec.advisorfee)])
+                                })
+                                pdfDoc.text('Retrocession Fees Report', 14, pdfDoc.lastAutoTable.finalY + 15)
+                                pdfDoc.autoTable({
+                                    startY: pdfDoc.lastAutoTable.finalY + 30,
+                                    head: [['Policy Number', 'Retrocession Amount']],
+                                    body: transformedRecords.filter(item => {return item.retrocession && item.retrocession > 0}).map(rec => [rec.accountnumber, customRound(rec.retrocession)])
+                                })
+                                pdfData = pdfDoc.output()
+                            }
+                            if (reportTypes.includes('pdf') && record.params.source === 'EstablishmentFeeShares') {
                                 let feeShareList = []
                                 for (key in feeShareTotals) {
                                     feeShareList.push([key, customRound(feeShareTotals[key])])
@@ -225,7 +250,7 @@ const adminJsStatic = {
                                 pdfData = pdfDoc.output()
                             }
                             return { 
-                                record: new AdminJS.BaseRecord({data: parsed? parsed : pdfData, reportType: reportType}, resource).toJSON(currentAdmin)
+                                record: new AdminJS.BaseRecord({csvData: parsed, pdfData: pdfData, reportTypes: JSON.stringify(reportTypes)}, resource).toJSON(currentAdmin)
                             }
                         }
                     }

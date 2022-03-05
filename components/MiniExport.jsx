@@ -13,18 +13,18 @@ const MiniExport = (props) => {
     const [pdfUrl, setPdfUrl] = useState([])
     const sendNotice = useNotice()
     const createPdf = () => {
-        const blob = new Blob([record.params.data], {type: 'application/pdf'})
+        const blob = new Blob([record.params.pdfData], {type: 'application/pdf'})
         const docUrl = URL.createObjectURL(blob)
         setPdfUrl(docUrl)
     }
 
-    const exportData = async () => {
+    const exportData = async (type) => {
         try{
-            if (record.params.reportType === 'csv') {
-                const blob = new Blob([record.params.data], { type: 'text/csv' })
+            if (type === 'csv') {
+                const blob = new Blob([record.params.csvData], { type: 'text/csv' })
                 saveAs(blob, getExportedFileName('csv'))
                 sendNotice({ message: 'Exported successfully', type: 'success' })   
-            } else if (record.params.reportType === 'pdf') {
+            } else if (type === 'pdf') {
                 setIsPDF(true)
                 await createPdf()
                 sendNotice({ message: 'Exported successfully', type: 'success' })   
@@ -37,13 +37,20 @@ const MiniExport = (props) => {
     return (
         <Box justifyContent="center">
             <Box>
-                <Button style={{marginBottom: 20}} onClick={() => exportData()}>
-                    {`Output to ${record.params.reportType.toUpperCase()} file`}
-                </Button>
+                {
+                    JSON.parse(record.params.reportTypes).includes('csv') &&
+                    <Button style={{marginBottom: 20, marginRight: 20}} onClick={() => exportData('csv')}>
+                        {`Output to CSV file`}
+                    </Button>
+                }
+                {
+                    JSON.parse(record.params.reportTypes).includes('pdf') &&
+                    <Button style={{marginBottom: 20}} onClick={() => exportData('pdf')}>
+                        {`Output to PDF file`}
+                    </Button>
+                }      
             </Box>
-            { isPDF &&
-                <iframe width={1200} height={800} src={pdfUrl} type="application/pdf"/>
-            }
+            { isPDF && <iframe width={1200} height={800} src={pdfUrl} type="application/pdf"/>}
         </Box>
     )
 }

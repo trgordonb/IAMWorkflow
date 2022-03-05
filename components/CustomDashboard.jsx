@@ -1,48 +1,53 @@
-import { Box, H3, Button } from '@adminjs/design-system'
-import React, { useEffect, useState } from 'react'
-//import { PDFDocument } from 'pdf-lib'
+import { Box, H4, Button, Section, Input } from '@adminjs/design-system'
+import React, { useState } from 'react'
+import { ApiClient, useNotice } from 'adminjs'
 
 const CustomDashboard = () => {
-  const [pdfInfo, setPdfInfo] = useState([])
-  const generateReport = async () => {
-    //const formUrl = 'https://oh-estore.s3.amazonaws.com/testpdf.pdf'
-    //const formPdfBytes = await fetch(formUrl).then(res => res.arrayBuffer())
-    //const blob = new Blob([formPdfBytes], {type: 'application/pdf'})
-    //const docUrl = URL.createObjectURL(blob)
-    //setPdfInfo(docUrl)
-    //const pdfDoc = await PDFDocument.load(formPdfBytes)
-    //const form = pdfDoc.getForm()
-    //const nameField = form.getTextField('Name')
-    //nameField.setText('Gordon Cheng')
-    //const emailField = form.getTextField('Email')
-    //emailField.setText('trgordonb@gmail.com')
-    //const mobileField = form.getTextField('Mobile')
-    //mobileField.setText('92334925')
-    //const pdfBytes = await pdfDoc.save()
-  }
-
-  useEffect(() => {
-    const loadPdf = async () => {
-      //const formUrl = 'https://oh-estore.s3.amazonaws.com/testpdf.pdf'
-      //const formPdfBytes = await fetch(formUrl).then(res => res.arrayBuffer())
-      //const pdfDoc = await PDFDocument.load(formPdfBytes)
-      //const blob = new Blob([formPdfBytes], {type: 'application/pdf'})
-      //const docUrl = URL.createObjectURL(blob)
-      //setPdfInfo(docUrl)
-    }
-    //loadPdf()
-  },[])
-
+  const api = new ApiClient()
+  const sendNotice = useNotice()
+  const [tag1, setTag1] = useState('')
+  const [tag2, setTag2] = useState('')
+  const [tag3, setTag3] = useState('')
   return (
     <Box variant="grey">
       <Box variant="white">
-          <H3>Here you can specify a totally custom dashboard</H3>
-          <Box>
-            <Button onClick={()=>{}}>PDF View</Button>
-          </Box>
-          {
-            //<iframe width={1200} height={800} src={pdfInfo} type="application/pdf"/>
-          }
+          <H4>Tasks to be carried out: </H4>
+          <Section style={{marginTop:15}}>
+              <H4>Reconcilation of Settlement Bank Statements with Custodian Statements</H4>
+              <Input 
+                type='text' 
+                value={tag1}
+                id="t1" 
+                placeholder="Enter your tag here"
+                style={{marginRight: 15}}
+                onChange={(event) => setTag1(event.target.value)}
+              />
+              <Button onClick={()=> sendNotice({message: 'Reconcilation success'})}>Proceed</Button>
+          </Section>
+          <Section style={{marginTop:15}}>
+              <H4>Reconcilation of Settlement Bank Statements with Demand Notes</H4>
+              <Input 
+                type='text' 
+                value={tag2}
+                id="t2" 
+                placeholder="Enter your tag here"
+                style={{marginRight: 15}}
+                onChange={(event) => setTag2(event.target.value)}
+              />
+              <Button onClick={()=> sendNotice({message: 'Reconcilation success'})}>Proceed</Button>
+          </Section>
+          <Section style={{marginTop:15}}>
+              <H4>Reconcilation of Demand Notes with Custodian Statements</H4>
+              <Input 
+                type='text' 
+                value={tag3}
+                id="t3" 
+                placeholder="Enter your tag here"
+                style={{marginRight: 15}}
+                onChange={(event) => setTag3(event.target.value)}
+              />
+              <Button onClick={()=> sendNotice({message: 'Reconcilation success'})}>Proceed</Button>
+          </Section>
       </Box>
     </Box>
   )
