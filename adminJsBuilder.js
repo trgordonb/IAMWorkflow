@@ -1,5 +1,8 @@
 const mongoose = require('mongoose')
 const AdminJS = require('adminjs')
+const bcrypt = require('bcrypt')
+const moment = require('moment')
+const { parse } = require('json2csv');
 const CustodianModel = require('./models/custodian.model')
 const AccountCustodianModel = require('./models/account-custodian.model')
 const AccountPolicyModel = require('./models/account-policy')
@@ -15,14 +18,20 @@ const FeeSharingSchemeModel = require('./models/fee-sharing.model')
 const AccountFeeModel = require('./models/account-fee.model')
 const DemandNoteModel = require('./models/demand-note.model')
 const PolicyFeeSettingModel = require('./models/policyfee-setting.model')
+const UserModel = require('./models/user.model')
 const ReportModel = require('./models/report.model')
 const EstablishmentFeeShareModel = require('./models/establishment-feeshare.model')
 const importExportFeature = require('./features/import-export/index')
+const { jsPDF } = require('jspdf/dist/jspdf.node')
 
 const menu = {
     Master: { name: 'Main', icon: 'SpineLabel' },
     Reports: { name: 'Report' }
 }
+
+const getExportedFileName = (extension) =>
+  `export-${moment().format('yyyy-MM-dd_HH-mm')}.${extension}`
+
     
 const adminJsStatic = {
     databases: [mongoose],
@@ -31,6 +40,62 @@ const adminJsStatic = {
         component: AdminJS.bundle('./components/CustomDashboard')
     },
     resources: [
+        {
+            resource: UserModel, options: {
+                parent: menu.Master,
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    },
+                    encryptedPassword: {
+                        isVisible: false
+                    },
+                    password: {
+                        type: 'string',
+                        isVisible: {
+                            list: false, edit: true, filter: false, show: false,
+                        }
+                    }
+                },
+                actions: {
+                    new: {
+                        isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+                        before: async(request) => {
+                            if (request.payload.password) {
+                                request.payload = {
+                                    ...request.payload,
+                                    encryptedPassword: await bcrypt.hash(request.payload.password, 10),
+                                    password: undefined
+                                }
+                            }
+                            return request
+                        }
+                    },
+                    list: {
+                        isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+                    },
+                    edit: {
+                        isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+                        before: async(request) => {
+                            if (request.payload.password) {
+                                request.payload = {
+                                    ...request.payload,
+                                    encryptedPassword: await bcrypt.hash(request.payload.password, 10),
+                                    password: undefined
+                                }
+                            }
+                            return request
+                        }
+                    },
+                    show: {
+                        isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+                    },
+                    filter: {
+                        isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+                    }
+                }
+            }
+        },
         { 
             resource: CustodianModel, options: { 
                 parent: menu.Master,
@@ -53,6 +118,93 @@ const adminJsStatic = {
         {
             resource: ReportModel, options: {
                 parent: menu.Master,
+                actions: {
+                    export: {
+                        actionType: 'record',
+                        icon: 'Csv',
+                        component: AdminJS.bundle('./components/MiniExport.jsx'),
+                        handler: async (request, response, context) => {
+                            const { record, resource, currentAdmin } = context
+                            let exportModel = record.params.source === 'AccountLedgerBalances' ? AccountLedgerBalanceModel : EstablishmentFeeShareModel
+                            let parsed = null
+                            let transformedRecords = []
+                            let pdfData = null
+                            let reportType = 'csv'
+                            let docs = await exportModel.find({[record.params['filters.0.fieldname']]: record.params['filters.0.value']})
+                            await Promise.all(docs.map(async (doc) => {
+                                if (record.params.source === 'AccountLedgerBalances') {
+                                    let resultAccountPolicy = await AccountPolicyModel.findById(doc.accountnumber)
+                                    let resultCurrency = await CurrencyModel.findById(doc.currency)
+                                    let resultCustodian = await CustodianModel.findById(doc.custodian)
+                                    let resultCustomer = await CustomerModel.findById(doc.customer)
+                                    let transformedRecord = {
+                                        accountnumber: resultAccountPolicy? resultAccountPolicy.number: '',
+                                        NAVDate: doc.NAVDate? moment(doc.NAVDate).format('YYYY-MM-DD'): '',
+                                        AUM: doc.AUM? doc.AUM: '',
+                                        currency: resultCurrency? resultCurrency.name : '',
+                                        advisorfee: doc.advisorfee? doc.advisorfee: '',
+                                        retrocession: doc.retrocession? doc.retrocession: '',
+                                        custodian: resultCustodian? resultCustodian.name : '',
+                                        customer: resultCustomer? resultCustomer.clientId: ''
+                                    }
+                                    transformedRecords.push(transformedRecord)
+                                } else if (record.params.source === 'EstablishmentFeeShares') {
+                                    reportType = 'pdf'
+                                    let resultAccountPolicy = await AccountPolicyModel.findById(doc.accountnumber)
+                                    let resultCurrency = await CurrencyModel.findById(doc.currency)
+                                    let recipients = []
+                                    await Promise.all(doc.recipientRecords.map(async (recipient) => {
+                                        let resultRole = await RoleModel.findById(recipient.role)
+                                        let resultRecipient = await PayeeModel.findById(recipient.recipient)
+                                        recipients.push([resultRecipient.name, resultRole.name, recipient.share.toFixed(2), recipient.amount.toFixed(2)])
+                                    }))
+                                    let transformedRecord = {
+                                        accountnumber: resultAccountPolicy? resultAccountPolicy.number: '',
+                                        providerStatement: doc.providerStatement,
+                                        particulars: doc.particulars,
+                                        recordDate: moment(doc.date).format('YYYY-MM-DD'),
+                                        totalAmount: doc.totalAmount,
+                                        currency: resultCurrency? resultCurrency.name : '',
+                                        recipientRecords: recipients
+                                    }
+                                    transformedRecords.push(transformedRecord)
+                                    const { applyPlugin } = require('./lib/jspdf.plugin.autotable')
+                                    applyPlugin(jsPDF)
+                                    const pdfDoc = new jsPDF()
+                                    pdfDoc.text('Establishment Fees Report', 14, 20)
+                                    transformedRecords.forEach(record => {
+                                        pdfDoc.autoTable({
+                                            styles: {
+                                                fontSize: 10
+                                            },
+                                            startY: pdfDoc.lastAutoTable.finalY + 10 || 30,
+                                            head: [['Policy#','Provider Statement','Date','Amount']],
+                                            body: [[record.accountnumber, `${record.providerStatement} (${record.particulars})`, moment(record.recordDate).format('YYYY-MM-DD'), record.totalAmount.toFixed(2)]]
+                                        })
+                                        pdfDoc.autoTable({
+                                            styles: {
+                                                fontSize: 8
+                                            },
+                                            headStyles: {
+                                                fillColor: '#E4A2C6'
+                                            },
+                                            startY: pdfDoc.lastAutoTable.finalY + 10,
+                                            head: [['Name','Role','Share(%)','Amount']],
+                                            body: record.recipientRecords
+                                        })
+                                    })
+                                    pdfData = pdfDoc.output()
+                                }                            
+                            }))
+                            if (reportType === 'csv') {
+                                parsed = parse(transformedRecords)          
+                            } 
+                            return { 
+                                record: new AdminJS.BaseRecord({data: parsed? parsed : pdfData, reportType: reportType}, resource).toJSON(currentAdmin)
+                            }
+                        }
+                    }
+                },
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -109,6 +261,38 @@ const adminJsStatic = {
             resource: AccountLedgerBalanceModel, options: {
                 parent: menu.Master,
                 actions: {
+                    new: {
+                        before: async (request, context) => {
+                            const { currentAdmin } = context
+                            if (request.payload) {
+                                request.payload = {
+                                    ...request.payload,
+                                    lastModifiedBy: currentAdmin._id
+                                }
+                            }
+                            return request
+                        }
+                    },
+                    edit: {
+                        isAccessible: ({ currentAdmin, record }) => {
+                            return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
+                        },
+                        before: async (request, context) => {
+                            const { currentAdmin, record } = context
+                            if (request.payload) {
+                                request.payload = {
+                                    ...request.payload,
+                                    lastModifiedBy: currentAdmin._id
+                                }
+                            }
+                            return request
+                        }
+                    },
+                    delete: {
+                        isAccessible: ({ currentAdmin, record }) => {
+                            return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
+                        },
+                    },
                     import: {
                         actionType: 'resource',
                         isVisible: true,
@@ -173,6 +357,15 @@ const adminJsStatic = {
                     },
                     retrocession: {
                         isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    lastModifiedBy: {
+                        isVisible: { list: false, filter: false, show: true, edit: false },
+                    },
+                    lastModifiedTime: {
+                        isVisible: { list: false, filter: false, show: true, edit: false },
+                    },
+                    isLocked: {
+                        isVisible: { list: false, filter: false, show: true, edit: true }
                     }
                 },
             },
@@ -265,46 +458,6 @@ const adminJsStatic = {
         },
         { 
             resource: CurrencyModel, options: { 
-                actions: {
-                    import: {
-                        actionType: 'resource',
-                        handler: async(request, response, data) => {
-                            try {
-                                const records = JSON.parse(request.payload.payload)
-                                let hasRequiredFields = true
-                                records.forEach(record => {
-                                    if (!record.hasOwnProperty('name')) {
-                                        hasRequiredFields = false
-                                    }
-                                })
-                                if (records.length > 0 && hasRequiredFields) {
-                                    await CurrencyModel.insertMany(records)
-                                    return {
-                                        notice: {
-                                            message: 'OK',
-                                            type: 'success'
-                                        }
-                                    } 
-                                } else {
-                                    return {
-                                        notice: {
-                                            message: 'Fail',
-                                            type: 'error'
-                                        }
-                                    } 
-                                }
-                            } catch (err) {
-                                return {
-                                    notice: {
-                                        message: 'Fail',
-                                        type: 'error'
-                                    }
-                                }
-                            }
-                                                  
-                        }
-                    }
-                },
                 properties: {
                     mimeType: {}
                 },
@@ -314,7 +467,6 @@ const adminJsStatic = {
                 filterProperties: ['name'],
                 showProperties: ['name'],
             },
-            features: [importExportFeature()]
         },
         { 
             resource: CurrencyHistoryModel, options: { 
@@ -420,7 +572,7 @@ const adminJsStatic = {
         },
     ],
     version: {
-        admin: false,
+        admin: true,
         app: '1.0.0'
     },
     branding: {
@@ -430,6 +582,12 @@ const adminJsStatic = {
     },
     locale: {
         translations: {
+            labels: {
+                loginWelcome: 'Welcome to IAM Legacy',
+            },
+            properties: {
+                email: 'User Id'
+            },
             resources: {
                 DemandNote: {
                     properties: {

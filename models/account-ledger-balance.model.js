@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const PolicyFeeSetting = require('./policyfee-setting.model')
 const AccountPolicy = require('./account-policy')
+const User = require('./user.model')
 
 const AccountLedgerBalanceSchema = new Schema({
     accountnumber: {
@@ -18,7 +19,16 @@ const AccountLedgerBalanceSchema = new Schema({
     estimatedfee: Number,
     overrideAdvisorFee: Boolean,
     advisorfee: Number,
-    retrocession: Number
+    retrocession: Number,
+    lastModifiedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    lastModifiedTime: Date,
+    isLocked: {
+        type: Boolean,
+        default: false
+    }
 })
 
 AccountLedgerBalanceSchema.pre('save', async function() {
@@ -32,6 +42,7 @@ AccountLedgerBalanceSchema.pre('save', async function() {
         if (accountPolicy) {
             this.currency = accountPolicy.currency
         }
+        this.lastModifiedTime = new Date()
     }
 })
 
@@ -46,6 +57,7 @@ AccountLedgerBalanceSchema.pre('findOneAndUpdate', async function() {
         if (accountPolicy) {
             this._update.$set.currency = accountPolicy.currency
         }
+        this._update.$set.lastModifiedTime = new Date()
     }
 })
 

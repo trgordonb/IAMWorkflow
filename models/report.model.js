@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const Currency = require('./currency.model')
+const AccountLedgerBalance = require('./account-ledger-balance.model')
 const Schema = mongoose.Schema
 
 const ReportSchema = new Schema({
@@ -18,34 +19,26 @@ const ReportSchema = new Schema({
     display: {
         type: String,
         enum: ['Management Fees', 'Retrocession','All']
+    },
+    lockRecords: {
+        type: Boolean,
+        default: false
     }
 })
 
-ReportSchema.post('save', async function() {
-    let filterStages = this.filters.map(filter => (
-        {
-            "$match" : { [filter.fieldname] : filter.value }
-        }
-    ))
-    let lookupStage = {
-        '$lookup': {
-            from: 'AccountCustodians', 
-            localField: 'accountnumber', 
-            foreignField: 'accountPolicyNumber', 
-            as: 'custodian'
-        }
-    }
-    let transformStage = {
-        '$set': {
-            custodian: {
-                '$arrayElemAt': ['$custodian.custodian', 0]
+ReportSchema.post('findOneAndUpdate', async function() {
+    let preFilterStages = this._update.$set.filters.map(filter => ([filter.fieldname, filter.value]))
+    const filters = Object.fromEntries(new Map(preFilterStages))
+    const transform = this._update.$set.lockRecords ? { isLocked: true } : { isLocked: false }
+    if (this._update.$set.source === 'AccountLedgerBalances') {
+        AccountLedgerBalance.updateMany(filters, transform, (err, docs) => {
+            if (err) {
+                console.log(err)
+            } else {
+                console.log(docs)
             }
-        }
+        })
     }
-    Currency.db.createCollection(this.name, {
-        viewOn: this.source,
-        pipeline: [...filterStages, lookupStage, transformStage]
-    })
 })
 
 const Report = mongoose.model('Report', ReportSchema, 'Reports')

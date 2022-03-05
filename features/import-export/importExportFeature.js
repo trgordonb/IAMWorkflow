@@ -2,7 +2,12 @@ const adminJs = require('adminjs')
 const { buildFeature } = adminJs;
 const { postActionHandler, getRecords, saveRecords } = require('./utils');
 const { parse } = require('json2csv');
+const moment = require('moment')
 const csv = require('csvtojson');
+const AccountPolicy = require('../../models/account-policy')
+const Currency = require('../../models/currency.model')
+const Custodian = require('../../models/custodian.model')
+const Customer = require('../../models/customer-model')
 
 const jsonExporter = (records) => {
   return JSON.stringify(records.map(r => r.params));
@@ -13,13 +18,31 @@ const jsonImporter = async (jsonString, resource) => {
   return saveRecords(records, resource);
 };
 
-const csvExporter = (records) => {
+const csvExporter = async (records) => {
   let cleanRecords = records.map(r => r.params)
-  cleanRecords.forEach(record => {
+  await Promise.all(cleanRecords.map(async (record) => {
     delete record.__v;
     delete record._id;
-  })
-  return parse(cleanRecords)
+    record.NAVDate = moment(record.NAVDate).format('YYYY-MM-DD')
+    if (record.hasOwnProperty('accountnumber')) {
+      let result = await AccountPolicy.findById(record.accountnumber)
+      record.accountnumber = result.number
+    }
+    if (record.hasOwnProperty('currency')) {
+      let result = await Currency.findById(record.currency)
+      record.currency = result.name
+    }
+    if (record.hasOwnProperty('custodian')) {
+      let result = await Custodian.findById(record.custodian)
+      record.custodian = result.name
+    }
+    if (record.hasOwnProperty('customer')) {
+      let result = await Customer.findById(record.customer)
+      record.customer = result.clientId
+    }
+  }))
+  const csvdata = parse(cleanRecords)
+  return csvdata
 };
 
 const csvImporter = async (csvString, resource) => {
@@ -35,7 +58,7 @@ const Parsers = {
 const exportHandler = async (request, response, context) => {
   const parser = Parsers[request.query?.type ?? 'json'].export;
   const records = await getRecords(context);
-  const parsedData = parser(records);
+  const parsedData = await parser(records);
   return {
     exportedData: parsedData,
   };

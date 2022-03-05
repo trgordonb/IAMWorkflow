@@ -6,6 +6,10 @@ const AccountPolicySchema = new Schema({
     currency: {
         type: Schema.Types.ObjectId,
         ref: 'Currency'
+    },
+    customer: {
+        type: Schema.Types.ObjectId,
+        ref: 'Customer'
     }
 })
 
