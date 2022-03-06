@@ -20,6 +20,7 @@ const DemandNoteModel = require('./models/demand-note.model')
 const PolicyFeeSettingModel = require('./models/policyfee-setting.model')
 const UserModel = require('./models/user.model')
 const ReportModel = require('./models/report.model')
+const TaskModel = require('./models/task.model')
 const EstablishmentFeeShareModel = require('./models/establishment-feeshare.model')
 const importExportFeature = require('./features/import-export/index')
 const { jsPDF } = require('jspdf/dist/jspdf.node')
@@ -95,6 +96,25 @@ const adminJsStatic = {
                         isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
                     }
                 }
+            }
+        },
+        {
+            resource: TaskModel, options: {
+                parent: menu.Master,
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    },
+                    lastRunTime: {
+                        isVisible: { list: false, filter: false, show: true, edit: false },
+                    },
+                    lastRunBy: {
+                        isVisible: { list: false, filter: true, show: true, edit: false },
+                    },
+                    lastRunStatus: {
+                        isVisible: { list: false, filter: true, show: true, edit: false },
+                    }
+                },
             }
         },
         { 

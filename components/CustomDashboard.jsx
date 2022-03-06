@@ -1,53 +1,128 @@
-import { Box, H4, Button, Section, Input } from '@adminjs/design-system'
-import React, { useState } from 'react'
+import { Box, H4, H5, Button, Section } from '@adminjs/design-system'
+import React, { useState, useEffect } from 'react'
 import { ApiClient, useNotice } from 'adminjs'
+import axios from 'axios'
+import { parse } from 'json2csv'
 
 const CustomDashboard = () => {
   const api = new ApiClient()
   const sendNotice = useNotice()
-  const [tag1, setTag1] = useState('')
-  const [tag2, setTag2] = useState('')
-  const [tag3, setTag3] = useState('')
+  const [tasks, setTasks] = useState([])
+  
+  const taskHandler = async (task) => {
+    let page = 0
+    let totalPage = 0
+    let sourceResults = []
+    let targetResults = []
+    let sourceData = []
+    let targetData = []
+    let unmatched = []
+    let success = true
+    let failReason = ''
+    do {
+      page = page + 1
+      const results = await axios.get(`${api.baseURL}/api/resources/${task['source.name']}/actions/list?filters.tag=${task.tag}&&page=${page}`)
+      sourceResults.push(...results.data.records)
+      totalPage = Math.ceil(results.data.meta.total / 10)
+    } while (page < totalPage)
+    sourceResults = sourceResults.map(record => [record.params, record.populated])
+    sourceResults.forEach((result) => {
+      if (result[0].hasOwnProperty(task['source.field']) && result[0].hasOwnProperty(task['matcheOn']) && success) {
+        sourceData.push({
+          _id: result[0]._id,
+          [task['source.field']]: result[0][task['source.field']],
+          [task['matcheOn']]: result[1][task['matcheOn']].params.number
+        })
+      } else {
+        success == false
+        failReason = "Source table does not have the required field"
+      }
+    })
+    if (success) {
+      page = 0
+      totalPage = 0
+      do {
+        page = page + 1
+        const results = await axios.get(`${api.baseURL}/api/resources/${task['target.name']}/actions/list?filters.tag=${task.tag}&&page=${page}`)
+        targetResults.push(...results.data.records)
+        totalPage = Math.ceil(results.data.meta.total / 10)
+      } while (page < totalPage)
+      targetResults = targetResults.map(record => [record.params, record.populated])
+      targetResults.forEach(result => {
+        if (result[0].hasOwnProperty(task['target.field']) && result[0].hasOwnProperty(task['matcheOn']) && success) {
+          targetData.push({
+            _id: result[0]._id,
+            [task['target.field']]: result[0][task['target.field']],
+            [task['matcheOn']]: result[1][task['matcheOn']].params.number //TO FIX LATER
+          })
+        } else {
+          success == false
+          failReason = "Target table does not have the required field"
+        }
+      })
+    }
+    
+    if (task.relationship === 'OneOnOne') {
+      sourceData.forEach(record => {
+        let matchKey = record[task['matcheOn']]
+        let matchedRecord = targetData.find(obj => obj[task['matcheOn']] === matchKey)
+        if (!matchedRecord) {
+          unmatched.push({
+            source: record,
+            target: undefined
+          })
+        } else {
+          if (matchedRecord[task['target.field']] !== record[task['sourceData.field']]) {
+            unmatched.push({
+              source: record,
+              target: matchedRecord
+            })
+          }
+        }
+      })
+    }
+    if (unmatched.length > 0) {
+      let unmatchedCSV = parse(unmatched.map((item) => {
+        return {
+          [task['matcheOn']] : item.source[task['matcheOn']],
+          [`Source: ${task['source.field']}`] : item.source[task['source.field']],
+          [`Target: ${task['target.field']}`] : item.target ? item.target[task['target.field']] : '-'
+        }
+      }))
+      const blob = new Blob([unmatchedCSV], { type: 'text/csv' })
+      saveAs(blob, 'unmatched.csv')
+      sendNotice({message: 'Reconcilation fail, see the discrepencies at the downloaded CSV file', type:'error'})  
+    } else {
+      if (success) {
+        sendNotice({message: 'Reconcilation success'})
+      } else {
+        sendNotice({message: failReason, type: 'error'})
+      }
+    }
+  }
+
+  useEffect(() => {
+    api.resourceAction({
+      resourceId: 'Task',
+      actionName: 'list'
+    })
+    .then(result => {
+      setTasks(result.data.records)
+    })
+  },[])
+
   return (
     <Box variant="grey">
       <Box variant="white">
           <H4>Tasks to be carried out: </H4>
-          <Section style={{marginTop:15}}>
-              <H4>Reconcilation of Settlement Bank Statements with Custodian Statements</H4>
-              <Input 
-                type='text' 
-                value={tag1}
-                id="t1" 
-                placeholder="Enter your tag here"
-                style={{marginRight: 15}}
-                onChange={(event) => setTag1(event.target.value)}
-              />
-              <Button onClick={()=> sendNotice({message: 'Reconcilation success'})}>Proceed</Button>
-          </Section>
-          <Section style={{marginTop:15}}>
-              <H4>Reconcilation of Settlement Bank Statements with Demand Notes</H4>
-              <Input 
-                type='text' 
-                value={tag2}
-                id="t2" 
-                placeholder="Enter your tag here"
-                style={{marginRight: 15}}
-                onChange={(event) => setTag2(event.target.value)}
-              />
-              <Button onClick={()=> sendNotice({message: 'Reconcilation success'})}>Proceed</Button>
-          </Section>
-          <Section style={{marginTop:15}}>
-              <H4>Reconcilation of Demand Notes with Custodian Statements</H4>
-              <Input 
-                type='text' 
-                value={tag3}
-                id="t3" 
-                placeholder="Enter your tag here"
-                style={{marginRight: 15}}
-                onChange={(event) => setTag3(event.target.value)}
-              />
-              <Button onClick={()=> sendNotice({message: 'Reconcilation success'})}>Proceed</Button>
-          </Section>
+          {
+            tasks.map(task => (
+              <Section key={task.params.name} style={{ marginTop: 15 }}>
+                <H5>{task.params.name}</H5>
+                <Button onClick={() => taskHandler(task.params)}>Proceed</Button>
+              </Section>
+            ))
+          }
       </Box>
     </Box>
   )
