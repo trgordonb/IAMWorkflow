@@ -17,6 +17,7 @@ const CustomDashboard = () => {
     let sourceData = []
     let targetData = []
     let unmatched = []
+    let matched = []
     let success = true
     let failReason = ''
     do {
@@ -25,6 +26,7 @@ const CustomDashboard = () => {
       sourceResults.push(...results.data.records)
       totalPage = Math.ceil(results.data.meta.total / 10)
     } while (page < totalPage)
+    //console.log(sourceResults)
     sourceResults = sourceResults.map(record => [record.params, record.populated])
     sourceResults.forEach((result) => {
       if (result[0].hasOwnProperty(task['source.field']) && result[0].hasOwnProperty(task['matcheOn']) && success) {
@@ -72,8 +74,13 @@ const CustomDashboard = () => {
             target: undefined
           })
         } else {
-          if (matchedRecord[task['target.field']] !== record[task['sourceData.field']]) {
+          if (matchedRecord[task['target.field']] !== record[task['source.field']]) {
             unmatched.push({
+              source: record,
+              target: matchedRecord
+            })
+          } else {
+            matched.push({
               source: record,
               target: matchedRecord
             })
@@ -81,6 +88,29 @@ const CustomDashboard = () => {
         }
       })
     }
+    let reconcileDetails = []
+    reconcileDetails = unmatched.map(item => ({
+      status: 'Unmatched',
+      source: {
+        name: task['source.name'],
+        id: item.source._id,
+      },
+      target: { 
+        name: task['target.name'],
+        id: item.target ? item.target._id : ''
+      }
+    }))
+    reconcileDetails.push(...matched.map(item => ({
+      status: 'Matched',
+      source: {
+        name: task['source.name'],
+        id: item.source._id,
+      },
+      target: { 
+        name: task['target.name'],
+        id: item.target._id
+      }
+    })))
     if (unmatched.length > 0) {
       let unmatchedCSV = parse(unmatched.map((item) => {
         return {
@@ -92,10 +122,42 @@ const CustomDashboard = () => {
       const blob = new Blob([unmatchedCSV], { type: 'text/csv' })
       saveAs(blob, 'unmatched.csv')
       sendNotice({message: 'Reconcilation fail, see the discrepencies at the downloaded CSV file', type:'error'})  
+      const apiResult = await api.recordAction({
+        recordId: task._id,
+        resourceId: 'Task',
+        actionName: 'edit',
+        data: {
+          lastRunStatus: 'Unmatched',
+          lastRunTime: new Date(),
+          lastRunDetails: reconcileDetails
+        }
+      })
     } else {
       if (success) {
+        //update success reconcile status to backend
+        const apiResult = await api.recordAction({
+          recordId: task._id,
+          resourceId: 'Task',
+          actionName: 'edit',
+          data: {
+            lastRunStatus: 'Matched',
+            lastRunTime: new Date(),
+            lastRunDetails: reconcileDetails
+          }
+        })
         sendNotice({message: 'Reconcilation success'})
       } else {
+        //update fail reconcile status to backend
+        const apiResult = await api.recordAction({
+          recordId: task._id,
+          resourceId: 'Task',
+          actionName: 'edit',
+          data: {
+            lastRunStatus: 'Unmatched',
+            lastRunTime: new Date(),
+            lastRunDetails: []
+          }
+        })
         sendNotice({message: failReason, type: 'error'})
       }
     }

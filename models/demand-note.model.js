@@ -34,7 +34,24 @@ const DemandNoteSchema = new Schema({
     feesharing: {
         type: Schema.Types.ObjectId,
         ref: 'FeeSharingScheme'
-    }
+    },
+    reconcileStatus: [
+    {
+        with: {
+            type: String,
+            default: 'AccountLedgerBalance'
+        },
+        lastReconcileTime: Date,
+        lastReconcileStatus:{
+            type: String,
+            enum: ['Matched', 'Unmatched', 'NotDone'],
+            default: 'NotDone'
+        },
+        link: {
+            type: Schema.Types.ObjectId,
+            ref: 'AccountLedgerBalance'
+        }
+    }]
 })
 
 DemandNoteSchema.pre('save', async function() {
@@ -45,32 +62,34 @@ DemandNoteSchema.pre('save', async function() {
 })
 
 DemandNoteSchema.post('save', async function() {
-    const feeSharingRaw = await FeeSharing.findById(this.feesharing).populate('feerecipients')
-    const currenycRaw = await Currency.findOne({name: 'HKD'})
-    const exchRateRaw = await CurrenyHistory.findOne({currency: this.currency, date: this.serviceFeeEndDate})
-    const feeSharingCalculated = [] 
-    feeSharingRaw.feerecipients.forEach(item => {
-        const amount = (this.amount * ( item.percentage / 100 ) * exchRateRaw.rate).toFixed(2)
-        feeSharingCalculated.push({
-            recipient: item.recipient,
-            share: item.percentage,
-            role: item.role,
-            amount: amount
+    if (this.__v == 0) {
+        const feeSharingRaw = await FeeSharing.findById(this.feesharing).populate('feerecipients')
+        const currenycRaw = await Currency.findOne({name: 'HKD'})
+        const exchRateRaw = await CurrenyHistory.findOne({currency: this.currency, date: this.serviceFeeEndDate})
+        const feeSharingCalculated = [] 
+        feeSharingRaw.feerecipients.forEach(item => {
+            const amount = (this.amount * ( item.percentage / 100 ) * exchRateRaw.rate).toFixed(2)
+            feeSharingCalculated.push({
+                recipient: item.recipient,
+                share: item.percentage,
+                role: item.role,
+                amount: amount
+            })
         })
-    })
-    const establishmentFeeShare = new EstablishmentFeeShare({
-        demandnote: this._id,
-        accountnumber: this.accountnumber,
-        date: this.date,
-        providerStatement: this.providerStatement,
-        particulars: this.comment,
-        tag: this.tag,
-        receivedDate: this.receivedDate,
-        currency: currenycRaw._id,
-        totalAmount: (this.amount * exchRateRaw.rate).toFixed(2),
-        recipientRecords: feeSharingCalculated
-    })
-    await establishmentFeeShare.save()
+        const establishmentFeeShare = new EstablishmentFeeShare({
+            demandnote: this._id,
+            accountnumber: this.accountnumber,
+            date: this.date,
+            providerStatement: this.providerStatement,
+            particulars: this.comment,
+            tag: this.tag,
+            receivedDate: this.receivedDate,
+            currency: currenycRaw._id,
+            totalAmount: (this.amount * exchRateRaw.rate).toFixed(2),
+            recipientRecords: feeSharingCalculated
+        })
+        await establishmentFeeShare.save()
+    }
 })
 
 DemandNoteSchema.pre('findOneAndUpdate', async function() {

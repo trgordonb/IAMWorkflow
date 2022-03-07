@@ -108,11 +108,11 @@ const adminJsStatic = {
                     lastRunTime: {
                         isVisible: { list: false, filter: false, show: true, edit: false },
                     },
-                    lastRunBy: {
-                        isVisible: { list: false, filter: true, show: true, edit: false },
-                    },
                     lastRunStatus: {
                         isVisible: { list: false, filter: true, show: true, edit: false },
+                    },
+                    lastRunDetails: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
                     }
                 },
             }
@@ -435,7 +435,10 @@ const adminJsStatic = {
                         isVisible: { list: false, filter: false, show: true, edit: false },
                     },
                     isLocked: {
-                        isVisible: { list: false, filter: false, show: true, edit: true }
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    reconcileStatus: {
+                        isVisible: { list: false, filter: false, show: true, edit: false },
                     }
                 },
             },
@@ -635,6 +638,9 @@ const adminJsStatic = {
                         isVisible: { list: false, filter: false, show: true, edit: true },
                     },
                     currency: {
+                        isVisible: { list: false, filter: false, show: true, edit: false },
+                    },
+                    reconcileStatus: {
                         isVisible: { list: false, filter: false, show: true, edit: false },
                     }
                 }

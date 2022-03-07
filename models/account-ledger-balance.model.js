@@ -28,7 +28,24 @@ const AccountLedgerBalanceSchema = new Schema({
     isLocked: {
         type: Boolean,
         default: false
-    }
+    },
+    reconcileStatus: [
+    {
+        with: {
+            type: String,
+            default: 'DemandNote'
+        },
+        lastReconcileTime: Date,
+        lastReconcileStatus:{
+            type: String,
+            enum: ['Matched', 'Unmatched', 'NotDone'],
+            default: 'NotDone'
+        },
+        link: {
+            type: Schema.Types.ObjectId,
+            ref: 'DemandNote'
+        }
+    }]
 })
 
 AccountLedgerBalanceSchema.pre('save', async function() {
