@@ -915,8 +915,11 @@ const adminJsStatic = {
     },
     locale: {
         translations: {
+            messages: {
+                loginWelcome: 'Integrated Asset Management System'
+            },
             labels: {
-                loginWelcome: 'Assetonchain Technology I-AMS',
+                loginWelcome: 'I-AMS',
             },
             properties: {
                 email: 'User Id'
