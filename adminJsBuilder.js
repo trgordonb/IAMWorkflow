@@ -141,19 +141,33 @@ const adminJsStatic = {
                         isVisible: true,
                         component: AdminJS.bundle('./components/BankReconcile'),
                         handler: async(request, resource, context) => {
-                            try {
-                                const { record, resource, currentAdmin } = context
-                                return { 
-                                    record: new AdminJS.BaseRecord(record.params, resource).toJSON(currentAdmin)
-                                }
-                            } catch (err) {
-                                return {
-                                    notice: {
-                                        message: 'Fail',
-                                        type: 'error'
+                            const statementItems = await BankStatementItemModel.find({bankstatementId: request.payload.statementId}).populate('statement')
+                            let unmatched = []
+                            await Promise.all(statementItems.map(async (item) => {
+                                const alreadyReconciled = item.statement.bankStatementitem ? true: false
+                                if (!alreadyReconciled) {
+                                    const sourcegrossamt = item.grossamount
+                                    const targetgrossamt = item.statement.grossamount
+                                    if (item.currency.toString() !== item.statement.currency.toString()) {
+                                        unmatch.push(item.statement.reference)
+                                    } else if (sourcegrossamt !== targetgrossamt) {
+                                        unmatch.push(item.statement.reference)
+                                    } else {
+                                        item.isLocked = true
+                                        await item.save()
+                                        let statement = await StatmentModel.findById(item.statement._id)
+                                        statement.bankcharges = item.bankcharges
+                                        statement.netamount = item.netamount
+                                        statement.bankStatementitem = item._id
+                                        await statement.save()
                                     }
                                 }
-                            }
+                            }))
+                            if (unmatched.length === 0) {
+                                return { notice: { message: 'OK', type: 'success', data: [] } }
+                            } else {
+                                return { notice: { message: 'Fail', type: 'error', data: unmatched } }
+                            }   
                         }
                     }
                 },
@@ -170,6 +184,9 @@ const adminJsStatic = {
                     },
                     party: {
                         isVisible: { list: false, filter: true, show: true, edit: true },
+                    },
+                    isLocked: {
+                        isVisible: { list: true, filter: true, show: true, edit: false },
                     }
                 }
             }
@@ -177,213 +194,6 @@ const adminJsStatic = {
         {
             resource: StatmentModel, options: {
                 parent: menu.Master,
-                actions: {
-                    edit: {
-                        actionType: 'record',
-                        isAccessible: (context) => {
-                            return true //currentAdmin not available ?
-                        },
-                        before: async (request) => {
-                            let matched = true
-                            let newPayload = {}
-                            let status = request.payload.status
-                            let allKeys = Object.keys(request.payload)
-                            await Promise.all(allKeys.map(async (key) => {
-                                if (key === 'statementitems' && status === 'Init') {
-                                    const items = request.payload[key]
-                                    let newStatementItems = []
-                                    let total = 0
-                                    await Promise.all(items.map(async (item) => {
-                                        let account = await AccountPolicyModel.findOne({number: item.accountnumber})
-                                        total = total + parseFloat(item.grossamount)
-                                        newStatementItems.push({
-                                            accountnumber: account._id,
-                                            grossamount: parseFloat(item.grossamount),
-                                            netamount: 0
-                                        })
-                                    }))
-                                    if (request.payload.grossamount && total !== request.payload.grossamount) {
-                                        matched = false
-                                    }
-                                    newPayload = {
-                                        ...newPayload,
-                                        statementitems: matched ? newStatementItems: [],
-                                        status: matched ? 'DetailsMatched' : 'Init'
-                                    }
-                                    console.log('NewPayload:', newPayload)
-                                } 
-                                else if (key === 'statementitems' && status === 'DetailsMatched') {
-                                    const items = request.payload[key]
-                                    let newStatementItems = []
-                                    await Promise.all(items.map(async (item) => {
-                                        let account = await AccountPolicyModel.findById(item.accountnumber)
-                                        newStatementItems.push({
-                                            accountnumber: account._id,
-                                            grossamount: parseFloat(item.grossamount),
-                                            netamount: parseFloat(item.netamount)
-                                        })
-                                    }))
-                                    newPayload = {
-                                        ...newPayload,
-                                        statementitems: newStatementItems,
-                                        status: 'BankFeesAllocated'
-                                    }
-                                }
-                                else if (key === 'statementitems' && status === 'FeeSharingCompleted') {
-                                    newPayload = {
-                                        ...newPayload,
-                                        status: 'FeeSharingCompleted'
-                                    }
-                                    await Promise.all(request.payload.statementitems.map(async (item) => {
-                                        const accountFeeRaw = await AccountFeeModel.findOne({accountnumber: item.accountnumber, statementCode: request.payload.statementcode})
-                                        const feeSharingRaw = await FeeSharingSchemeModel.findById(accountFeeRaw.feeSharingScheme).populate('feerecipients')
-                                        const currenycRaw = await CurrencyModel.findById(request.payload.currency)
-                                        const periodRaw = await PeriodModel.findById(request.payload.period)
-                                        const exchRateRaw = await CurrencyHistoryModel.findOne({currency: currenycRaw._id, date: periodRaw.end})
-                                        const feeSharingCalculated = [] 
-                                        feeSharingRaw.feerecipients.forEach(recipient => {
-                                            const amount = (item.netamount * ( recipient.percentage / 100 ) * exchRateRaw.rate).toFixed(2)
-                                            feeSharingCalculated.push({
-                                                recipient: recipient.recipient,
-                                                share: recipient.percentage,
-                                                role: recipient.role,
-                                                amount: amount
-                                            })
-                                        })
-                                        const feeShareHistory = new FeeShareHistoryModel({
-                                            statement: request.payload.statementId,
-                                            accountnumber: item.accountnumber,
-                                            amount: item.netamount,
-                                            date: new Date(),
-                                            tag: request.payload.tag,
-                                            currency: request.payload.currency,
-                                            recipientRecords: feeSharingCalculated
-                                        })
-                                        await feeShareHistory.save()
-                                    }))
-                                }
-                                else if (['isLocked','bankcharges','netamount','bankStatementitem'].includes(key)) {
-                                    newPayload = {
-                                        ...newPayload,
-                                        [key]: request.payload[key]
-                                    }
-                                    console.log('NewPayload:', newPayload)
-                                }
-                            }))
-                            request = {
-                                ...request,
-                                payload: newPayload
-                            }
-                            console.log(newPayload)
-                            return request
-                        }
-                    },
-                    import: {
-                        actionType: 'record',
-                        isVisible: true,
-                        component: AdminJS.bundle('./components/MiniImport'),
-                        handler: async(request, response, context) => {
-                            try {
-                                const { record, resource, currentAdmin } = context
-                                return { 
-                                    record: new AdminJS.BaseRecord(record.params, resource).toJSON(currentAdmin)
-                                }
-                            } catch (err) {
-                                return {
-                                    notice: {
-                                        message: 'Fail',
-                                        type: 'error'
-                                    }
-                                }
-                            }                                       
-                        },
-                    },
-                    applycharges: {
-                        actionType: 'resource',
-                        isVisible: true,
-                        component: AdminJS.bundle('./components/ChargesApply'),
-                        handler: async(request, resource, context) => {
-                            try {
-                                const { record, resource, currentAdmin } = context
-                                return { 
-                                    record: new AdminJS.BaseRecord(record.params, resource).toJSON(currentAdmin)
-                                }
-                            } catch (err) {
-                                return {
-                                    notice: {
-                                        message: 'Fail',
-                                        type: 'error'
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    reconcile: {
-                        actionType: 'resource',
-                        isVisible: true,
-                        component: AdminJS.bundle('./components/FeeReconcile'),
-                        handler: async(request, response, context) => {
-                            console.log(request.payload)
-                            let balances = await AccountLedgerBalanceModel.find({tag: request.payload.tag})
-                            balances = balances.map(balance => ({
-                                accountnumber: balance.accountnumber,
-                                currency: balance.currency,
-                                advisorfee: balance.advisorfee
-                            }))
-                            let statements = await StatmentModel.find({tag: request.payload.tag})
-                            let transformedStatements = []
-                            let finalStatements = []
-                            let unmatched = []
-                            statements.forEach((statement) => {
-                                transformedStatements.push({
-                                    items: statement.statementitems,
-                                    currency: statement.currency
-                                })
-                            })
-                            transformedStatements.forEach(statement => {
-                                statement.items.forEach(item => {
-                                    finalStatements.push({
-                                        accountnumber: item.accountnumber,
-                                        currency: statement.currency,
-                                        amount: item.grossamount
-                                    })
-                                })
-                            })
-                            await Promise.all(finalStatements.map(async (item) => {
-                                let matchedRecord = balances.find(obj => obj.accountnumber.toString() === item.accountnumber.toString())
-                                if (matchedRecord.currency.toString() !== item.currency.toString() || matchedRecord.advisorfee !== item.amount) {
-                                    const rawAccount = await AccountPolicyModel.findById(item.accountnumber)
-                                    unmatched.push(rawAccount.number)
-                                }
-                            }))
-                            if (unmatched.length === 0) {
-                                return { notice: { message: 'OK', type: 'success', data: [] } }    
-                            } else {
-                                return { notice: { message: 'Fail', type: 'error', data: unmatched } }    
-                            }
-                        }
-                    },
-                    calccharges: {
-                        actionType: 'resource',
-                        isVisible: true,
-                        component: AdminJS.bundle('./components/FeeShareCalc'),
-                        handler: async(request, resource, context) => {
-                            try {
-                                const { record, resource, currentAdmin } = context
-                                return { 
-                                    record: new AdminJS.BaseRecord(record.params, resource).toJSON(currentAdmin)
-                                }
-                            } catch (err) {
-                                return {
-                                    notice: {
-                                        message: 'Fail',
-                                        type: 'error'
-                                    }
-                                }
-                            }
-                        }
-                    },              
-                },
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -414,13 +224,13 @@ const adminJsStatic = {
                         isVisible: { list: false, filter: false, show: true, edit: true },
                     },
                     netamount: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
+                        isVisible: { list: false, filter: false, show: true, edit: false },
                     },
                     bankcharges: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
+                        isVisible: { list: false, filter: false, show: true, edit: false },
                     },
                     bankStatementitem: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
+                        isVisible: { list: false, filter: false, show: true, edit: false },
                     },
                     statementitems: {
                         isVisible: { list: false, filter: false, show: true, edit: false }
@@ -428,6 +238,173 @@ const adminJsStatic = {
                     status: {
                         isVisible: { list: true, filter: true, show: true, edit: false }
                     },
+                    isLocked: {
+                        isVisible: { list: true, filter: true, show: true, edit: false }
+                    }
+                },
+                actions: {
+                    edit: {
+                        actionType: 'record',
+                        isAccessible: (context) => {
+                            return true //currentAdmin not available ?
+                        },
+                    },
+                    import: {
+                        actionType: 'record',
+                        isVisible: true,
+                        component: AdminJS.bundle('./components/MiniImport'),
+                        handler: async(request, response, context) => {
+                            const { record, resource, currentAdmin } = context
+                            return { record: new AdminJS.BaseRecord(record.params, resource).toJSON(currentAdmin) }
+                        },
+                    },
+                    csvimport: {
+                        actionType: 'resource',
+                        isVisible: false,
+                        isAccessible: true,
+                        component: false,
+                        handler: async(request, response, context) => {
+                            console.log(request.payload)
+                            let total = 0
+                            let matched = true
+                            let statement = await StatmentModel.findById(request.payload.statementId)
+                            let newStatementItems = []
+                            await Promise.all(request.payload.statementitems.map(async (item) => {
+                                let account = await AccountPolicyModel.findOne({number: item.accountnumber})
+                                total = total + parseFloat(item.grossamount)
+                                newStatementItems.push({
+                                    accountnumber: account._id,
+                                    grossamount: parseFloat(item.grossamount),
+                                    netamount: 0
+                                })
+                            }))
+                            if (request.payload.grossamount && total !== request.payload.grossamount) {
+                                matched = false
+                            } else {
+                                statement.statementitems = newStatementItems
+                                statement.status = 'DetailsMatched'
+                                await statement.save()
+                            }
+                            if (matched) {
+                                return { notice: { message: 'OK', type: 'success' } }
+                            } else {
+                                return { notice: { message: 'Fail', type: 'error' } }
+                            }
+                        }
+                    },
+                    applycharges: {
+                        actionType: 'resource',
+                        isVisible: true,
+                        component: AdminJS.bundle('./components/ChargesApply'),
+                        handler: async(request, resource, context) => {
+                            let statements = await StatmentModel.find({tag: request.payload.tag})
+                            await Promise.all(statements.map(async (statement) => {
+                                if (statement.status === 'DetailsMatched') {
+                                    let totalcharges = statement.bankcharges
+                                    let grossamount = statement.grossamount
+                                    statement.statementitems.forEach(item => {
+                                        let bankcharge = Math.round(totalcharges * (item.grossamount / grossamount) * 100)/100
+                                        item.netamount = item.grossamount - bankcharge
+                                    })
+                                    statement.status = 'BankFeesAllocated'
+                                    statement.isLocked = true
+                                    console.log(statement)
+                                    await statement.save()
+                                }
+                            }))
+                            return { notice: { message: 'OK', type: 'success', data: [] } }    
+                        }
+                    },
+                    reconcile: {
+                        actionType: 'resource',
+                        isVisible: true,
+                        component: AdminJS.bundle('./components/FeeReconcile'),
+                        handler: async(request, response, context) => {
+                            let balances = await AccountLedgerBalanceModel.find({tag: request.payload.tag})
+                            balances = balances.map(balance => ({
+                                accountnumber: balance.accountnumber,
+                                currency: balance.currency,
+                                advisorfee: balance.advisorfee
+                            }))
+                            let statements = await StatmentModel.find({tag: request.payload.tag})
+                            let transformedStatements = []
+                            let finalStatements = []
+                            let unmatched = []
+                            statements.forEach((statement) => {
+                                transformedStatements.push({
+                                    items: statement.statementitems,
+                                    currency: statement.currency
+                                })
+                            })
+                            transformedStatements.forEach(statement => {
+                                statement.items.forEach(item => {
+                                    finalStatements.push({
+                                        accountnumber: item.accountnumber,
+                                        currency: statement.currency,
+                                        amount: item.grossamount
+                                    })
+                                })
+                            })
+                            await Promise.all(finalStatements.map(async (item) => {
+                                let matchedRecord = balances.find(obj => obj.accountnumber.toString() === item.accountnumber.toString())
+                                if (!matchedRecord) {
+                                    const rawAccount = await AccountPolicyModel.findById(item.accountnumber)
+                                    unmatched.push(rawAccount.number)
+                                } else
+                                if (matchedRecord.currency.toString() !== item.currency.toString() || matchedRecord.advisorfee !== item.amount) {
+                                    const rawAccount = await AccountPolicyModel.findById(item.accountnumber)
+                                    unmatched.push(rawAccount.number)
+                                }
+                            }))
+                            if (unmatched.length === 0) {
+                                return { notice: { message: 'OK', type: 'success', data: [] } }    
+                            } else {
+                                return { notice: { message: 'Fail', type: 'error', data: unmatched } }    
+                            }
+                        }
+                    },
+                    feesharescalc: {
+                        actionType: 'resource',
+                        isVisible: true,
+                        component: AdminJS.bundle('./components/FeeShareCalc'),
+                        handler: async(request, resource, context) => {
+                            let statements = await StatmentModel.find({tag: request.payload.tag})
+                            await Promise.all(statements.map(async (statement) => {
+                                if (statement.status === 'BankFeesAllocated') {
+                                    await Promise.all(statement.statementitems.map(async (item) => {
+                                        const accountFeeRaw = await AccountFeeModel.findOne({accountnumber: item.accountnumber, statementCode: statement.statementcode})
+                                        const feeSharingRaw = await FeeSharingSchemeModel.findById(accountFeeRaw.feeSharingScheme).populate('feerecipients')
+                                        const currenycRaw = await CurrencyModel.findById(statement.currency)
+                                        const periodRaw = await PeriodModel.findById(statement.period)
+                                        const exchRateRaw = await CurrencyHistoryModel.findOne({currency: currenycRaw._id, date: periodRaw.end})
+                                        const feeSharingCalculated = [] 
+                                        feeSharingRaw.feerecipients.forEach(recipient => {
+                                            const amount = (item.netamount * ( recipient.percentage / 100 ) * exchRateRaw.rate).toFixed(2)
+                                            feeSharingCalculated.push({
+                                                recipient: recipient.recipient,
+                                                share: recipient.percentage,
+                                                role: recipient.role,
+                                                amount: amount
+                                            })
+                                        })
+                                        const feeShareHistory = new FeeShareHistoryModel({
+                                            statement: statement._id,
+                                            accountnumber: item.accountnumber,
+                                            amount: item.netamount,
+                                            date: new Date(),
+                                            tag: request.payload.tag,
+                                            currency: statement.currency,
+                                            recipientRecords: feeSharingCalculated
+                                        })
+                                        await feeShareHistory.save()
+                                    }))
+                                    statement.status = 'FeeSharingCompleted'
+                                    await statement.save()
+                                }
+                            }))
+                            return { notice: { message: 'OK', type: 'success' } }
+                        }
+                    }
                 },
             },
         },
@@ -599,7 +576,6 @@ const adminJsStatic = {
                                     head: [['Name','Total']],
                                     body: feeShareList
                                 })
-                                pdfDoc.text('Total Amount: ' + customRound(accumulateTotal), 14, pdfDoc.lastAutoTable.finalY + 10)
                                 pdfData = pdfDoc.output()
                             }
                             return { 

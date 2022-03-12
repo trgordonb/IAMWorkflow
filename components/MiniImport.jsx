@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { ApiClient, useNotice } from 'adminjs';
+import { ApiClient } from 'adminjs';
 import {
   DropZoneItem,
-  Loader,
   Box,
   Button,
   DropZone,
+  Modal
 } from '@adminjs/design-system';
 import csv from 'csvtojson'
 
 const MiniImport = (props) => {
     const [file, setFile] = useState(null);
-    const sendNotice = useNotice();
-    const [isFetching, setFetching] = useState();
+    const [showModal, setShowModal] = useState(false)
+    const [isSuccess, setIsSuccess] = useState(true)
 
     const onUpload = (uploadedFile) => {
         setFile(uploadedFile?.[0] ?? null);
@@ -22,35 +22,27 @@ const MiniImport = (props) => {
         if (!file) {
             return;
         }
-
-        setFetching(true);
-        try {
-            const fileReader = new FileReader()
-            fileReader.onload = async (e) => {
-                const records = await csv().fromString(e.target.result);
-                console.log(props.record)
-                await new ApiClient().recordAction({
-                    recordId: props.record.id,
-                    resourceId: props.resource.id,
-                    actionName: 'edit',
-                    data: {
-                        statementitems: records,
-                        status: props.record.params.status,
-                        grossamount: props.record.params.grossamount,
-                    },
-                });
-            sendNotice({ message: 'Imported successfully', type: 'success' });
+        const fileReader = new FileReader()
+        fileReader.onload = async (e) => {
+            const records = await csv().fromString(e.target.result);
+            const result = await new ApiClient().resourceAction({
+                resourceId: 'Statement',
+                actionName: 'csvimport',
+                data: {
+                    statementId: props.record.id,
+                    statementitems: records,
+                    grossamount: props.record.params.grossamount,
+                },
+            })
+            if (result.data.notice.type === 'error') {
+              setIsSuccess(false)
+            } else {
+              setIsSuccess(true)
+            }
+            setShowModal(true)
         }
         fileReader.readAsText(file)
-        } catch (e) {
-            sendNotice({ message: e.message, type: 'error' });
-        }
-        setFetching(false);
     };
-
-  if (isFetching) {
-    return <Loader />;
-  }
 
   return (
     <Box
@@ -69,10 +61,23 @@ const MiniImport = (props) => {
         />
       )}
       <Box display="flex" justifyContent="center" m={10}>
-        <Button onClick={onSubmit} disabled={!file || isFetching}>
+        <Button onClick={onSubmit} disabled={!file}>
           Upload
         </Button>
       </Box>
+      {
+        showModal &&
+        <Modal
+            title='File Import'
+            onOverlayClick={()=> setShowModal(false)}
+            variant={ isSuccess ? 'success': 'danger'}
+            subTitle={ isSuccess ?  'File Import Success' : 'File Import Fail' }
+            buttons={[{
+                label: 'OK',
+                onClick: () => setShowModal(false)
+            }]}
+        />
+      }
     </Box>
   );
 };

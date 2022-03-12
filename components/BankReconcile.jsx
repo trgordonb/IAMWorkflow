@@ -10,6 +10,23 @@ const BankReconcile = () => {
     const [unmatched, setUnmatched] = useState([])
     const [showModal, setShowModal] = useState(false)
 
+    const doReconcile = async () => {
+      const result = await api.resourceAction({
+        resourceId: 'BankStatementItem',
+        actionName: 'reconcile',
+        data: {
+            statementId: statementId,
+            action: 'bankreconcile'
+        }
+      })
+      if (result.data.notice.type === 'error') {
+        setIsMatched(false)
+      } else {
+        setIsMatched(true)
+      }
+      setShowModal(true)
+    }
+
     const reconcile = async () => {
         let page = 0
         let totalPage = 0
@@ -75,7 +92,7 @@ const BankReconcile = () => {
                 placeholder='Statement Id'
                 onChange={(evt) => setStatementId(evt.target.value)}
             />
-            <Button style={{marginRight: 20}} onClick={reconcile}>Reconcile</Button>
+            <Button style={{marginRight: 20}} onClick={doReconcile}>Reconcile</Button>
       </Box>
       
       {
