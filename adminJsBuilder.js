@@ -27,7 +27,7 @@ const BankStatementItemModel = require('./models/bankstatement-item.model')
 const FeeShareHistoryModel = require('./models/feeshare-history.model')
 const importExportFeature = require('./features/import-export/index')
 const { jsPDF } = require('jspdf/dist/jspdf.node')
-const { customRound } = require('./lib/utils')
+const { customRound } = require('./lib/utils');
 
 const menu = {
     Master: { name: 'Main', icon: 'SpineLabel' },
@@ -875,20 +875,48 @@ const adminJsStatic = {
                 showProperties: ['accountnumber','statementCode','startDate','endDate','feeSharingScheme']
             }
         },
+        {
+            resource: FeeShareHistoryModel, options: {
+                parent: menu.Master,
+                actions: {
+                    new: {
+                        actionType: 'record',
+                        isAccessible: false
+                    },
+                    edit: {
+                        actionType: 'record',
+                        isAccessible: false
+                    },
+                    delete: {
+                        actionType: 'record',
+                        isAccessible: false
+                    },
+                    bulkDelete: {
+                        actionType: 'resource',
+                        isAccessible: false
+                    }
+                },
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    }
+                }
+            }
+        }
     ],
     version: {
         admin: true,
         app: '1.0.0'
     },
     branding: {
-        logo: false,
-        companyName: 'Asset Management CRM',
+        logo: 'https://oh-estore.s3.amazonaws.com/AOCLogo.png',
+        companyName: 'I-AMS',
         softwareBrothers: false,
     },
     locale: {
         translations: {
             labels: {
-                loginWelcome: 'Welcome to IAM Legacy',
+                loginWelcome: 'Assetonchain Technology I-AMS',
             },
             properties: {
                 email: 'User Id'
