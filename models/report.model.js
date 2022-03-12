@@ -7,7 +7,7 @@ const ReportSchema = new Schema({
     name: String,
     source: {
         type: String,
-        enum : ['AccountLedgerBalances','EstablishmentFeeShares'],
+        enum : ['AccountLedgerBalances','FeeShareHistory'],
     },
     filters: [{
         fieldname: {
@@ -27,18 +27,18 @@ const ReportSchema = new Schema({
 })
 
 ReportSchema.post('findOneAndUpdate', async function() {
-    let preFilterStages = this._update.$set.filters.map(filter => ([filter.fieldname, filter.value]))
-    const filters = Object.fromEntries(new Map(preFilterStages))
-    const transform = this._update.$set.lockRecords ? { isLocked: true } : { isLocked: false }
-    if (this._update.$set.source === 'AccountLedgerBalances') {
-        AccountLedgerBalance.updateMany(filters, transform, (err, docs) => {
-            if (err) {
-                console.log(err)
-            } else {
-                console.log(docs)
-            }
-        })
-    }
+    //let preFilterStages = this._update.$set.filters.map(filter => ([filter.fieldname, filter.value]))
+    //const filters = Object.fromEntries(new Map(preFilterStages))
+    //const transform = this._update.$set.lockRecords ? { isLocked: true } : { isLocked: false }
+    //if (this._update.$set.source === 'AccountLedgerBalances') {
+    //    AccountLedgerBalance.updateMany(filters, transform, (err, docs) => {
+    //        if (err) {
+    //            console.log(err)
+    //        } else {
+    //            console.log(docs)
+    //        }
+    //    })
+    //}
 })
 
 const Report = mongoose.model('Report', ReportSchema, 'Reports')

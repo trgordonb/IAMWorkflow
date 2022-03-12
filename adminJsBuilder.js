@@ -16,12 +16,15 @@ const CurrencyModel = require('./models/currency.model')
 const CurrencyHistoryModel = require('./models/currency-history.model')
 const FeeSharingSchemeModel = require('./models/fee-sharing.model')
 const AccountFeeModel = require('./models/account-fee.model')
-const DemandNoteModel = require('./models/demand-note.model')
 const PolicyFeeSettingModel = require('./models/policyfee-setting.model')
 const UserModel = require('./models/user.model')
 const ReportModel = require('./models/report.model')
-const TaskModel = require('./models/task.model')
-const EstablishmentFeeShareModel = require('./models/establishment-feeshare.model')
+const PeriodModel = require('./models/period-model')
+const CounterPartyModel = require('./models/counterparty.model')
+const StatmentModel = require('./models/statement.model')
+const BankModel = require('./models/bank.model')
+const BankStatementItemModel = require('./models/bankstatement-item.model')
+const FeeShareHistoryModel = require('./models/feeshare-history.model')
 const importExportFeature = require('./features/import-export/index')
 const { jsPDF } = require('jspdf/dist/jspdf.node')
 const { customRound } = require('./lib/utils')
@@ -99,22 +102,352 @@ const adminJsStatic = {
             }
         },
         {
-            resource: TaskModel, options: {
+            resource: CounterPartyModel, options: {
+                parent: menu.Master,
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    }
+                }
+            }
+        },
+        {
+            resource: BankModel, options: {
+                parent: menu.Master,
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    }
+                }
+            }
+        },
+        {
+            resource: BankStatementItemModel, options: {
+                parent: menu.Master,
+                actions: {
+                    edit: {
+                        actionType: 'record',
+                        before: async(request) => {
+                            console.log('Payload:',request.payload)
+                            return request
+                        },
+                        isAccessible: ({ currentAdmin, record }) => {
+                            return true
+                            //return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
+                        },
+                    },
+                    reconcile: {
+                        actionType: 'resource',
+                        isVisible: true,
+                        component: AdminJS.bundle('./components/BankReconcile'),
+                        handler: async(request, resource, context) => {
+                            try {
+                                const { record, resource, currentAdmin } = context
+                                return { 
+                                    record: new AdminJS.BaseRecord(record.params, resource).toJSON(currentAdmin)
+                                }
+                            } catch (err) {
+                                return {
+                                    notice: {
+                                        message: 'Fail',
+                                        type: 'error'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    },
+                    date: {
+                        type: 'date',
+                        isVisible: { list: false, filter: true, show: true, edit: true },
+                    },
+                    netamount: {
+                        isVisible: { list: false, filter: false, show: true, edit: false },
+                    },
+                    party: {
+                        isVisible: { list: false, filter: true, show: true, edit: true },
+                    }
+                }
+            }
+        },
+        {
+            resource: StatmentModel, options: {
+                parent: menu.Master,
+                actions: {
+                    edit: {
+                        actionType: 'record',
+                        isAccessible: (context) => {
+                            return true //currentAdmin not available ?
+                        },
+                        before: async (request) => {
+                            let matched = true
+                            let newPayload = {}
+                            let status = request.payload.status
+                            let allKeys = Object.keys(request.payload)
+                            await Promise.all(allKeys.map(async (key) => {
+                                if (key === 'statementitems' && status === 'Init') {
+                                    const items = request.payload[key]
+                                    let newStatementItems = []
+                                    let total = 0
+                                    await Promise.all(items.map(async (item) => {
+                                        let account = await AccountPolicyModel.findOne({number: item.accountnumber})
+                                        total = total + parseFloat(item.grossamount)
+                                        newStatementItems.push({
+                                            accountnumber: account._id,
+                                            grossamount: parseFloat(item.grossamount),
+                                            netamount: 0
+                                        })
+                                    }))
+                                    if (request.payload.grossamount && total !== request.payload.grossamount) {
+                                        matched = false
+                                    }
+                                    newPayload = {
+                                        ...newPayload,
+                                        statementitems: matched ? newStatementItems: [],
+                                        status: matched ? 'DetailsMatched' : 'Init'
+                                    }
+                                    console.log('NewPayload:', newPayload)
+                                } 
+                                else if (key === 'statementitems' && status === 'DetailsMatched') {
+                                    const items = request.payload[key]
+                                    let newStatementItems = []
+                                    await Promise.all(items.map(async (item) => {
+                                        let account = await AccountPolicyModel.findById(item.accountnumber)
+                                        newStatementItems.push({
+                                            accountnumber: account._id,
+                                            grossamount: parseFloat(item.grossamount),
+                                            netamount: parseFloat(item.netamount)
+                                        })
+                                    }))
+                                    newPayload = {
+                                        ...newPayload,
+                                        statementitems: newStatementItems,
+                                        status: 'BankFeesAllocated'
+                                    }
+                                }
+                                else if (key === 'statementitems' && status === 'FeeSharingCompleted') {
+                                    newPayload = {
+                                        ...newPayload,
+                                        status: 'FeeSharingCompleted'
+                                    }
+                                    await Promise.all(request.payload.statementitems.map(async (item) => {
+                                        const accountFeeRaw = await AccountFeeModel.findOne({accountnumber: item.accountnumber, statementCode: request.payload.statementcode})
+                                        const feeSharingRaw = await FeeSharingSchemeModel.findById(accountFeeRaw.feeSharingScheme).populate('feerecipients')
+                                        const currenycRaw = await CurrencyModel.findById(request.payload.currency)
+                                        const periodRaw = await PeriodModel.findById(request.payload.period)
+                                        const exchRateRaw = await CurrencyHistoryModel.findOne({currency: currenycRaw._id, date: periodRaw.end})
+                                        const feeSharingCalculated = [] 
+                                        feeSharingRaw.feerecipients.forEach(recipient => {
+                                            const amount = (item.netamount * ( recipient.percentage / 100 ) * exchRateRaw.rate).toFixed(2)
+                                            feeSharingCalculated.push({
+                                                recipient: recipient.recipient,
+                                                share: recipient.percentage,
+                                                role: recipient.role,
+                                                amount: amount
+                                            })
+                                        })
+                                        const feeShareHistory = new FeeShareHistoryModel({
+                                            statement: request.payload.statementId,
+                                            accountnumber: item.accountnumber,
+                                            amount: item.netamount,
+                                            date: new Date(),
+                                            tag: request.payload.tag,
+                                            currency: request.payload.currency,
+                                            recipientRecords: feeSharingCalculated
+                                        })
+                                        await feeShareHistory.save()
+                                    }))
+                                }
+                                else if (['isLocked','bankcharges','netamount','bankStatementitem'].includes(key)) {
+                                    newPayload = {
+                                        ...newPayload,
+                                        [key]: request.payload[key]
+                                    }
+                                    console.log('NewPayload:', newPayload)
+                                }
+                            }))
+                            request = {
+                                ...request,
+                                payload: newPayload
+                            }
+                            console.log(newPayload)
+                            return request
+                        }
+                    },
+                    import: {
+                        actionType: 'record',
+                        isVisible: true,
+                        component: AdminJS.bundle('./components/MiniImport'),
+                        handler: async(request, response, context) => {
+                            try {
+                                const { record, resource, currentAdmin } = context
+                                return { 
+                                    record: new AdminJS.BaseRecord(record.params, resource).toJSON(currentAdmin)
+                                }
+                            } catch (err) {
+                                return {
+                                    notice: {
+                                        message: 'Fail',
+                                        type: 'error'
+                                    }
+                                }
+                            }                                       
+                        },
+                    },
+                    applycharges: {
+                        actionType: 'resource',
+                        isVisible: true,
+                        component: AdminJS.bundle('./components/ChargesApply'),
+                        handler: async(request, resource, context) => {
+                            try {
+                                const { record, resource, currentAdmin } = context
+                                return { 
+                                    record: new AdminJS.BaseRecord(record.params, resource).toJSON(currentAdmin)
+                                }
+                            } catch (err) {
+                                return {
+                                    notice: {
+                                        message: 'Fail',
+                                        type: 'error'
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    reconcile: {
+                        actionType: 'resource',
+                        isVisible: true,
+                        component: AdminJS.bundle('./components/FeeReconcile'),
+                        handler: async(request, response, context) => {
+                            console.log(request.payload)
+                            let balances = await AccountLedgerBalanceModel.find({tag: request.payload.tag})
+                            balances = balances.map(balance => ({
+                                accountnumber: balance.accountnumber,
+                                currency: balance.currency,
+                                advisorfee: balance.advisorfee
+                            }))
+                            let statements = await StatmentModel.find({tag: request.payload.tag})
+                            let transformedStatements = []
+                            let finalStatements = []
+                            let unmatched = []
+                            statements.forEach((statement) => {
+                                transformedStatements.push({
+                                    items: statement.statementitems,
+                                    currency: statement.currency
+                                })
+                            })
+                            transformedStatements.forEach(statement => {
+                                statement.items.forEach(item => {
+                                    finalStatements.push({
+                                        accountnumber: item.accountnumber,
+                                        currency: statement.currency,
+                                        amount: item.grossamount
+                                    })
+                                })
+                            })
+                            await Promise.all(finalStatements.map(async (item) => {
+                                let matchedRecord = balances.find(obj => obj.accountnumber.toString() === item.accountnumber.toString())
+                                if (matchedRecord.currency.toString() !== item.currency.toString() || matchedRecord.advisorfee !== item.amount) {
+                                    const rawAccount = await AccountPolicyModel.findById(item.accountnumber)
+                                    unmatched.push(rawAccount.number)
+                                }
+                            }))
+                            if (unmatched.length === 0) {
+                                return { notice: { message: 'OK', type: 'success', data: [] } }    
+                            } else {
+                                return { notice: { message: 'Fail', type: 'error', data: unmatched } }    
+                            }
+                        }
+                    },
+                    calccharges: {
+                        actionType: 'resource',
+                        isVisible: true,
+                        component: AdminJS.bundle('./components/FeeShareCalc'),
+                        handler: async(request, resource, context) => {
+                            try {
+                                const { record, resource, currentAdmin } = context
+                                return { 
+                                    record: new AdminJS.BaseRecord(record.params, resource).toJSON(currentAdmin)
+                                }
+                            } catch (err) {
+                                return {
+                                    notice: {
+                                        message: 'Fail',
+                                        type: 'error'
+                                    }
+                                }
+                            }
+                        }
+                    },              
+                },
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    },
+                    from: {
+                        isVisible: { list: true, filter: false, show: true, edit: true },
+                    },
+                    statementcode: {
+                        isVisible: { list: true, filter: true, show: true, edit: true },
+                    },
+                    date: {
+                        type: 'date',
+                        isVisible: { list: false, filter: true, show: true, edit: true },
+                    },
+                    period: {
+                        isVisible: { list: true, filter: true, show: true, edit: true },
+                    },
+                    tag: {
+                        isVisible: { list: false, filter: true, show: true, edit: true },
+                    },
+                    remark: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    currency: {
+                        isVisible: { list: false, filter: true, show: true, edit: true },
+                    },
+                    grossamount: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    netamount: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    bankcharges: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    bankStatementitem: {
+                        isVisible: { list: false, filter: false, show: true, edit: true },
+                    },
+                    statementitems: {
+                        isVisible: { list: false, filter: false, show: true, edit: false }
+                    },
+                    status: {
+                        isVisible: { list: true, filter: true, show: true, edit: false }
+                    },
+                },
+            },
+        },
+        {
+            resource: PeriodModel, options: {
                 parent: menu.Master,
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
                     },
-                    lastRunTime: {
-                        isVisible: { list: false, filter: false, show: true, edit: false },
-                    },
-                    lastRunStatus: {
-                        isVisible: { list: false, filter: true, show: true, edit: false },
-                    },
-                    lastRunDetails: {
+                    factor: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
+                    },
+                    start: {
+                        type: 'date'
+                    },
+                    end: {
+                        type: 'date'
                     }
-                },
+                }
             }
         },
         { 
@@ -146,7 +479,7 @@ const adminJsStatic = {
                         component: AdminJS.bundle('./components/MiniExport.jsx'),
                         handler: async (request, response, context) => {
                             const { record, resource, currentAdmin } = context
-                            let exportModel = record.params.source === 'AccountLedgerBalances' ? AccountLedgerBalanceModel : EstablishmentFeeShareModel
+                            let exportModel = record.params.source === 'AccountLedgerBalances' ? AccountLedgerBalanceModel : FeeShareHistoryModel
                             let parsed = null
                             let transformedRecords = []
                             let pdfData = null
@@ -173,24 +506,24 @@ const adminJsStatic = {
                                         customer: resultCustomer? resultCustomer.clientId: ''
                                     }
                                     transformedRecords.push(transformedRecord)
-                                } else if (record.params.source === 'EstablishmentFeeShares') {
+                                } else if (record.params.source === 'FeeShareHistory') {
                                     reportTypes = ['pdf']
                                     let resultAccountPolicy = await AccountPolicyModel.findById(doc.accountnumber)
                                     let resultCurrency = await CurrencyModel.findById(doc.currency)
+                                    let resultStatement = await StatmentModel.findById(doc.statement)
                                     let recipients = []
                                     await Promise.all(doc.recipientRecords.map(async (recipient) => {
                                         let resultRole = await RoleModel.findById(recipient.role)
                                         let resultRecipient = await PayeeModel.findById(recipient.recipient)
                                         feeShareTotals[resultRecipient.name] = feeShareTotals.hasOwnProperty(resultRecipient.name) ? feeShareTotals[resultRecipient.name] + recipient.amount : recipient.amount
-                                        recipients.push([resultRecipient.name, resultRole.name, customRound(recipient.share), customRound(recipient.amount)])
+                                        recipients.push([resultRecipient.name, resultRole.name, customRound(recipient.share), customRound(recipient.amount),'HKD'])
                                     }))
-                                    accumulateTotal = accumulateTotal + doc.totalAmount
+                                    accumulateTotal = accumulateTotal + doc.amount
                                     let transformedRecord = {
                                         accountnumber: resultAccountPolicy? resultAccountPolicy.number: '',
-                                        providerStatement: doc.providerStatement,
-                                        particulars: doc.particulars,
+                                        statement: resultStatement.reference,
                                         recordDate: moment(doc.date).format('YYYY-MM-DD'),
-                                        totalAmount: doc.totalAmount,
+                                        totalAmount: doc.amount,
                                         currency: resultCurrency? resultCurrency.name : '',
                                         recipientRecords: recipients
                                     }
@@ -198,18 +531,18 @@ const adminJsStatic = {
                                     const { applyPlugin } = require('./lib/jspdf.plugin.autotable')
                                     applyPlugin(jsPDF)
                                     pdfDoc = new jsPDF()
-                                    pdfDoc.text('Establishment Fees Report', 14, 20)
+                                    pdfDoc.text('Fees Report', 14, 20)
                                     transformedRecords.forEach(record => {
                                         pdfDoc.autoTable({
                                             styles: {
                                                 fontSize: 10
                                             },
                                             startY: pdfDoc.lastAutoTable.finalY + 10 || 30,
-                                            head: [['Policy#','Provider Statement','Date','Amount']],
+                                            head: [['Policy#','Statement','Date','Amount','Currency']],
                                             columnStyles: {
                                                 3: { halign: 'left' }
                                             },
-                                            body: [[record.accountnumber, `${record.providerStatement} (${record.particulars})`, moment(record.recordDate).format('YYYY-MM-DD'), customRound(record.totalAmount)]]
+                                            body: [[record.accountnumber, record.statement, moment(record.recordDate).format('YYYY-MM-DD'), customRound(record.totalAmount), record.currency]]
                                         })
                                         pdfDoc.autoTable({
                                             styles: {
@@ -219,7 +552,7 @@ const adminJsStatic = {
                                                 fillColor: '#E4A2C6'
                                             },
                                             startY: pdfDoc.lastAutoTable.finalY + 10,
-                                            head: [['Name','Role','Share(%)','Amount']],
+                                            head: [['Name','Role','Share(%)','Amount','Currency']],
                                             columnStyles: {
                                                 3: { halign: 'left' }
                                             },
@@ -249,7 +582,7 @@ const adminJsStatic = {
                                 })
                                 pdfData = pdfDoc.output()
                             }
-                            if (reportTypes.includes('pdf') && record.params.source === 'EstablishmentFeeShares') {
+                            if (reportTypes.includes('pdf') && record.params.source === 'FeeShareHistory') {
                                 let feeShareList = []
                                 for (key in feeShareTotals) {
                                     feeShareList.push([key, customRound(feeShareTotals[key])])
@@ -344,21 +677,23 @@ const adminJsStatic = {
                         }
                     },
                     edit: {
+                        actionType: 'record',
                         isAccessible: ({ currentAdmin, record }) => {
                             return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
                         },
                         before: async (request, context) => {
                             const { currentAdmin, record } = context
-                            if (request.payload) {
+                            if (request.payload && currentAdmin) {
                                 request.payload = {
                                     ...request.payload,
                                     lastModifiedBy: currentAdmin._id
                                 }
-                            }
+                            } 
                             return request
                         }
                     },
                     delete: {
+                        actionType: 'record',
                         isAccessible: ({ currentAdmin, record }) => {
                             return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
                         },
@@ -414,7 +749,7 @@ const adminJsStatic = {
                         isVisible: { list: true, filter: false, show: true, edit: true },
                     },
                     currency: {
-                        isVisible: { list: true, filter: true, show: true, edit: false },
+                        isVisible: { list: true, filter: true, show: true, edit: true },
                     },
                     estimatedfee: {
                         isVisible: { list: false, filter: false, show: true, edit: true },
@@ -499,27 +834,6 @@ const adminJsStatic = {
                 }
             }
         },
-        {
-            resource: EstablishmentFeeShareModel, options: {
-                actions: {
-                    list: {
-                        isAccessible: false
-                    },
-                    new: {
-                        isAccessible: false
-                    },
-                    edit: {
-                        isAccessible: false
-                    },
-                    filter: {
-                        isAccessible: false
-                    },
-                    show: {
-                        isAccessible: false
-                    }
-                }
-            }
-        },
         { 
             resource: StatementParticularModel, options: { 
                 parent: menu.Master,
@@ -583,67 +897,6 @@ const adminJsStatic = {
                 editProperties: ['accountnumber','statementCode','startDate','endDate','feeSharingScheme'],
                 filterProperties: ['accountnumber','statementCode','startDate','endDate','feeSharingScheme'],
                 showProperties: ['accountnumber','statementCode','startDate','endDate','feeSharingScheme']
-            }
-        },
-        {
-            resource: DemandNoteModel, options: {
-                parent: menu.Master,
-                actions: {
-                    delete: {
-                        isVisible: false
-                    },
-                    bulkDelete: {
-                        isVisible: false
-                    }
-                },
-                properties: {
-                    _id: {
-                        isVisible: { list: false, filter: false, show: false, edit: false },
-                    },
-                    accountnumber: {
-                        isVisible: { list: true, filter: true, show: true, edit: true },
-                    },
-                    date: {
-                        type: 'date',
-                        isVisible: { list: true, filter: true, show: true, edit: true },
-                    },
-                    providerStatement: {
-                        isVisible: { list: true, filter: false, show: true, edit: true },
-                    },
-                    statementCode: {
-                        isVisible: { list: true, filter: true, show: true, edit: true },
-                    },
-                    comment: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
-                    },
-                    tag: {
-                        isVisible: { list: true, filter: true, show: true, edit: true },
-                    },
-                    serviceFeeStartDate: {
-                        type: 'date',
-                        isVisible: { list: false, filter: false, show: true, edit: true },
-                    },
-                    serviceFeeEndDate: {
-                        type: 'date',
-                        isVisible: { list: false, filter: false, show: true, edit: true },
-                    },
-                    receivedDate: {
-                        type: 'date',
-                        isVisible: { list: false, filter: false, show: true, edit: true },
-                    },
-                    receivedPayee: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
-                    },
-                    amount: {
-                        isVisible: { list: false, filter: false, show: true, edit: true },
-                    },
-                    currency: {
-                        isVisible: { list: false, filter: false, show: true, edit: false },
-                    },
-                    reconcileStatus: {
-                        isVisible: { list: false, filter: false, show: true, edit: false },
-                    }
-                }
             }
         },
     ],

@@ -7,7 +7,7 @@ const TaskSchema = new Schema({
     source: {
         name: {
             type: String,
-            enum : ['AccountLedgerBalance','EstablishmentFeeShare','DemandNote'],
+            enum : ['AccountLedgerBalance','EstablishmentFeeShare','DemandNote','Statement','BankStatementItem'],
         },
         field: {
             type: String
@@ -16,7 +16,7 @@ const TaskSchema = new Schema({
     target: {
         name: {
             type: String,
-            enum : ['AccountLedgerBalance','EstablishmentFeeShare','DemandNote'],
+            enum : ['AccountLedgerBalance','Statement'],
         },
         field: {
             type: String

@@ -1,20 +1,16 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const EstablishmentFeeShareSchema = new Schema({
-    demandnote : {
+const FeeShareHistorySchema = new Schema({
+    statement : {
         type: Schema.Types.ObjectId,
-        ref: 'DemandNote'
+        ref: 'Statement'
     },
     accountnumber: {
         type: Schema.Types.ObjectId,
         ref: 'AccountPolicy'
     },
-    totalAmount: Number,
-    date: Date,
-    providerStatement: String,
-    particulars: String,
-    receivedDate: Date,
+    amount: Number,
     tag: String,
     currency: {
         type: Schema.Types.ObjectId,
@@ -34,6 +30,6 @@ const EstablishmentFeeShareSchema = new Schema({
     }]
 })
 
-const EstablishmentFeeShare = mongoose.model('EstablishmentFeeShare', EstablishmentFeeShareSchema, 'EstablishmentFeeShares')
+const FeeShareHistory = mongoose.model('FeeShareHistory', FeeShareHistorySchema, 'FeeShareHistories')
 
-module.exports = EstablishmentFeeShare
+module.exports = FeeShareHistory

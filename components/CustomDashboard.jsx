@@ -9,7 +9,7 @@ const CustomDashboard = () => {
   const sendNotice = useNotice()
   const [tasks, setTasks] = useState([])
   
-  const taskHandler = async (task) => {
+  /**const taskHandler = async (task) => {
     let page = 0
     let totalPage = 0
     let sourceResults = []
@@ -171,19 +171,19 @@ const CustomDashboard = () => {
     .then(result => {
       setTasks(result.data.records)
     })
-  },[])
+  },[])*/
 
   return (
     <Box variant="grey">
       <Box variant="white">
           <H4>Tasks to be carried out: </H4>
-          {
+          {/** 
             tasks.map(task => (
               <Section key={task.params.name} style={{ marginTop: 15 }}>
                 <H5>{task.params.name}</H5>
                 <Button onClick={() => taskHandler(task.params)}>Proceed</Button>
               </Section>
-            ))
+            ))*/
           }
       </Box>
     </Box>
