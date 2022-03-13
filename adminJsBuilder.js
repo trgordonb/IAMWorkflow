@@ -37,11 +37,7 @@ const menu = {
     Statements: { name: 'Statement Maintainence' },
     Fees: { name: 'Fees' }
 }
-
-const getExportedFileName = (extension) =>
-  `export-${moment().format('yyyy-MM-dd_HH-mm')}.${extension}`
-
-    
+ 
 const adminJsStatic = {
     databases: [mongoose],
     rootPath: '/admin',
@@ -49,6 +45,16 @@ const adminJsStatic = {
         component: AdminJS.bundle('./components/CustomDashboard')
     },
     resources: [
+        {
+            resource: CounterPartyModel, options: {
+                parent: menu.Master,
+                properties: {
+                    _id: {
+                        isVisible: { list: false, filter: false, show: false, edit: false },
+                    }
+                }
+            }
+        },
         {
             resource: UserModel, options: {
                 parent: menu.Admin,
@@ -101,16 +107,6 @@ const adminJsStatic = {
                     },
                     filter: {
                         isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
-                    }
-                }
-            }
-        },
-        {
-            resource: CounterPartyModel, options: {
-                parent: menu.Master,
-                properties: {
-                    _id: {
-                        isVisible: { list: false, filter: false, show: false, edit: false },
                     }
                 }
             }
