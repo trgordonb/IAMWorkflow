@@ -33,8 +33,8 @@ const menu = {
     Admin: { name: 'Admin/Reports' },
     Master: { name: 'Masters' },
     Currency: { name: 'Currency' },
-    Accounts: { name: 'Accounts' },
-    Statements: { name: 'Statements' },
+    Accounts: { name: 'IAM Customer Maintainence' },
+    Statements: { name: 'Statement Maintainence' },
     Fees: { name: 'Fees' }
 }
 
@@ -938,25 +938,25 @@ const adminJsStatic = {
                 CurrencyHistory: 'Currency Histories',
                 Currency: 'Currencies',
                 Period: 'Report Periods',
-                CounterParty: 'Counter Parties',
+                CounterParty: 'Custodians',
                 Bank: 'Settlement Banks',
-                Role: 'Roles',
+                Role: 'Company Roles',
                 User: 'Portal Users',
                 Report: 'Reports',
                 Custodian: 'Custodians',
                 Customer: 'Customers',
-                Statement: 'Third-party Statements',
-                StatementParticular: 'Statement Types',
-                Payee: 'Payees',
-                BankStatementItem: 'Bank Statement Items',
-                AccountPolicy: 'Accounts/Policies',
+                Statement: 'Custodian Statements',
+                StatementParticular: 'Custodian Particulars',
+                Payee: 'Company Payees',
+                BankStatementItem: 'Bank Statements',
+                AccountPolicy: 'Customer Policy Settings',
                 AccountLedgerBalance: 'Account Ledger Balances',
-                AccountCustodian: 'Accounts Custodian',
-                FeeShareHistory: 'Fee Shares Histories',
-                FeeCode: 'Fee Codes',
-                PolicyFeeSetting: 'Policy Fees',
+                AccountCustodian: 'Custodian Policy Settings',
+                FeeShareHistory: 'Fee Shares Results',
+                FeeCode: 'Fee Codes Maintainence',
+                PolicyFeeSetting: 'Policy Fees Setting',
                 FeeSharingScheme: 'Fee Share Schemes',
-                AccountFee: 'Account Fees'
+                AccountFee: 'Statement Particular Fee Sharing Settings'
             },
             properties: {
                 email: 'User Id'
