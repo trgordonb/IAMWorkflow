@@ -30,8 +30,12 @@ const { jsPDF } = require('jspdf/dist/jspdf.node')
 const { customRound } = require('./lib/utils');
 
 const menu = {
-    Master: { name: 'Main', icon: 'SpineLabel' },
-    Reports: { name: 'Report' }
+    Admin: { name: 'Admin/Reports' },
+    Master: { name: 'Masters' },
+    Currency: { name: 'Currency' },
+    Accounts: { name: 'Accounts' },
+    Statements: { name: 'Statements' },
+    Fees: { name: 'Fees' }
 }
 
 const getExportedFileName = (extension) =>
@@ -47,7 +51,7 @@ const adminJsStatic = {
     resources: [
         {
             resource: UserModel, options: {
-                parent: menu.Master,
+                parent: menu.Admin,
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -123,7 +127,7 @@ const adminJsStatic = {
         },
         {
             resource: BankStatementItemModel, options: {
-                parent: menu.Master,
+                parent: menu.Statements,
                 actions: {
                     edit: {
                         actionType: 'record',
@@ -193,7 +197,7 @@ const adminJsStatic = {
         },
         {
             resource: StatmentModel, options: {
-                parent: menu.Master,
+                parent: menu.Statements,
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -410,7 +414,7 @@ const adminJsStatic = {
         },
         {
             resource: PeriodModel, options: {
-                parent: menu.Master,
+                parent: menu.Currency,
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -429,7 +433,7 @@ const adminJsStatic = {
         },
         { 
             resource: CustodianModel, options: { 
-                parent: menu.Master,
+                parent: menu.Accounts,
                 listProperties: ['name'],
                 editProperties: ['name'],
                 filterProperties: ['name'],
@@ -438,7 +442,7 @@ const adminJsStatic = {
         },
         {
             resource: AccountPolicyModel, options: {
-                parent: menu.Master,
+                parent: menu.Accounts,
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -448,7 +452,7 @@ const adminJsStatic = {
         },
         {
             resource: ReportModel, options: {
-                parent: menu.Master,
+                parent: menu.Admin,
                 actions: {
                     export: {
                         actionType: 'record',
@@ -593,7 +597,7 @@ const adminJsStatic = {
         },
         {
             resource: AccountCustodianModel, options: {
-                parent: menu.Master,
+                parent: menu.Accounts,
                 listProperties: ['accountPolicyNumber', 'custodian'],
                 editProperties: ['accountPolicyNumber', 'custodian'],
                 filterProperties: ['accountPolicyNumber', 'custodian'],
@@ -602,7 +606,7 @@ const adminJsStatic = {
         },
         {
             resource: CustomerModel, options: {
-                parent: menu.Master,
+                parent: menu.Accounts,
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -638,7 +642,7 @@ const adminJsStatic = {
         },
         {
             resource: AccountLedgerBalanceModel, options: {
-                parent: menu.Master,
+                parent: menu.Accounts,
                 actions: {
                     new: {
                         before: async (request, context) => {
@@ -757,7 +761,7 @@ const adminJsStatic = {
         },
         {
             resource: PolicyFeeSettingModel, options: {
-                parent: menu.Master,
+                parent: menu.Fees,
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -793,7 +797,7 @@ const adminJsStatic = {
         },
         {
             resource: FeeCodeModel, options: {
-                parent: menu.Master,
+                parent: menu.Fees,
                 listProperties: ['code', 'value', 'comment'],
                 editProperties: ['code', 'value', 'comment'],
                 filterProperties:  ['code', 'value', 'comment'],
@@ -812,7 +816,7 @@ const adminJsStatic = {
         },
         { 
             resource: StatementParticularModel, options: { 
-                parent: menu.Master,
+                parent: menu.Statements,
                 listProperties: ['name'],
                 editProperties: ['name'],
                 filterProperties: ['name'],
@@ -824,7 +828,7 @@ const adminJsStatic = {
                 properties: {
                     mimeType: {}
                 },
-                parent: menu.Master,
+                parent: menu.Currency,
                 listProperties: ['name'],
                 editProperties: ['name'],
                 filterProperties: ['name'],
@@ -833,7 +837,7 @@ const adminJsStatic = {
         },
         { 
             resource: CurrencyHistoryModel, options: { 
-                parent: menu.Master,
+                parent: menu.Currency,
                 properties: {
                     date: {
                         type: 'date'
@@ -847,7 +851,7 @@ const adminJsStatic = {
         },
         {
             resource: FeeSharingSchemeModel, options: {
-                parent: menu.Master,
+                parent: menu.Fees,
                 properties: {
                     _id: {
                         isVisible: { list: false, filter: false, show: false, edit: false },
@@ -860,7 +864,7 @@ const adminJsStatic = {
         },
         {
             resource: AccountFeeModel, options: {
-                parent: menu.Master,
+                parent: menu.Fees,
                 properties: {
                     startDate: {
                         type: 'date'
@@ -877,7 +881,7 @@ const adminJsStatic = {
         },
         {
             resource: FeeShareHistoryModel, options: {
-                parent: menu.Master,
+                parent: menu.Fees,
                 actions: {
                     new: {
                         actionType: 'record',
@@ -920,21 +924,33 @@ const adminJsStatic = {
             },
             labels: {
                 loginWelcome: 'I-AMS',
+                CurrencyHistory: 'Currency Histories',
+                Currency: 'Currencies',
+                Period: 'Report Periods',
+                CounterParty: 'Counter Parties',
+                Bank: 'Settlement Banks',
+                Role: 'Roles',
+                User: 'Portal Users',
+                Report: 'Reports',
+                Custodian: 'Custodians',
+                Customer: 'Customers',
+                Statement: 'Third-party Statements',
+                StatementParticular: 'Statement Types',
+                Payee: 'Payees',
+                BankStatementItem: 'Bank Statement Items',
+                AccountPolicy: 'Accounts/Policies',
+                AccountLedgerBalance: 'Account Ledger Balances',
+                AccountCustodian: 'Accounts Custodian',
+                FeeShareHistory: 'Fee Shares Histories',
+                FeeCode: 'Fee Codes',
+                PolicyFeeSetting: 'Policy Fees',
+                FeeSharingScheme: 'Fee Share Schemes',
+                AccountFee: 'Account Fees'
             },
             properties: {
                 email: 'User Id'
             },
             resources: {
-                DemandNote: {
-                    properties: {
-                        accountnumber: 'Account Number',
-                        providerStatement: 'Demand Note No. /Provider Statement',
-                        statementCode: 'Statement Particular Code',
-                        serviceFeeStartDate: 'Particular Service Fee Start Date',
-                        serviceFeeEndDate: 'Particular Service Fee End Date',
-                        receivedPayee: 'Received By Payee',
-                    }
-                },
                 Customer: {
                     properties: {
                         bankaccountnumber: 'Bank Account #'
