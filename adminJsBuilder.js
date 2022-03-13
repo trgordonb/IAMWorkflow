@@ -142,7 +142,8 @@ const adminJsStatic = {
                     },
                     reconcile: {
                         actionType: 'resource',
-                        isVisible: true,
+                        isVisible: false,
+                        isAccessible: true,
                         component: AdminJS.bundle('./components/BankReconcile'),
                         handler: async(request, resource, context) => {
                             const statementItems = await BankStatementItemModel.find({bankstatementId: request.payload.statementId}).populate('statement')
@@ -298,7 +299,8 @@ const adminJsStatic = {
                     },
                     applycharges: {
                         actionType: 'resource',
-                        isVisible: true,
+                        isVisible: false,
+                        isAccessible: true,
                         component: AdminJS.bundle('./components/ChargesApply'),
                         handler: async(request, resource, context) => {
                             let statements = await StatmentModel.find({tag: request.payload.tag})
@@ -321,15 +323,11 @@ const adminJsStatic = {
                     },
                     reconcile: {
                         actionType: 'resource',
-                        isVisible: true,
+                        isVisible: false,
+                        isAccessible: true,
                         component: AdminJS.bundle('./components/FeeReconcile'),
                         handler: async(request, response, context) => {
                             let balances = await AccountLedgerBalanceModel.find({tag: request.payload.tag})
-                            //balances = balances.map(balance => ({
-                            //    accountnumber: balance.accountnumber,
-                            //    currency: balance.currency,
-                            //    advisorfee: balance.advisorfee
-                            //}))
                             let statements = await StatmentModel.find({tag: request.payload.tag})
                             let transformedStatements = []
                             let finalStatements = []
@@ -379,7 +377,8 @@ const adminJsStatic = {
                     },
                     feesharescalc: {
                         actionType: 'resource',
-                        isVisible: true,
+                        isVisible: false,
+                        isAccessible: true,
                         component: AdminJS.bundle('./components/FeeShareCalc'),
                         handler: async(request, resource, context) => {
                             let statements = await StatmentModel.find({tag: request.payload.tag})
