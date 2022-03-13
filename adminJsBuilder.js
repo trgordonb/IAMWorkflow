@@ -144,7 +144,7 @@ const adminJsStatic = {
                         actionType: 'resource',
                         isVisible: false,
                         isAccessible: true,
-                        component: AdminJS.bundle('./components/BankReconcile'),
+                        component: false,
                         handler: async(request, resource, context) => {
                             const statementItems = await BankStatementItemModel.find({bankstatementId: request.payload.statementId}).populate('statement')
                             let unmatched = []
@@ -301,7 +301,7 @@ const adminJsStatic = {
                         actionType: 'resource',
                         isVisible: false,
                         isAccessible: true,
-                        component: AdminJS.bundle('./components/ChargesApply'),
+                        component: false,
                         handler: async(request, resource, context) => {
                             let statements = await StatmentModel.find({tag: request.payload.tag})
                             await Promise.all(statements.map(async (statement) => {
@@ -325,7 +325,7 @@ const adminJsStatic = {
                         actionType: 'resource',
                         isVisible: false,
                         isAccessible: true,
-                        component: AdminJS.bundle('./components/FeeReconcile'),
+                        component: false,
                         handler: async(request, response, context) => {
                             let balances = await AccountLedgerBalanceModel.find({tag: request.payload.tag})
                             let statements = await StatmentModel.find({tag: request.payload.tag})
@@ -379,7 +379,7 @@ const adminJsStatic = {
                         actionType: 'resource',
                         isVisible: false,
                         isAccessible: true,
-                        component: AdminJS.bundle('./components/FeeShareCalc'),
+                        component: false,
                         handler: async(request, resource, context) => {
                             let statements = await StatmentModel.find({tag: request.payload.tag})
                             await Promise.all(statements.map(async (statement) => {
