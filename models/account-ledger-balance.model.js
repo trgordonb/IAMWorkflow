@@ -31,7 +31,7 @@ const AccountLedgerBalanceSchema = new Schema({
     {
         with: {
             type: String,
-            default: 'DemandNote'
+            default: 'Statement'
         },
         lastReconcileTime: Date,
         lastReconcileStatus:{
@@ -41,7 +41,7 @@ const AccountLedgerBalanceSchema = new Schema({
         },
         link: {
             type: Schema.Types.ObjectId,
-            ref: 'DemandNote'
+            ref: 'Statement'
         }
     }]
 })

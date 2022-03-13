@@ -325,11 +325,11 @@ const adminJsStatic = {
                         component: AdminJS.bundle('./components/FeeReconcile'),
                         handler: async(request, response, context) => {
                             let balances = await AccountLedgerBalanceModel.find({tag: request.payload.tag})
-                            balances = balances.map(balance => ({
-                                accountnumber: balance.accountnumber,
-                                currency: balance.currency,
-                                advisorfee: balance.advisorfee
-                            }))
+                            //balances = balances.map(balance => ({
+                            //    accountnumber: balance.accountnumber,
+                            //    currency: balance.currency,
+                            //    advisorfee: balance.advisorfee
+                            //}))
                             let statements = await StatmentModel.find({tag: request.payload.tag})
                             let transformedStatements = []
                             let finalStatements = []
@@ -337,7 +337,8 @@ const adminJsStatic = {
                             statements.forEach((statement) => {
                                 transformedStatements.push({
                                     items: statement.statementitems,
-                                    currency: statement.currency
+                                    currency: statement.currency,
+                                    id: statement._id
                                 })
                             })
                             transformedStatements.forEach(statement => {
@@ -345,7 +346,8 @@ const adminJsStatic = {
                                     finalStatements.push({
                                         accountnumber: item.accountnumber,
                                         currency: statement.currency,
-                                        amount: item.grossamount
+                                        amount: item.grossamount,
+                                        id: item.id
                                     })
                                 })
                             })
@@ -358,6 +360,14 @@ const adminJsStatic = {
                                 if (matchedRecord.currency.toString() !== item.currency.toString() || matchedRecord.advisorfee !== item.amount) {
                                     const rawAccount = await AccountPolicyModel.findById(item.accountnumber)
                                     unmatched.push(rawAccount.number)
+                                } else {
+                                    matchedRecord.reconcileStatus = [...matchedRecord.reconcileStatus, {
+                                        with: 'Statement',
+                                        lastReconcileTime: new Date(),
+                                        lastReconcileStatus: 'Matched',
+                                        link: item.id
+                                    }]
+                                    await matchedRecord.save()
                                 }
                             }))
                             if (unmatched.length === 0) {
@@ -659,7 +669,8 @@ const adminJsStatic = {
                     edit: {
                         actionType: 'record',
                         isAccessible: ({ currentAdmin, record }) => {
-                            return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
+                            return true
+                            //return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
                         },
                         before: async (request, context) => {
                             const { currentAdmin, record } = context
