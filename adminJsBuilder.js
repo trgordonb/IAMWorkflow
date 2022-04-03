@@ -959,7 +959,8 @@ const adminJsStatic = {
             resources: {
                 Customer: {
                     properties: {
-                        bankaccountnumber: 'Bank Account #'
+                        bankaccountnumber: 'Bank Account #',
+                        email: 'Email'
                     }
                 },
                 AccountFee: {

@@ -5,7 +5,7 @@ const CustomerResource = {
         },
         clientId: {
             isTitle: true,
-            isVisible: { list: true, filter: true, show: true, edit: false },
+            isVisible: { list: true, filter: true, show: true, edit: true },
         },
         bankaccountnumber: {
             isVisible: { list: false, filter: true, show: true, edit: true },
