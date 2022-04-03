@@ -6,7 +6,7 @@ const UserSchema = new Schema({
     encryptedPassword: String,
     role: {
         type: String,
-        enum: ['admin', 'user']
+        enum: ['admin', 'user', 'reader']
     }
 })
 

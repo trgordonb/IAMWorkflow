@@ -2,7 +2,7 @@ const AdminJSExpress = require('@adminjs/express')
 const AdminJS = require('adminjs')
 const express = require('express')
 const bcrypt = require('bcrypt')
-const adminJsStatic = require('./adminJsBuilder')
+const adminJsConfig = require('./adminJsConfig')
 const AdminJsMongoose = require('@adminjs/mongoose')
 const mongoose = require('mongoose')
 const UserModel = require('./models/user.model')
@@ -14,7 +14,7 @@ async function main() {
     const app = express()
     await mongoose.connect(MONGO_URL, { useNewUrlParser: true })
 
-    const adminJs = new AdminJS(adminJsStatic.adminJsStatic)
+    const adminJs = new AdminJS(adminJsConfig.adminJsConfig)
     const router = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
         authenticate: async (userId, password) => {
             let user = await UserModel.findOne({ userId })
