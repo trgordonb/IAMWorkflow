@@ -48,7 +48,7 @@ const Dashboard = (data) => {
             {
                 currentAdmin && currentAdmin.role !== 'reader' &&
                 <Box style={{marginTop:10}} display="flex" variant="white">
-                    <H5>{`Asset Allocation records Portfolio value alert count: ${alertCount}`}</H5>
+                    <H5>{`Asset Allocation records Portfolio value alert count (threshold: 10%): ${alertCount}`}</H5>
                 </Box>
             }
             {

@@ -15,6 +15,9 @@ const AllAssetAllocationResource = {
         },
         date: {
             type: 'date',
+            isVisible: { list: true, filter: true, show: true, edit: true },
+        },
+        currency: {
             isVisible: { list: false, filter: true, show: true, edit: true },
         },
         total: {
