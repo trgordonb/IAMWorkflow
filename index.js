@@ -32,7 +32,7 @@ async function main() {
             }
             return false
         },
-        //cookiePassword: process.env.COOKIE_PASSWORD
+        cookiePassword: process.env.COOKIE_PASSWORD
     })
     app.use(adminJs.options.rootPath, router)
     await app.listen(process.env.PORT, () => { console.log('AdminJS is at localhost:8080/admin') })
