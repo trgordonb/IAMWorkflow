@@ -51,11 +51,11 @@ const AssetAllocationSchema = new Schema({
 })
 
 AssetAllocationSchema.pre('save', function() {
-    this.total = this.cash + this.bonds + this.forwards + this.equities + this.alternate
+    this.total = Math.round(100 * (this.cash + this.bonds + this.forwards + this.equities + this.alternate),2)/100
 })
 
 AssetAllocationSchema.pre('findOneAndUpdate', function() {
-    this._update.$set.total = this._update.$set.cash + this._update.$set.equities + this._update.$set.forwards + this._update.$set.bonds + this._update.$set.alternate
+    this._update.$set.total = Math.round(100*(this._update.$set.cash + this._update.$set.equities + this._update.$set.forwards + this._update.$set.bonds + this._update.$set.alternate),2)/100
 })
 
 const AssetAllocation = mongoose.model('AssetAllocation', AssetAllocationSchema, 'AssetAllocations')
