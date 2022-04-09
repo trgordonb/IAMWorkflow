@@ -1,5 +1,6 @@
 const Statement = require('../models/statement.model')
 const BankStatementItem = require('../models/bankstatement-item.model')
+const AdminJS = require('adminjs')
 
 const BankStatementItemResource = {
     actions: {
@@ -13,6 +14,16 @@ const BankStatementItemResource = {
                 return true
                 //return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
             },
+        },
+        bulkApprove: {
+            actionType: 'bulk',
+            isAccessible: ({ currentAdmin, record }) => {
+                return (currentAdmin && currentAdmin.role === 'admin') 
+            },
+            component: AdminJS.bundle('../components/Approval'),
+            handler: async(request, response, context) => {
+                return {records: [new AdminJS.BaseRecord({}, context.resource).toJSON(context.currentAdmin)] }
+            }
         },
         reconcile: {
             actionType: 'resource',

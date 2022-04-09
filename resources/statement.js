@@ -65,6 +65,16 @@ const StatementResource = {
                 return true //currentAdmin not available ?
             },
         },
+        bulkApprove: {
+            actionType: 'bulk',
+            isAccessible: ({ currentAdmin, record }) => {
+                return (currentAdmin && currentAdmin.role === 'admin') 
+            },
+            component: AdminJS.bundle('../components/Approval'),
+            handler: async(request, response, context) => {
+                return {records: [new AdminJS.BaseRecord({}, context.resource).toJSON(context.currentAdmin)] }
+            }
+        },
         import: {
             actionType: 'record',
             isVisible: true,

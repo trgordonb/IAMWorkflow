@@ -1,5 +1,6 @@
 const AccountPolicy = require('../models/account-policy')
 const AccountLedgerBalance = require('../models/account-ledger-balance.model')
+const AdminJS = require('adminjs')
 
 const AccountLedgerBalanceResource = {
     actions: {
@@ -37,6 +38,16 @@ const AccountLedgerBalanceResource = {
             isAccessible: ({ currentAdmin, record }) => {
                 return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
             },
+        },
+        bulkApprove: {
+            actionType: 'bulk',
+            isAccessible: ({ currentAdmin, record }) => {
+                return (currentAdmin && currentAdmin.role === 'admin') 
+            },
+            component: AdminJS.bundle('../components/Approval'),
+            handler: async(request, response, context) => {
+                return {records: [new AdminJS.BaseRecord({}, context.resource).toJSON(context.currentAdmin)] }
+            }
         },
         import: {
             actionType: 'resource',
