@@ -12,13 +12,21 @@ let MONGO_URL = ''
 if (process.env.NODE_ENV !== 'production') {
     MONGO_URL = process.env.MONGO_URL
 } else {
-    MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.REPLICASET_1}:27017,${process.env.REPLICASET_2}:27017/IAMTest`
-    console.log(MONGO_URL)
+    MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.REPLICASET_1}:27017,${process.env.REPLICASET_2}:27017/IAMTest?retryWrites=true&w=majority`
 }
 
 async function main() {
     const app = express()
-    await mongoose.connect(MONGO_URL, { useNewUrlParser: true })
+    try {
+        await mongoose.connect(MONGO_URL, {
+            serverSelectionTimeoutMS: 5000,
+            useNewUrlParser: true
+        })
+    } 
+    catch (err) {
+        console.log(err.reason)
+    }
+    //await mongoose.connect(MONGO_URL, { useNewUrlParser: true })
 
     const adminJs = new AdminJS(adminJsConfig.adminJsConfig)
     const router = AdminJSExpress.buildRouter(adminJs)
