@@ -12,7 +12,7 @@ let MONGO_URL = ''
 if (process.env.NODE_ENV !== 'production') {
     MONGO_URL = process.env.MONGO_URL
 } else {
-    MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.REPLICASET_1}:27017,${process.env.REPLICASET_2}:27017/IAMTest?directConnection=true`
+    MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.REPLICASET_1}:27017,${process.env.REPLICASET_2}:27017/IAMTest?authSource=admin&replicaSet=rs0`
     console.log(MONGO_URL)
 }
 
