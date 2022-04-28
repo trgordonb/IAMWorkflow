@@ -12,16 +12,14 @@ let MONGO_URL = ''
 if (process.env.NODE_ENV !== 'production') {
     MONGO_URL = process.env.MONGO_URL
 } else {
-    MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.REPLICASET_1}:27017/IAMTest`
+    MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.REPLICASET_1}:27017,${process.env.REPLICASET_2}:27017/IAMTest`
+    console.log(MONGO_URL)
 }
 
 async function main() {
     const app = express()
     try {
-        await mongoose.connect(MONGO_URL, {
-            //serverSelectionTimeoutMS: 5000,
-            useNewUrlParser: true
-        })
+        await mongoose.connect(MONGO_URL)
     } 
     catch (err) {
         console.log(err.reason)
