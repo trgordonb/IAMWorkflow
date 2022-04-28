@@ -22,7 +22,7 @@ async function main() {
         await mongoose.connect(MONGO_URL)
     } 
     catch (err) {
-        console.log(err.reason)
+        console.log(err)
     }
     //await mongoose.connect(MONGO_URL, { useNewUrlParser: true })
 
