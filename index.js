@@ -19,7 +19,7 @@ async function main() {
     const app = express()
     try {
         await mongoose.connect(MONGO_URL, {
-            serverSelectionTimeoutMS: 5000,
+            //serverSelectionTimeoutMS: 5000,
             useNewUrlParser: true
         })
     } 
