@@ -19,7 +19,9 @@ if (process.env.NODE_ENV !== 'production') {
 async function main() {
     const app = express()
     try {
-        await mongoose.connect(MONGO_URL)
+        await mongoose.connect(MONGO_URL, {
+            readPreference : 'primary'
+        })
     } 
     catch (err) {
         console.log(err)
