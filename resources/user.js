@@ -16,7 +16,7 @@ const UserResource = {
         }
     },
     actions: {
-        new: {
+        /**new: {
             isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
             before: async(request) => {
                 if (request.payload.password) {
@@ -50,7 +50,7 @@ const UserResource = {
         },
         filter: {
             isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
-        }
+        }*/
     }
 }
 

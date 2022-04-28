@@ -8,14 +8,20 @@ const mongoose = require('mongoose')
 const UserModel = require('./models/user.model')
 
 AdminJS.registerAdapter(AdminJsMongoose)
-const MONGO_URL = process.env.MONGO_URL
-  
+let MONGO_URL = ''
+if (process.env.NODE_ENV !== 'production') {
+    MONGO_URL = process.env.MONGO_URL
+} else {
+    MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.REPLICASET_1}:27017/IAMTest,mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.REPLICASET_2}:27017/IAMTest`
+}
+
 async function main() {
     const app = express()
     await mongoose.connect(MONGO_URL, { useNewUrlParser: true })
 
     const adminJs = new AdminJS(adminJsConfig.adminJsConfig)
-    const router = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
+    const router = AdminJSExpress.buildRouter(adminJs)
+    /**const router = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
         authenticate: async (userId, password) => {
             let user = await UserModel.findOne({ userId })
             if (user) {
@@ -33,7 +39,7 @@ async function main() {
             return false
         },
         cookiePassword: process.env.COOKIE_PASSWORD
-    })
+    })*/
     app.use(adminJs.options.rootPath, router)
     await app.listen(process.env.PORT, () => { console.log('AdminJS is at localhost:8080/admin') })
 }

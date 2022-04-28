@@ -18,6 +18,7 @@
     "@adminjs/design-system": "^2.1.0",
     "@adminjs/express": "^4.0.2",
     "@adminjs/mongoose": "^2.0.1",
+    "admin-bro-theme-dark": "^1.0.0",
     "adminjs": "^5.7.2",
     "axios": "^0.26.0",
     "bcrypt": "^5.0.1",

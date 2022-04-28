@@ -54,6 +54,7 @@ const CurrencyHistoryResource = require('./resources/currency-history')
 const FeeSharingHistoryResource = require('./resources/fee-sharing-history')
 const PolicyFeeSettingResource = require('./resources/policy-fee-setting')
 const ReportResource = require('./resources/report')
+const theme = require('admin-bro-theme-dark')
 
 const menu = {
     Admin: { name: 'Admin/Reports' },
@@ -77,6 +78,10 @@ const adminJsConfig = {
         logo: 'https://oh-estore.s3.amazonaws.com/AOCLogo.png',
         companyName: 'I-AMS',
         softwareBrothers: false,
+        theme: {
+            fontSizes: 'md',
+            lineHeights: 'md'
+        }
     },
     resources: [
         { resource: User, options: { parent: menu.Admin, ...UserResource } },
