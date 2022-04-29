@@ -26,7 +26,7 @@ async function main() {
         mongoose.connection.useDb('IAMTest')
     } 
     catch (err) {
-        console.log(err)
+        console.log(JSON.stringify(err,null,2))
     }
     //await mongoose.connect(MONGO_URL, { useNewUrlParser: true })
 
