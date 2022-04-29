@@ -20,13 +20,15 @@ async function main() {
     const app = express()
     try {
         await mongoose.connect(MONGO_URL, {
-            minPoolSize: 2,
-            maxPoolSize: 2
+            //minPoolSize: 2,
+            //maxPoolSize: 2
         })
         mongoose.connection.useDb('IAMTest')
     } 
     catch (err) {
-        console.log(JSON.stringify(err,null,2))
+        if (err.name === 'MongooseServerSelectionError') {
+            console.log(JSON.stringify(err.reason.servers,null,2));
+        }
     }
     //await mongoose.connect(MONGO_URL, { useNewUrlParser: true })
 
