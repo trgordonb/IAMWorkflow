@@ -20,8 +20,7 @@ async function main() {
     const app = express()
     try {
         await mongoose.connect(MONGO_URL, {
-            //minPoolSize: 2,
-            //maxPoolSize: 2
+            readPreference: 'primary'
         })
         mongoose.connection.useDb('IAMTest')
     } 
