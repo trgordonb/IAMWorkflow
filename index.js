@@ -13,13 +13,17 @@ if (process.env.NODE_ENV !== 'production') {
     MONGO_URL = process.env.MONGO_URL
 } else {
     //MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.REPLICASET_1}:27017,${process.env.REPLICASET_2}:27017/?authSource=admin&replicaSet=rs0`
-    MONGO_URL = `mongodb://root:L664z3tkJ@${process.env.REPLICASET_1}:27017/IAMTest?authSource=admin&replicaSet=rs0`
+    MONGO_URL = `mongodb://root:L664z3tkJ@${process.env.REPLICASET_1}:27017/?authSource=admin&replicaSet=rs0`
 }
 
 async function main() {
     const app = express()
     try {
-        await mongoose.connect(MONGO_URL)
+        await mongoose.connect(MONGO_URL, {
+            maxIdleTimeMS: 270000,
+            minPoolSize: 1,
+            maxPoolSize: 4
+        })
         mongoose.connection.useDb('IAMTest')
     } 
     catch (err) {
