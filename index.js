@@ -21,7 +21,8 @@ async function main() {
     await mongoose.connect(MONGO_URL)
 
     const adminJs = new AdminJS(adminJsConfig.adminJsConfig)
-    const router = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
+    const router = AdminJSExpress.buildRouter(adminJs)
+    /**const router = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
         authenticate: async (userId, password) => {
             let user = await UserModel.findOne({ userId })
             console.log(user)
@@ -41,7 +42,7 @@ async function main() {
             return false
         },
         cookiePassword: process.env.COOKIE_PASSWORD
-    })
+    })*/
     app.use(adminJs.options.rootPath, router)
     await app.listen(process.env.PORT, () => { console.log('AdminJS is at localhost:8080/admin') })
 }
