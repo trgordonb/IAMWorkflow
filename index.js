@@ -12,7 +12,7 @@ let MONGO_URL = ''
 if (process.env.NODE_ENV !== 'production') {
     MONGO_URL = process.env.MONGO_URL
 } else {
-    MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.REPLICASET_1}:27017,${process.env.REPLICASET_2}:27017/?authSource=admin&replicaSet=rs0`
+    MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.REPLICASET_1}:27017,${process.env.REPLICASET_2}:27017/test?authSource=admin&replicaSet=rs0`
     //MONGO_URL = `mongodb://root:L664z3tkJ@${process.env.REPLICASET_1}:27017/?authSource=admin&replicaSet=rs0`
 }
 
@@ -27,7 +27,7 @@ async function main() {
     } 
     catch (err) {
         if (err.name === 'MongooseServerSelectionError') {
-            console.log(JSON.stringify(err.reason.servers,null,2));
+            console.log(err.reason)
         }
     }
     //await mongoose.connect(MONGO_URL, { useNewUrlParser: true })
