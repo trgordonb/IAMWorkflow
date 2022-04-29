@@ -13,16 +13,12 @@ if (process.env.NODE_ENV !== 'production') {
     MONGO_URL = process.env.MONGO_URL
 } else {
     MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.REPLICASET_1}:27017,${process.env.REPLICASET_2}:27017/test?authSource=admin&replicaSet=rs0`
-    //MONGO_URL = `mongodb://root:L664z3tkJ@${process.env.REPLICASET_1}:27017/?authSource=admin&replicaSet=rs0`
 }
 
 async function main() {
     const app = express()
     try {
-        await mongoose.connect(MONGO_URL, {
-            readPreference: 'primary'
-        })
-        mongoose.connection.useDb('IAMTest')
+        await mongoose.connect(MONGO_URL)
     } 
     catch (err) {
         if (err.name === 'MongooseServerSelectionError') {
@@ -32,8 +28,8 @@ async function main() {
     //await mongoose.connect(MONGO_URL, { useNewUrlParser: true })
 
     const adminJs = new AdminJS(adminJsConfig.adminJsConfig)
-    const router = AdminJSExpress.buildRouter(adminJs)
-    /**const router = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
+    //const router = AdminJSExpress.buildRouter(adminJs)
+    const router = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
         authenticate: async (userId, password) => {
             let user = await UserModel.findOne({ userId })
             if (user) {
@@ -51,7 +47,7 @@ async function main() {
             return false
         },
         cookiePassword: process.env.COOKIE_PASSWORD
-    })*/
+    })
     app.use(adminJs.options.rootPath, router)
     await app.listen(process.env.PORT, () => { console.log('AdminJS is at localhost:8080/admin') })
 }
