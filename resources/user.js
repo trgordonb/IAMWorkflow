@@ -27,7 +27,8 @@ const UserResource = {
                     }
                 }
                 return request
-            }
+            },
+            showInDrawer: true
         },
         list: {
             isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
@@ -43,10 +44,12 @@ const UserResource = {
                     }
                 }
                 return request
-            }
+            },
+            showInDrawer: true
         },
         show: {
             isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+            showInDrawer: true
         },
         filter: {
             isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',

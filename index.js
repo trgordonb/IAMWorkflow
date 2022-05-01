@@ -21,12 +21,9 @@ async function main() {
     await mongoose.connect(MONGO_URL)
 
     const adminJs = new AdminJS(adminJsConfig.adminJsConfig)
-    //const router = AdminJSExpress.buildRouter(adminJs)
     const router = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
         authenticate: async (userId, password) => {
             let user = await UserModel.findOne({ userId })
-            console.log(user)
-            console.log(password)
             if (user) {
                 const matched = await bcrypt.compare(password, user.encryptedPassword)
                 if (matched) {
