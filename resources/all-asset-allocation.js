@@ -64,7 +64,8 @@ const AllAssetAllocationResource = {
                 return currentAdmin && (
                   currentAdmin.role === 'admin' || currentAdmin.role === 'user'
                 )
-            }
+            },
+            showInDrawer: true
         },
         stat: {
             actionType: 'resource',
@@ -110,7 +111,8 @@ const AllAssetAllocationResource = {
                   currentAdmin.role === 'admin'
                   || (currentAdmin.id === record.param('recordEnteredBy') && !record.param('isReconciled'))
                 )
-            }
+            },
+            showInDrawer: true
         },
         delete: {
             isAccessible: ({ currentAdmin, record }) => {

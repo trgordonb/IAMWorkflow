@@ -42,7 +42,8 @@ const AssetAllocationResource = {
                        'filters.isReconciled': false
                     }
                 }
-            }
+            },
+            showInDrawer: true
         },
         edit: {
             isAccessible: ({ currentAdmin, record }) => {
@@ -50,7 +51,8 @@ const AssetAllocationResource = {
                   currentAdmin.role === 'admin'
                   || (currentAdmin.id === record.param('recordEnteredBy') && !record.param('isReconciled'))
                 )
-            }
+            },
+            showInDrawer: true
         },
         delete: {
             isAccessible: false
