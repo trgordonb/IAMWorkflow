@@ -153,6 +153,13 @@ const adminJsConfig = {
                     properties: {
                         email: 'Email'
                     }
+                },
+                AccountPolicy: {
+                    properties: {
+                        number: 'Custodian Account Number',
+                        customer: 'IAM Customer Number',
+                        currency: 'Currency'
+                    }
                 }
             }
         }
