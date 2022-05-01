@@ -149,6 +149,11 @@ const adminJsConfig = {
                 email: 'User Id'
             },
             resources: {
+                Customer: {
+                    properties: {
+                        email: 'Email'
+                    }
+                }
             }
         }
     }
