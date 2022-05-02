@@ -26,6 +26,7 @@ const FeeSharing = require('./models/fee-sharing.model')
 const FeeSharingHistory = require('./models/feeshare-history.model')
 const Statement = require('./models/statement.model')
 const PolicyFeeSetting = require('./models/policyfee-setting.model')
+const CustodianStatement = require('./models/custodian-statement-model')
 const UserResource = require('./resources/user')
 const AssetAllocationResource = require('./resources/asset-allocation')
 const AllAssetAllocationResource = require('./resources/all-asset-allocation')
@@ -54,7 +55,8 @@ const CurrencyHistoryResource = require('./resources/currency-history')
 const FeeSharingHistoryResource = require('./resources/fee-sharing-history')
 const PolicyFeeSettingResource = require('./resources/policy-fee-setting')
 const ReportResource = require('./resources/report')
-const theme = require('admin-bro-theme-dark')
+const CustodianStatementResource = require('./resources/custodian-statement')
+const uploadFeature = require('./resources/uploadFeature')
 
 const menu = {
     Admin: { name: 'Admin/Reports' },
@@ -112,6 +114,7 @@ const adminJsConfig = {
         { resource: Statement, options: { parent: menu.Fees, ...StatementResource } },
         { resource: PolicyFeeSetting, options: { parent: menu.Fees, ...PolicyFeeSettingResource } },
         { resource: Report, options: { parent: menu.Admin, ...ReportResource }},
+        { resource: CustodianStatement, options: { parent: menu.Custodian, ...CustodianStatementResource }},
     ],
     locale: {
         translations: {

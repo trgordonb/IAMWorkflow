@@ -18,8 +18,12 @@
     "@adminjs/design-system": "^2.1.0",
     "@adminjs/express": "^4.0.2",
     "@adminjs/mongoose": "^2.0.2",
+    "@adminjs/upload": "^2.0.2",
+    "@react-pdf-viewer/core": "^3.3.0",
+    "@react-pdf-viewer/drop": "^3.3.1",
     "admin-bro-theme-dark": "^1.0.0",
     "adminjs": "^5.7.2",
+    "aws-sdk": "^2.1125.0",
     "axios": "^0.26.0",
     "bcrypt": "^5.0.1",
     "cookie-parser": "^1.4.6",
@@ -35,7 +39,10 @@
     "jspdf-autotable": "^3.5.23",
     "moment": "^2.29.1",
     "mongoose": "^6.3.1",
-    "mongoose-plugin-autoinc-fix": "^1.2.1"
+    "mongoose-plugin-autoinc-fix": "^1.2.1",
+    "pdfjs-dist": "^2.13.216",
+    "react-dropzone": "^14.1.1",
+    "react-router": "^6.3.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

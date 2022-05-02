@@ -28,7 +28,7 @@ const AllAssetAllocationResource = {
         },
         totalPercentChange: {
             isVisible: { list: false, filter: false, show: true, edit: false }
-        }
+        },
     },
     actions: {
         new: {
@@ -65,7 +65,7 @@ const AllAssetAllocationResource = {
                   currentAdmin.role === 'admin' || currentAdmin.role === 'user'
                 )
             },
-            showInDrawer: true
+            showInDrawer: true,
         },
         stat: {
             actionType: 'resource',
@@ -121,6 +121,9 @@ const AllAssetAllocationResource = {
                   || (currentAdmin.id === record.param('recordEnteredBy') && !record.param('isReconciled'))
                 )
             }
+        },
+        show: {
+            showInDrawer: true
         },
         bulkDelete: {
             isAccessible: false

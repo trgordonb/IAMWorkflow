@@ -47,7 +47,7 @@ const AssetAllocationSchema = new Schema({
     recordEnteredBy: {
         type: Schema.Types.ObjectId,
         ref: 'User'
-    }
+    },
 })
 
 AssetAllocationSchema.pre('save', function() {
