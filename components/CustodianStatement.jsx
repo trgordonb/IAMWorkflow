@@ -42,6 +42,7 @@ const CustodianStatement = (props) => {
                 recordId: selectedRecord.params.customer,
                 actionName: 'show'
             })
+            console.log(result)
             if (result.request && result.request.statusText === 'OK') {
                 setClientId(result.data.record.params.clientId)
             }
