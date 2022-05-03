@@ -1,4 +1,4 @@
-import { Box, Button, DrawerFooter, DrawerContent, Drawer, Header, Icon, Text } from '@adminjs/design-system'
+import { Box, Button, Text } from '@adminjs/design-system'
 import { useRecord, BasePropertyComponent, useTranslation, ApiClient } from 'adminjs'
 import { useHistory } from 'react-router'
 import {useDropzone} from 'react-dropzone'
@@ -18,7 +18,7 @@ const CustodianStatement = (props) => {
         console.log(acceptedFiles[0])
         setDocURL(URL.createObjectURL(acceptedFiles[0]))
     }, [])
-    const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
+    const {getRootProps, getInputProps} = useDropzone({onDrop})
     const allKeys = ['cashValue','equitiesValue','derivativesValue','bondsValue','alternativesValue']
 
     const { record, handleChange, submit } = useRecord(initialRecord, resource.id)

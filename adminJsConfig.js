@@ -56,7 +56,6 @@ const FeeSharingHistoryResource = require('./resources/fee-sharing-history')
 const PolicyFeeSettingResource = require('./resources/policy-fee-setting')
 const ReportResource = require('./resources/report')
 const CustodianStatementResource = require('./resources/custodian-statement')
-const uploadFeature = require('./resources/uploadFeature')
 
 const menu = {
     Admin: { name: 'Admin/Reports' },
