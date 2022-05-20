@@ -8,8 +8,6 @@ const mongoose = require('mongoose')
 const UserModel = require('./models/user.model')
 
 AdminJS.registerAdapter(AdminJsMongoose)
-    //let MONGO_URL = ''
-    //MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URL}:27017/IAMTest?authSource=admin`
 MONGO_URL = process.env.MONGO_URL
 
 async function main() {
