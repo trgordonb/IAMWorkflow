@@ -14,7 +14,7 @@ MONGO_URL = process.env.MONGO_URL
 
 async function main() {
     const app = express()
-    await mongoose.connect(MONGO_URL)
+    await mongoose.connect(MONGO_URL, {ssl: true})
 
     const adminJs = new AdminJS(adminJsConfig.adminJsConfig)
     const router = AdminJSExpress.buildRouter(adminJs)
