@@ -8,34 +8,35 @@ const mongoose = require('mongoose')
 const UserModel = require('./models/user.model')
 
 AdminJS.registerAdapter(AdminJsMongoose)
-    let MONGO_URL = ''
-    MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URL}:27017/IAMTest?authSource=admin`
-    //MONGO_URL = process.env.MONGO_URL
+    //let MONGO_URL = ''
+    //MONGO_URL = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URL}:27017/IAMTest?authSource=admin`
+MONGO_URL = process.env.MONGO_URL
 
 async function main() {
     const app = express()
     await mongoose.connect(MONGO_URL)
 
     const adminJs = new AdminJS(adminJsConfig.adminJsConfig)
-    const router = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
-        authenticate: async (userId, password) => {
-            let user = await UserModel.findOne({ userId })
-            if (user) {
-                const matched = await bcrypt.compare(password, user.encryptedPassword)
-                if (matched) {
-                    return {
-                        email: user.userId,
-                        title: user.role,
-                        id: user._id,
-                        role: user.role,
-                        avatarUrl: `https://ui-avatars.com/api/?name=${user.userId}`
-                    }
-                }
-            }
-            return false
-        },
-        cookiePassword: process.env.COOKIE_PASSWORD
-    })
+    const router = AdminJSExpress.buildRouter(adminJs)
+    //const router = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
+    //    authenticate: async (userId, password) => {
+    //        let user = await UserModel.findOne({ userId })
+    //        if (user) {
+    //            const matched = await bcrypt.compare(password, user.encryptedPassword)
+    //            if (matched) {
+    //                return {
+    //                    email: user.userId,
+    //                    title: user.role,
+    //                    id: user._id,
+    //                    role: user.role,
+    //                    avatarUrl: `https://ui-avatars.com/api/?name=${user.userId}`
+    //                }
+    //            }
+    //        }
+    //        return false
+    //    },
+    //    cookiePassword: process.env.COOKIE_PASSWORD
+    //})
     app.use(adminJs.options.rootPath, router)
     await app.listen(process.env.PORT, () => { console.log('AdminJS is at localhost:8080/admin') })
 }
