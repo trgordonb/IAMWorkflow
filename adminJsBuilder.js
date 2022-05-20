@@ -264,7 +264,6 @@ const adminJsStatic = {
                         isAccessible: true,
                         component: false,
                         handler: async(request, response, context) => {
-                            console.log(request.payload)
                             let total = 0
                             let matched = true
                             let statement = await StatmentModel.findById(request.payload.statementId)
