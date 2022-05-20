@@ -17,7 +17,7 @@ const UserResource = {
     },
     actions: {
         new: {
-            isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+            //isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
             before: async(request) => {
                 if (request.payload.password) {
                     request.payload = {
@@ -31,10 +31,10 @@ const UserResource = {
             showInDrawer: true
         },
         list: {
-            isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+            //isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
         },
         edit: {
-            isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+            //isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
             before: async(request) => {
                 if (request.payload.password) {
                     request.payload = {
@@ -48,7 +48,7 @@ const UserResource = {
             showInDrawer: true
         },
         show: {
-            isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+            //isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
             showInDrawer: true
         },
         filter: {
