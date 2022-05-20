@@ -128,7 +128,6 @@ const adminJsStatic = {
                     edit: {
                         actionType: 'record',
                         before: async(request) => {
-                            console.log('Payload:',request.payload)
                             return request
                         },
                         isAccessible: ({ currentAdmin, record }) => {
