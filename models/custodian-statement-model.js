@@ -4,7 +4,8 @@ const Schema = mongoose.Schema
 const CustodianStatementSchema = new Schema({
     custodianAccount: {
         type: Schema.Types.ObjectId,
-        ref: 'AccountPolicy'
+        ref: 'AccountPolicy',
+        index: true
     },
     statementDate: {
         type: Date,
