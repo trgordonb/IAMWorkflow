@@ -2,8 +2,14 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const CustomerSchema = new Schema({
-    clientId: String,
-    name: String,
+    clientId: {
+        type: String,
+        index: true
+    },
+    name: {
+        type: String,
+        index: true
+    },
     address: String,
     mobile: String,
     email: String,
