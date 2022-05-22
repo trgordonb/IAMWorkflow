@@ -107,16 +107,16 @@ const Dashboard = (data) => {
     
 
     useEffect(() => {
-        const getAAAlertCount = async () => {
-            let results = await api.resourceAction({
-                resourceId: 'AllAssetAllocation',
-                actionName: 'stat'
-            })
-            if (results.data) {
-                setAlertCount(results.data.data)
-            }
-        }
-        getAAAlertCount()
+        //const getAAAlertCount = async () => {
+        //    let results = await api.resourceAction({
+        //        resourceId: 'AllAssetAllocation',
+        //        actionName: 'stat'
+        //    })
+        //    if (results.data) {
+        //        setAlertCount(results.data.data)
+        //    }
+        //}
+        //getAAAlertCount()
     },[])
 
     return (

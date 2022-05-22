@@ -33,7 +33,7 @@ const CustodianStatementResource = {
             isVisible: { list: true, filter: false, show: true, edit: true },
         },
         total: {
-            isVisible:{ list: true, filter: false, show: true, edit: true }
+            isVisible:{ list: false, filter: false, show: true, edit: true }
         },
         cashAllocation: {
             isVisible:{ list: false, filter: false, show: true, edit: true }
