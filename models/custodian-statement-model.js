@@ -6,30 +6,38 @@ const CustodianStatementSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'AccountPolicy'
     },
-    statementDate: Date,
+    statementDate: {
+        type: Date,
+        index: true
+    },
     currency: {
         type: Schema.Types.ObjectId,
         ref: 'Currency'
     },
     cashValue: {
         type: Number,
-        default: 0
+        default: 0,
+        index: true
     },
     equitiesValue: {
         type: Number,
-        default: 0
+        default: 0,
+        index: true
     },
     derivativesValue: {
         type: Number,
-        default: 0
+        default: 0,
+        index: true
     },
     bondsValue: {
         type: Number,
-        default: 0
+        default: 0,
+        index: true
     },
     alternativesValue: {
         type: Number,
-        default: 0
+        default: 0,
+        index: true
     },
     recordEnteredBy: {
         type: Schema.Types.ObjectId,
