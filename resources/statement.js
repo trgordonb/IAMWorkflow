@@ -59,6 +59,9 @@ const StatementResource = {
         }
     },
     actions: {
+        list: {
+            isAccessible: false
+        },
         edit: {
             actionType: 'record',
             isAccessible: (context) => {

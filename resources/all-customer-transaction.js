@@ -40,6 +40,9 @@ const AllCustomerTransactionResource = {
                 )
             }
         },
+        list: {
+            isAccessible: false
+        },
         edit: {
             before: async (request, context) => {
                 const { currentAdmin } = context

@@ -33,6 +33,9 @@ const AccountLedgerBalanceResource = {
                 return request
             }
         },
+        list: {
+            isAccessible: false
+        },
         delete: {
             actionType: 'record',
             isAccessible: ({ currentAdmin, record }) => {

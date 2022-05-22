@@ -15,6 +15,9 @@ const BankStatementItemResource = {
                 //return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
             },
         },
+        list: {
+            isAccessible: false
+        },
         bulkApprove: {
             actionType: 'bulk',
             isAccessible: ({ currentAdmin, record }) => {

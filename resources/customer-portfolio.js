@@ -19,6 +19,9 @@ const CustomerPortfolioResource = {
         },
         bulkDelete: {
             isAccessible: ({ currentAdmin }) => currentAdmin && (currentAdmin.role === 'admin' || currentAdmin.role === 'user'),
+        },
+        list: {
+            isAccessible: false
         }
     }
 }

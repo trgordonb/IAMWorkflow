@@ -32,7 +32,8 @@ const CustomerTransactionResource = {
             isAccessible: false
         },
         list: {
-            isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+            //isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+            isAccessible: false,
             before: async (request, context) => {
                 const { currentAdmin } = context
                 return {

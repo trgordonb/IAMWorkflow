@@ -15,6 +15,9 @@ const FeeSharingHistoryResource = {
         bulkDelete: {
             actionType: 'resource',
             isAccessible: false
+        },
+        list: {
+            isAccessible: false
         }
     },
     properties: {

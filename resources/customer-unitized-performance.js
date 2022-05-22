@@ -68,6 +68,9 @@ const CustomerUnitizedPerformanceResource = {
         bulkDelete: {
             isAccessible: false
         }, 
+        list: {
+            isAccessible: false
+        },
         calc: {
             actionType: 'resource',
             isVisible: false,

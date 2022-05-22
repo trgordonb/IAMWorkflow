@@ -153,7 +153,8 @@ const adminJsConfig = {
             resources: {
                 Customer: {
                     properties: {
-                        email: 'Email'
+                        email: 'Email',
+                        bankaccountnumber: 'Bank Account Number'
                     }
                 },
                 AccountPolicy: {
@@ -162,7 +163,7 @@ const adminJsConfig = {
                         customer: 'IAM Customer Number',
                         currency: 'Currency'
                     }
-                }
+                },
             }
         }
     }

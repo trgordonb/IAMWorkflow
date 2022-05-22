@@ -12,6 +12,11 @@ const PeriodResource = {
         end: {
             type: 'date'
         }
+    },
+    actions: {
+        list: {
+            isAccessible: false
+        }
     }
 }
 

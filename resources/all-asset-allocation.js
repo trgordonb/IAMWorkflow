@@ -128,6 +128,9 @@ const AllAssetAllocationResource = {
         bulkDelete: {
             isAccessible: false
         },
+        list: {
+            isAccessible: false
+        }
     }
 }
 

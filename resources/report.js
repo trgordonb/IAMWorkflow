@@ -15,6 +15,9 @@ const { parse } = require('json2csv')
 
 const ReportResosurce = {
     actions: {
+        list: {
+            isAccessible: false
+        },
         export: {
             actionType: 'record',
             icon: 'Report',

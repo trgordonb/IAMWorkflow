@@ -29,6 +29,11 @@ const PolicyFeeSettingResource = {
         retrocession: {
             isVisible: { list: false, filter: false, show: true, edit: true },
         }
+    },
+    actions: {
+        list: {
+            isAccessible: false
+        }
     }
 }
 

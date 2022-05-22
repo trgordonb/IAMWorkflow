@@ -32,7 +32,8 @@ const AssetAllocationResource = {
             isAccessible: false
         },
         list: {
-            isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+            isAccessible: false,
+            //isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
             before: async (request, context) => {
                 const { currentAdmin } = context
                 return {
