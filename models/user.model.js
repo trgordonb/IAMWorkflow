@@ -2,11 +2,15 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const UserSchema = new Schema({
-    userId: String,
+    userId: {
+        type: String,
+        index: true
+    },
     encryptedPassword: String,
     role: {
         type: String,
-        enum: ['admin', 'user', 'reader']
+        enum: ['admin', 'user', 'reader'],
+        index: true
     }
 })
 
