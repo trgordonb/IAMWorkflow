@@ -7,6 +7,15 @@ const CurrencyResource = {
     actions: {
         list: {
             isAccessible: ({ currentAdmin }) => currentAdmin && (currentAdmin.role === 'admin' || currentAdmin.role === 'user'),
+        },
+        edit: {
+            showInDrawer: true
+        },
+        new: {
+            showInDrawer: true
+        },
+        show: {
+            showInDrawer: true
         }
     }
 }

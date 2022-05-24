@@ -23,6 +23,7 @@
     "aws-sdk": "^2.1125.0",
     "axios": "^0.26.0",
     "bcrypt": "^5.0.1",
+    "chart.js": "^3.7.1",
     "cookie-parser": "^1.4.6",
     "csvtojson": "^2.0.10",
     "date-fns": "^2.28.0",
@@ -37,7 +38,9 @@
     "moment": "^2.29.1",
     "mongoose": "^6.3.1",
     "mongoose-plugin-autoinc-fix": "^1.2.1",
+    "nodemailer": "^6.7.5",
     "pdfjs-dist": "^2.13.216",
+    "react-chartjs-2": "^4.1.0",
     "react-dropzone": "^14.1.1",
     "react-router": "^6.3.0"
   },

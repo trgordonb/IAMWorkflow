@@ -13,7 +13,8 @@ const CustodianStatementSchema = new Schema({
     },
     currency: {
         type: Schema.Types.ObjectId,
-        ref: 'Currency'
+        ref: 'Currency',
+        index: true
     },
     cashValue: {
         type: Number,
@@ -38,6 +39,17 @@ const CustodianStatementSchema = new Schema({
     alternativesValue: {
         type: Number,
         default: 0,
+        index: true
+    },
+    status: {
+        type: String,
+        enum: ['approved','pending','rejected'],
+        default: 'pending',
+        index: true,
+    },
+    alert: {
+        type: Boolean,
+        default: false,
         index: true
     },
     recordEnteredBy: {

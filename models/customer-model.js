@@ -12,7 +12,10 @@ const CustomerSchema = new Schema({
     },
     address: String,
     mobile: String,
-    email: String,
+    email: {
+        type: String,
+        index: true
+    },
     bankaccountnumber: String
 })
 

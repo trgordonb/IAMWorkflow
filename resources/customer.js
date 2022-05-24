@@ -26,15 +26,20 @@ const CustomerResource = {
         },
         email: {
             position: 3,
-            isVisible: { list: false, filter: true, show: true, edit: true },
+            isVisible: { list: true, filter: true, show: true, edit: true },
         }
     },
     actions: {
         new: {
             isAccessible: ({ currentAdmin }) => currentAdmin && (currentAdmin.role === 'admin' || currentAdmin.role === 'user'),
+            showInDrawer: true
+        },
+        show: {
+            showInDrawer: true
         },
         edit: {
             isAccessible: ({ currentAdmin }) => currentAdmin && (currentAdmin.role === 'admin' || currentAdmin.role === 'user'),
+            showInDrawer: true
         },
         delete: {
             isAccessible: ({ currentAdmin }) => currentAdmin && (currentAdmin.role === 'admin' || currentAdmin.role === 'user'),

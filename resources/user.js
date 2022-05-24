@@ -5,14 +5,24 @@ const UserResource = {
         _id: {
             isVisible: { list: false, filter: false, show: false, edit: false },
         },
+        userId: {
+            isVisible: true,
+            isTitle: true,
+            position: 1
+        },
+        email: {
+            isVisible: { list: true, filter: true, show: true, edit: true },
+            position: 2
+        },
         encryptedPassword: {
             isVisible: false
         },
         password: {
-            type: 'string',
+            type: 'password',
             isVisible: {
                 list: false, edit: true, filter: false, show: false,
-            }
+            },
+            position: 3
         }
     },
     actions: {

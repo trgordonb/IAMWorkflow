@@ -4,13 +4,17 @@ const Schema = mongoose.Schema
 const UserSchema = new Schema({
     userId: {
         type: String,
-        index: true
+        index: true,
+    },
+    email: {
+        type: String,
+        index: true,
     },
     encryptedPassword: String,
     role: {
         type: String,
         enum: ['admin', 'user', 'reader'],
-        index: true
+        index: true,
     }
 })
 

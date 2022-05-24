@@ -69,7 +69,7 @@ const adminJsConfig = {
     databases: [mongoose],
     rootPath: '/admin',
     dashboard: {
-        component: AdminJS.bundle('./components/Dashboard')
+        component: AdminJS.bundle('./components/Dashboard.jsx')
     },
     version: {
         admin: true,
@@ -136,7 +136,7 @@ const adminJsConfig = {
                 StatementParticular: 'Custodian Particulars',
                 Payee: 'Company Payees',
                 BankStatementItem: 'Bank Statements',
-                AccountPolicy: 'Customer Policy Settings',
+                AccountPolicy: 'Custodian Accounts',
                 AccountLedgerBalance: 'Account Ledger Balances',
                 AccountCustodian: 'Custodian Policy Settings',
                 FeeShareHistory: 'Fee Shares Results',
@@ -151,6 +151,11 @@ const adminJsConfig = {
                 email: 'User Id'
             },
             resources: {
+                User: {
+                    properties: {
+                        email: 'Email'
+                    }
+                },
                 Customer: {
                     properties: {
                         email: 'Email',
