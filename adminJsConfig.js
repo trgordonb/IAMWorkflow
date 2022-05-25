@@ -81,7 +81,13 @@ const adminJsConfig = {
         softwareBrothers: false,
         theme: {
             fontSizes: 'md',
-            lineHeights: 'md'
+            lineHeights: 'md',
+            font: "Interstate",
+            colors: {
+                primary20: "#FCD1B7",
+                primary60: "#F49F70",
+                primary100: "#B2644B"
+            }
         }
     },
     resources: [
