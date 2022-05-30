@@ -107,16 +107,16 @@ const Dashboard = (data) => {
     
 
     useEffect(() => {
-        //const getAAAlertCount = async () => {
-        //    let results = await api.resourceAction({
-        //        resourceId: 'AllAssetAllocation',
-        //        actionName: 'stat'
-        //    })
-        //    if (results.data) {
-        //        setAlertCount(results.data.data)
-        //    }
-        //}
-        //getAAAlertCount()
+        const getCustodianStatementAlertCount = async () => {
+            let results = await api.resourceAction({
+                resourceId: 'Custodian Statement',
+                actionName: 'count',
+            })
+            if (results.data) {
+                setAlertCount(results.data.data)
+            }
+        }
+        getCustodianStatementAlertCount()
     },[])
 
     return (
@@ -127,12 +127,16 @@ const Dashboard = (data) => {
             </Box>
             {
                 currentAdmin && currentAdmin.role !== 'reader' &&
-                <Box style={{marginTop:10}} display="flex" variant="white">
-                    <H5>{`Asset Allocation records Portfolio value alert count (threshold: 10%): ${alertCount}`}</H5>
+                <Box style={{marginTop:10, color: alertCount > 0 ? 'red': 'green'}} display="flex" variant="white">
+                    <H5>{`Custodian Records rejected: ${alertCount}`}</H5>
+                    {alertCount > 0 && <NavigationElement
+                        href="/admin/resources/Custodian Statement?filters.status=rejected&page=1"
+                        label='See the records'
+                    />}
                 </Box>
             }
             {
-                currentAdmin && currentAdmin.role !== 'reader' &&
+                /**currentAdmin && currentAdmin.role !== 'reader' &&
                 <Box style={{marginTop:10}} variant="white">
                     <H5 style={{marginRight:10}}>Calculate current month portfolio unitized performance</H5>
                     <H6>Last Period Date</H6>
@@ -149,10 +153,10 @@ const Dashboard = (data) => {
                     />
                     
                     <Button style={{marginTop: 10}} onClick={doUnitize}>Proceed</Button>
-                </Box>
+                </Box>*/
             }
             {
-                currentAdmin && currentAdmin.role !== 'reader' &&
+                /**currentAdmin && currentAdmin.role !== 'reader' &&
                 <Box style={{marginTop:10}} display="flex" variant="white">
                     <H5>Reconcile bank statement amounts with custodian statements</H5>
                     <Input
@@ -162,10 +166,10 @@ const Dashboard = (data) => {
                         onChange={(evt) => setBStatement(evt.target.value)}
                     />
                     <Button onClick={doBankReconcile}>Proceed</Button>
-                </Box>
+                </Box>*/
             }
             {
-                currentAdmin && currentAdmin.role !== 'reader' &&
+                /**currentAdmin && currentAdmin.role !== 'reader' &&
                 <Box style={{marginTop:10}} display="flex" variant="white">
                     <H5>Apply bank charges to statement items</H5>
                     <Input
@@ -175,10 +179,10 @@ const Dashboard = (data) => {
                         onChange={(evt) => setTagBC(evt.target.value)}
                     />
                     <Button onClick={doApplyCharges}>Proceed</Button>
-                </Box>
+                </Box>*/
             }
             {
-                currentAdmin && currentAdmin.role !== 'reader' &&
+                /**currentAdmin && currentAdmin.role !== 'reader' &&
                 <Box style={{marginTop:10}} display="flex" variant="white">
                     <H5>Calculate fee shares</H5>
                     <Input
@@ -188,10 +192,10 @@ const Dashboard = (data) => {
                         onChange={(evt) => setTagFS(evt.target.value)}
                     />
                     <Button onClick={doCalc}>Proceed</Button>
-                </Box>
+                </Box>*/
             }
             {
-                currentAdmin && currentAdmin.role !== 'reader' &&
+                /**currentAdmin && currentAdmin.role !== 'reader' &&
                 <Box style={{marginTop:10}} display="flex" variant="white">
                     <H5>Reconcile custodian statements with demand notes</H5>
                     <Input
@@ -201,10 +205,10 @@ const Dashboard = (data) => {
                         onChange={(evt) => setTagDN(evt.target.value)}
                     />
                     <Button onClick={doReconcile}>Proceed</Button>
-                </Box>
+                </Box>*/
             }
             {
-                showModal &&
+                /**showModal &&
                 <Modal
                     title={taskName}
                     onOverlayClick={()=> setShowModal(false)}
@@ -214,7 +218,7 @@ const Dashboard = (data) => {
                         label: 'OK',
                         onClick: () => setShowModal(false)
                     }]}
-                />
+                />*/
             }
         </Box>
     )

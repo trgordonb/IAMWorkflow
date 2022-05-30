@@ -1,7 +1,8 @@
 const AdminJS = require('adminjs')
 const User = require('../models/user.model')
-const CustodianStatement = require('../models/custodian-statement-model')
+const Message = require('../models/message-model')
 const sendNotificationEmail = require('../utils/email')
+const { io } = require('../app')
 
 const CustodianStatementResource = {
     id: 'Custodian Statement',
@@ -11,6 +12,9 @@ const CustodianStatementResource = {
         },
         recordEnteredBy: {
             isVisible: { list: false, filter: false, show: true, edit: false },
+        },
+        custodianAccount: {
+            isTitle: true
         },
         statementDate: {
             type: 'date',
@@ -130,12 +134,10 @@ const CustodianStatementResource = {
             },
             component: false,
             handler: async(request, response, context) => {
-                let record = await CustodianStatement.findById(request.params.recordId)
-                record.status = 'approved'
-                record.alert = false
-                await record.save()
+                const { record, resource, currentAdmin } = context
+                await record.update({ status: 'approved', alert: false })
                 return { 
-                    record: context.record.toJSON(context.currentAdmin),
+                    record: record.toJSON(currentAdmin),
                     notice: { message: 'Approval done', type: 'success' }
                 }
             }
@@ -147,14 +149,23 @@ const CustodianStatementResource = {
             },
             component: false,
             handler: async(request, response, context) => {
-                let record = await CustodianStatement.findById(request.params.recordId)
-                record.status = 'rejected'
-                record.alert = false
-                await record.save()
+                const { record, resource, currentAdmin } = context
+                await record.update({ status: 'rejected', alert: false })
                 return { 
-                    record: context.record.toJSON(context.currentAdmin),
+                    record: record.toJSON(currentAdmin),
                     notice: { message: 'Reject done', type: 'success' }
                 }
+            }
+        },
+        count: {
+            actionType: 'resource',
+            isVisible: false,
+            isAccessible: true,
+            component: false,
+            handler: async(request, response, context) => {
+                const { record, resource, currentAdmin } = context
+                const records = await resource.MongooseModel.countDocuments({status: 'rejected'})
+                return { data: records ? records : 0 }
             }
         },
         notify: {
@@ -164,10 +175,9 @@ const CustodianStatementResource = {
                 const { record, resource, currentAdmin } = context
                 if (currentAdmin.role === 'user') {
                     let results = await resource.MongooseModel.find().populate('custodianAccount')
-                    let pending = results.filter(record => { return (record.status === 'pending')})
-                    let totalCount = pending.length
+                    //let allRecords = results.filter(record => { return (true)})
                     let alertRecords = []
-                    const groupByAcct = pending.reduce((group, record) => {
+                    const groupByAcct = results.reduce((group, record) => {
                         const { custodianAccount } = record;
                         group[custodianAccount.accountNumber] = group[custodianAccount.accountNumber] ?? [];
                         group[custodianAccount.accountNumber].push(record);
@@ -180,12 +190,15 @@ const CustodianStatementResource = {
                             if (idx >= 1) {
                                 let prevTotal = records[idx-1].total
                                 let curTotal = record.total
-                                if ((Math.abs((curTotal - prevTotal) / prevTotal)) > 0.1) {
+                                if (((Math.abs((curTotal - prevTotal) / prevTotal)) > 0.1) && (record.status === 'pending')) {
                                     alertRecords.push(record.id)
                                 }
                             }
                         })
                     })
+                    let pending = results.filter(record => {return record.status === 'pending'})
+                    let totalCount = pending.length
+
                     await Promise.all(alertRecords.map(async (record) => {
                         await resource.MongooseModel.findByIdAndUpdate(record, {
                             alert: true
@@ -198,6 +211,22 @@ const CustodianStatementResource = {
                     let adminusers = await User.find({role: 'admin'})
                     let adminusersEmail = adminusers.filter(record => { return (record.role === 'admin')}).map(record => record.email).join(',')
                     await sendNotificationEmail(msg, adminusersEmail)
+                    await Promise.all(adminusers.map(async (user) => {
+                        if (user.role === 'admin') {
+                            const message = new Message({
+                                text: msg,
+                                link: '/admin/resources/Custodian Statement?filters.status=pending&page=1',
+                                target: user.id
+                            })
+                            await message.save()
+                        }
+                    }))
+                    io.to('admin').emit('System', {
+                        type: 'Message',
+                        data: {
+                            text: 'New message'
+                        }
+                    })
                 } else if (currentAdmin.role === 'admin') {
                     let results = await resource.MongooseModel.find().populate('recordEnteredBy')
                     let rejected = results.filter(record => { return (record.status === 'rejected')}).map(record => record.recordEnteredBy.email)
@@ -205,6 +234,23 @@ const CustodianStatementResource = {
                     let msg = `There are ${count} custodian statement records rejected by admin. Please review and amend.`
                     let usersEmail = rejected.join(',')
                     await sendNotificationEmail(msg, usersEmail)
+                    let users = await User.find({role: 'user'})
+                    await Promise.all(users.map(async (user) => {
+                        if (user.role === 'user') {
+                            const message = new Message({
+                                text: msg,
+                                link: '/admin/resources/Custodian Statement?filters.status=rejected&page=1',
+                                target: user.id
+                            })
+                            await message.save()
+                        }
+                    }))
+                    io.to('user').emit('System', {
+                        type: 'Message',
+                        data: {
+                            text: 'New message'
+                        }
+                    })
                 }
                 return { notice: { message: 'Notification sent', type: 'success' } }
             }

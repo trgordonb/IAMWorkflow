@@ -17,6 +17,7 @@
   "dependencies": {
     "@adminjs/design-system": "^2.1.0",
     "@adminjs/express": "^4.0.2",
+    "@adminjs/logger": "^2.2.0",
     "@adminjs/mongoose": "^2.0.2",
     "admin-bro-theme-dark": "^1.0.0",
     "adminjs": "^5.7.2",
@@ -43,6 +44,8 @@
     "react-chartjs-2": "^4.1.0",
     "react-dropzone": "^14.1.1",
     "react-router": "^6.3.0",
+    "socket.io": "^4.5.1",
+    "socket.io-client": "^4.5.1",
     "styled-components": "^5.3.5"
   },
   "devDependencies": {

@@ -1,5 +1,8 @@
 const AdminJS = require('adminjs')
 const mongoose = require('mongoose')
+const loggerConfig = require('./config/logger.config')
+const loggerFeature = require('@adminjs/logger').default
+const ModifiedLogger = require('./features/logger/modifiedLogger')
 const User = require('./models/user.model')
 const AssetAllocation = require('./models/asset-allocation.model')
 const AccountPolicy = require('./models/account-policy')
@@ -27,6 +30,7 @@ const FeeSharingHistory = require('./models/feeshare-history.model')
 const Statement = require('./models/statement.model')
 const PolicyFeeSetting = require('./models/policyfee-setting.model')
 const CustodianStatement = require('./models/custodian-statement-model')
+const Message = require('./models/message-model')
 const UserResource = require('./resources/user')
 const AssetAllocationResource = require('./resources/asset-allocation')
 const AllAssetAllocationResource = require('./resources/all-asset-allocation')
@@ -56,6 +60,8 @@ const FeeSharingHistoryResource = require('./resources/fee-sharing-history')
 const PolicyFeeSettingResource = require('./resources/policy-fee-setting')
 const ReportResource = require('./resources/report')
 const CustodianStatementResource = require('./resources/custodian-statement')
+const MessageResource = require('./resources/message')
+const LogResource = require('./resources/log')
 
 const menu = {
     Admin: { name: 'Admin/Reports' },
@@ -68,6 +74,9 @@ const menu = {
 const adminJsConfig = {
     databases: [mongoose],
     rootPath: '/admin',
+    assets: {
+        scripts: ['/socket.io/socket.io.js']
+    },
     dashboard: {
         component: AdminJS.bundle('./components/Dashboard.jsx')
     },
@@ -91,6 +100,7 @@ const adminJsConfig = {
         }
     },
     resources: [
+        { ...LogResource, options: { ...LogResource.options, parent: menu.Admin } },
         { resource: User, options: { parent: menu.Admin, ...UserResource } },
         { resource: AssetAllocation, options: { parent: menu.Account, ...AssetAllocationResource} },
         { resource: AssetAllocation, options: { parent: menu.Account, ...AllAssetAllocationResource }},
@@ -119,7 +129,12 @@ const adminJsConfig = {
         { resource: Statement, options: { parent: menu.Fees, ...StatementResource } },
         { resource: PolicyFeeSetting, options: { parent: menu.Fees, ...PolicyFeeSettingResource } },
         { resource: Report, options: { parent: menu.Admin, ...ReportResource }},
-        { resource: CustodianStatement, options: { parent: menu.Custodian, ...CustodianStatementResource }},
+        { resource: CustodianStatement, options: { parent: menu.Custodian, ...CustodianStatementResource }, 
+            features: [
+                loggerFeature(loggerConfig), ModifiedLogger('Custodian Statement')
+            ]
+        },
+        { resource: Message, options: { parent: menu.Admin, ...MessageResource }},
     ],
     locale: {
         translations: {
@@ -151,7 +166,8 @@ const adminJsConfig = {
                 FeeSharingScheme: 'Fee Share Schemes',
                 AccountFee: 'Statement Particular Fee Sharing Settings',
                 AssetAllocation: 'Asset Allocation (unchecked)',
-                CustomerTransaction: 'Customer Transaction (unchecked)'
+                CustomerTransaction: 'Customer Transaction (unchecked)',
+                Message: 'System Messages'
             },
             properties: {
                 email: 'User Id'
@@ -175,6 +191,17 @@ const adminJsConfig = {
                         currency: 'Currency'
                     }
                 },
+                'Custodian Statement': {
+                    properties: {
+                        cashValue: 'Cash',
+                        equitiesValue: 'Equities',
+                        derivativesValue: 'Derivatives',
+                        bondsValue: 'Bonds',
+                        alternativesValue: 'Alternatives',
+                        custodianAccount: 'Account',
+                        statementDate: 'Date'
+                    }
+                }
             }
         }
     }

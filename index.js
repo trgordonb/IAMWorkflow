@@ -1,6 +1,9 @@
 const AdminJSExpress = require('@adminjs/express')
 const AdminJS = require('adminjs')
-const express = require('express')
+//const { Server } = require("socket.io")
+//const express = require("express");
+//const { createServer } = require("http")
+const { app, httpServer } = require('./app')
 const bcrypt = require('bcrypt')
 const adminJsConfig = require('./adminJsConfig')
 const AdminJsMongoose = require('@adminjs/mongoose')
@@ -8,13 +11,13 @@ const mongoose = require('mongoose')
 const UserModel = require('./models/user.model')
 
 AdminJS.registerAdapter(AdminJsMongoose)
+AdminJS.bundle('./components/LoggedIn', 'LoggedIn')
 MONGO_URL = process.env.MONGO_URL
 
 async function main() {
-    const app = express()
     await mongoose.connect(MONGO_URL, {ssl: true})
-
     const adminJs = new AdminJS(adminJsConfig.adminJsConfig)
+    
     //const router = AdminJSExpress.buildRouter(adminJs)
     const router = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
         authenticate: async (userId, password) => {
@@ -35,8 +38,12 @@ async function main() {
         },
         cookiePassword: process.env.COOKIE_PASSWORD
     })
+    
     app.use(adminJs.options.rootPath, router)
-    await app.listen(process.env.PORT, () => { console.log('AdminJS is at localhost:8080/admin') })
+    
+    await httpServer.listen(process.env.PORT, () => { 
+        console.log('AdminJS is at localhost:8080/admin') 
+    })
 }
   
 main();
