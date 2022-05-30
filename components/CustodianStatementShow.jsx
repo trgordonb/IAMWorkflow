@@ -1,7 +1,7 @@
 import { Box, Button, Text } from '@adminjs/design-system'
 import { useRecord, BasePropertyComponent, useTranslation, ApiClient } from 'adminjs'
 import { useHistory } from 'react-router'
-import {useDropzone} from 'react-dropzone'
+import { useDropzone } from 'react-dropzone'
 
 const CustodianStatementShow = (props) => {
     const { record: initialRecord, resource, action } = props
@@ -89,7 +89,8 @@ const CustodianStatementShow = (props) => {
                         property={resource.properties.statementDate}
                         resource={resource}
                         record={record}
-                    />
+                    >
+                    </BasePropertyComponent>
                 </Box>                   
             </Box>
             <Box flex flexDirection={'row'}>

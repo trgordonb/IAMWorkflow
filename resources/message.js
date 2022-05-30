@@ -27,6 +27,10 @@ const MessageResource = {
         date: {
             type: 'date',
             isVisible: { list: true, filter: true, show: true, edit: false },
+            components: {
+                edit: AdminJS.bundle('../components/DateControl.jsx'),
+                filter: AdminJS.bundle('../components/DateControl.jsx')
+            }
         }
     },
     actions: {

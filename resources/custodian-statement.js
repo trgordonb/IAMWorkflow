@@ -175,7 +175,6 @@ const CustodianStatementResource = {
                 const { record, resource, currentAdmin } = context
                 if (currentAdmin.role === 'user') {
                     let results = await resource.MongooseModel.find().populate('custodianAccount')
-                    //let allRecords = results.filter(record => { return (true)})
                     let alertRecords = []
                     const groupByAcct = results.reduce((group, record) => {
                         const { custodianAccount } = record;

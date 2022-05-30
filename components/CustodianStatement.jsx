@@ -1,7 +1,8 @@
 import { Box, Button, Text } from '@adminjs/design-system'
 import { useRecord, BasePropertyComponent, useTranslation, ApiClient } from 'adminjs'
 import { useHistory } from 'react-router'
-import {useDropzone} from 'react-dropzone'
+import { useDropzone } from 'react-dropzone'
+import DateControl from './DateControl'
 
 const CustodianStatement = (props) => {
     const { record: initialRecord, resource, action } = props
@@ -98,25 +99,10 @@ const CustodianStatement = (props) => {
             </div>
             <iframe width={1000} height={800} src={docURL} type="application/pdf"/>
         </Box>
-        <Box py='lg' marginX={25} as="form" onSubmit={handleSubmit}>
-            <Box flex flexDirection={'row'}>
-                <Box flexGrow={0} marginRight={5}>
-                    <BasePropertyComponent
-                        where="edit"
-                        onChange={customChange}
-                        property={resource.properties.custodianAccount}
-                        resource={resource}
-                        record={record}
-                    />
-                </Box>
-                <Box flexShrink={1} marginLeft={10} alignSelf='auto'>
-                    <Text>Customer Id</Text>
-                    <Text style={{marginTop:12}}>{clientId}</Text>
-                </Box>
-            </Box>          
+        <Box py='lg' marginX={25} as="form" onSubmit={handleSubmit}>          
             <Box flex flexDirection={'row'}>
                 <Box flexGrow={0} marginRight={15}>
-                    <BasePropertyComponent
+                    <DateControl 
                         where="edit"
                         onChange={handleChange}
                         property={resource.properties.statementDate}
@@ -133,6 +119,21 @@ const CustodianStatement = (props) => {
                         record={record}
                     />
                 </Box>                   
+            </Box>
+            <Box flex flexDirection={'row'}>
+                <Box flexGrow={1} marginRight={5}>
+                    <BasePropertyComponent
+                        where="edit"
+                        onChange={customChange}
+                        property={resource.properties.custodianAccount}
+                        resource={resource}
+                        record={record}
+                    />
+                </Box>
+                <Box flexShrink={1} marginLeft={10} alignSelf='auto'>
+                    <Text>Customer Id</Text>
+                    <Text style={{marginTop:12}}>{clientId}</Text>
+                </Box>
             </Box>
             <Box flex flexDirection={'row'}>
                 <Box flexGrow={0} marginRight={15}>

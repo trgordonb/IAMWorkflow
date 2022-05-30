@@ -75,7 +75,12 @@ const adminJsConfig = {
     databases: [mongoose],
     rootPath: '/admin',
     assets: {
-        scripts: ['/socket.io/socket.io.js']
+        scripts: [
+            '/socket.io/socket.io.js'
+        ],
+        styles: [
+            'https://iamlegacy.s3.ap-northeast-2.amazonaws.com/Datepicker.css'
+        ]
     },
     dashboard: {
         component: AdminJS.bundle('./components/Dashboard.jsx')

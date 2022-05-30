@@ -35,10 +35,10 @@ const RecordDifference = ({ record, property }) => {
               <TableRow key={propertyName}>
                 <TableCell width={1 / 3}>{propertyName}</TableCell>
                 <TableCell color="red" width={1 / 3}>
-                  {JSON.stringify(before).replaceAll('"','') || 'undefined'}
+                  {before ? JSON.stringify(before).replaceAll('"','') : 'undefined'}
                 </TableCell>
                 <TableCell color="green" width={1 / 3}>
-                  {JSON.stringify(after).replaceAll('"','') || 'undefined'}
+                  {after ? JSON.stringify(after).replaceAll('"','') : 'undefined'}
                 </TableCell>
               </TableRow>
             );

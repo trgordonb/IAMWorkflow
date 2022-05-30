@@ -1,8 +1,5 @@
 const AdminJSExpress = require('@adminjs/express')
 const AdminJS = require('adminjs')
-//const { Server } = require("socket.io")
-//const express = require("express");
-//const { createServer } = require("http")
 const { app, httpServer } = require('./app')
 const bcrypt = require('bcrypt')
 const adminJsConfig = require('./adminJsConfig')
