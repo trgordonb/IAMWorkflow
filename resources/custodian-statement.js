@@ -70,7 +70,8 @@ const CustodianStatementResource = {
                 request.payload = {
                     ...request.payload,
                     recordEnteredBy: currentAdmin.id,
-                    status: 'pending'
+                    status: 'pending',
+                    period: currentAdmin.period
                 }
                 return request
             },

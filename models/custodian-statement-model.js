@@ -56,6 +56,10 @@ const CustodianStatementSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
+    period: {
+        type: Schema.Types.ObjectId,
+        ref: 'Period'
+    }
 }, {
     toJSON: {
         virtuals: true

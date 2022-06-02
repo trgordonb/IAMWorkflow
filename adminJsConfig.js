@@ -31,6 +31,7 @@ const Statement = require('./models/statement.model')
 const PolicyFeeSetting = require('./models/policyfee-setting.model')
 const CustodianStatement = require('./models/custodian-statement-model')
 const Message = require('./models/message-model')
+const WorkflowConfig = require('./models/workflow-config.model')
 const UserResource = require('./resources/user')
 const AssetAllocationResource = require('./resources/asset-allocation')
 const AllAssetAllocationResource = require('./resources/all-asset-allocation')
@@ -62,6 +63,7 @@ const ReportResource = require('./resources/report')
 const CustodianStatementResource = require('./resources/custodian-statement')
 const MessageResource = require('./resources/message')
 const LogResource = require('./resources/log')
+const WorkflowConfigResource = require('./resources/workflow-config')
 
 const menu = {
     Admin: { name: 'Admin/Reports' },
@@ -79,7 +81,7 @@ const adminJsConfig = {
             '/socket.io/socket.io.js'
         ],
         styles: [
-            'https://iamlegacy.s3.ap-northeast-2.amazonaws.com/Datepicker.css'
+            'https://iamlegacy.s3.ap-northeast-2.amazonaws.com/DatePicker.css'
         ]
     },
     dashboard: {
@@ -105,25 +107,25 @@ const adminJsConfig = {
         }
     },
     resources: [
-        { ...LogResource, options: { ...LogResource.options, parent: menu.Admin } },
-        { resource: User, options: { parent: menu.Admin, ...UserResource } },
+        { ...LogResource, options: { ...LogResource.options, navigation: 'Admin Module' } },
+        { resource: User, options: { navigation: 'Admin Module', ...UserResource } },
         { resource: AssetAllocation, options: { parent: menu.Account, ...AssetAllocationResource} },
         { resource: AssetAllocation, options: { parent: menu.Account, ...AllAssetAllocationResource }},
         { resource: AccountLedgerBalance, options: { parent: menu.Account, ...AccountLedgerBalanceResource } },
-        { resource: AccountPolicy, options: { parent: menu.Account, ...AccountPolicyResource } },
+        { resource: AccountPolicy, options: { navigation: 'Admin Module', ...AccountPolicyResource } },
         { resource: Bank, options: { parent: menu.Master, ...BankResource } },
-        { resource: Currency, options: { parent: menu.Master, ...CurrencyResource } },
+        { resource: Currency, options: { navigation: 'Admin Module', ...CurrencyResource } },
         { resource: CurrencyHistory, options: { parent: menu.Master, ...CurrencyHistoryResource } },
-        { resource: Customer, options: { parent: menu.Account, ...CustomerResource } },
+        { resource: Customer, options: { navigation: 'Admin Module', ...CustomerResource } },
         { resource: CustomerTransaction, options: { parent: menu.Account, ...AllCustomerTransactionResource }},
         { resource: CustomerTransaction, options: { parent: menu.Account, ...CustomerTransactionResource }},
         { resource: CustomerPortfolio, options: { parent: menu.Account, ...CustomerPortfolioResource }},
         { resource: CustomerUnitizedPerformance, options: { parent: menu.Account, ...CustomerUnitizedPerformanceResource }},
         { resource: CounterParty, options: { parent: menu.Master, ...CounterPartyResource } },
-        { resource: Period, options: { parent: menu.Master, ...PeriodResource } },
+        { resource: Period, options: { navigation: 'Admin Module', ...PeriodResource } },
         { resource: Role, options: { parent: menu.Master, ...RoleResource } },
         { resource: Payee, options: { parent: menu.Master, ...PayeeResource } },
-        { resource: Custodian, options: { parent: menu.Custodian, ...CustodianResource } },
+        { resource: Custodian, options: { navigation: 'Admin Module', ...CustodianResource } },
         { resource: AccountCustodian, options: { parent: menu.Custodian, ...AccountCustodianResource } },
         { resource: FeeCode, options: { parent: menu.Fees, ...FeeCodeResource } },
         { resource: AccountFee, options: { parent: menu.Fees, ...AccountFeeResource } },
@@ -134,12 +136,13 @@ const adminJsConfig = {
         { resource: Statement, options: { parent: menu.Fees, ...StatementResource } },
         { resource: PolicyFeeSetting, options: { parent: menu.Fees, ...PolicyFeeSettingResource } },
         { resource: Report, options: { parent: menu.Admin, ...ReportResource }},
-        { resource: CustodianStatement, options: { parent: menu.Custodian, ...CustodianStatementResource }, 
+        { resource: CustodianStatement, options: { navigation: 'Quarterly Workflow Module', ...CustodianStatementResource }, 
             features: [
                 loggerFeature(loggerConfig), ModifiedLogger('Custodian Statement')
             ]
         },
-        { resource: Message, options: { parent: menu.Admin, ...MessageResource }},
+        { resource: Message, options: { navigation: 'Admin Module', ...MessageResource }},
+        { resource: WorkflowConfig, options: { navigation: 'Quarterly Workflow Module', ...WorkflowConfigResource }},
     ],
     locale: {
         translations: {

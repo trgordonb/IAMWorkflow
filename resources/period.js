@@ -1,3 +1,5 @@
+const AdminJS = require('adminjs')
+
 const PeriodResource = {
     properties: {
         _id: {
@@ -7,15 +9,49 @@ const PeriodResource = {
             isVisible: { list: false, filter: false, show: false, edit: false },
         },
         start: {
-            type: 'date'
+            type: 'date',
+            components: {
+                edit: AdminJS.bundle('../components/DateControl.jsx')
+            }
         },
         end: {
+            type: 'date',
+            components: {
+                edit: AdminJS.bundle('../components/DateControl.jsx')
+            }
+        },
+        subPeriodEndDates: {
             type: 'date'
         }
     },
     actions: {
         list: {
-            isAccessible: false
+            isAccessible: true
+        },
+        new: {
+            showInDrawer: true,
+            layout: [
+                ['name', { ml: 'xxl'}], 
+                [{ flexDirection: 'row', flex: true, ml: 'xxl' }, [
+                    ['start', { pr: 'default', flexGrow: 1 }],
+                    ['end', { flexGrow: 1 }],
+                ]], 
+                ['subPeriodEndDates']
+            ]
+        },
+        edit: {
+            showInDrawer: true,
+            layout: [
+                ['name', { ml: 'xxl'}], 
+                [{ flexDirection: 'row', flex: true, ml: 'xxl' }, [
+                    ['start', { pr: 'default', flexGrow: 1 }],
+                    ['end', { flexGrow: 1 }],
+                ]], 
+                ['subPeriodEndDates']
+            ]
+        },
+        show: {
+            showInDrawer: true
         }
     }
 }

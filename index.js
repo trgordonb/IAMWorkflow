@@ -6,9 +6,11 @@ const adminJsConfig = require('./adminJsConfig')
 const AdminJsMongoose = require('@adminjs/mongoose')
 const mongoose = require('mongoose')
 const UserModel = require('./models/user.model')
+const WorflowConfig = require('./models/workflow-config.model')
 
 AdminJS.registerAdapter(AdminJsMongoose)
 AdminJS.bundle('./components/LoggedIn', 'LoggedIn')
+AdminJS.bundle('./components/CustomSidebar', 'SidebarResourceSection')
 MONGO_URL = process.env.MONGO_URL
 
 async function main() {
@@ -21,13 +23,15 @@ async function main() {
             let user = await UserModel.findOne({ userId })
             if (user) {
                 const matched = await bcrypt.compare(password, user.encryptedPassword)
+                const workflow = await WorflowConfig.findOne({isCurrent: true})
                 if (matched) {
                     return {
                         email: user.userId,
                         title: user.role,
                         id: user._id,
                         role: user.role,
-                        avatarUrl: `https://ui-avatars.com/api/?name=${user.userId}`
+                        avatarUrl: `https://ui-avatars.com/api/?name=${user.userId}`,
+                        period: workflow?.period
                     }
                 }
             }

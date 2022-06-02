@@ -3,9 +3,19 @@ const Schema = mongoose.Schema
 const moment = require('moment')
 
 const PeriodSchema = new Schema({
-    name: String,
-    start: Date,
-    end: Date,
+    name: {
+        type: String,
+        index: true
+    },
+    start: {
+        type: Date,
+        index: true
+    },
+    end: {
+        type: Date,
+        index: true
+    },
+    subPeriodEndDates: [Date],
     factor: Number,
 })
 
