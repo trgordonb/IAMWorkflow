@@ -7,6 +7,7 @@ const WorkflowConfigSchema = new Schema({
         ref: 'Period',
         index: true
     },
+    subPeriodEndDates: [Date],
     status: {
         type: String,
         default: 'In Progress',
@@ -41,10 +42,11 @@ const WorkflowConfigSchema = new Schema({
         },
         data: [{
             name: String,
-            resourceId: String,
+            modelName: String,
             queries: [{
                 property: String,
-                value: String
+                value: String,
+                operator: String
             }],
             factor: Number,
             value: Number,

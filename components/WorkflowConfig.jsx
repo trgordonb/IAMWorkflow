@@ -1,13 +1,12 @@
-import { Box, Button, Stepper, Step, CheckBox, Label, Table, TableHead, TableRow, TableBody, TableCell, Loader, Overlay } from '@adminjs/design-system'
+import { Box, Button, Stepper, Step, CheckBox, Label, Table, TableHead, TableRow, TableBody, TableCell, Loader } from '@adminjs/design-system'
 import { useRecord, BasePropertyComponent, ApiClient, useNotice, useCurrentAdmin } from 'adminjs'
 import { flat } from 'adminjs'
 
 const WorkflowConfig = (props) => {
     const sendNotice = useNotice()
-    const [currentAdmin, setCurrentAdmin] = useCurrentAdmin()
     const api = new ApiClient()
-    const { record: initialRecord, resource, action } = props
-    const { record, handleChange, submit } = useRecord(initialRecord, resource.id)
+    const { record: initialRecord, resource } = props
+    const { record } = useRecord(initialRecord, resource.id)
     const orgRecord = flat.get(record.params)
     const [currentStep, setCurrentStep] = React.useState(orgRecord.currentStage)
     const [stages, setStages] = React.useState(orgRecord.stages)
@@ -23,73 +22,17 @@ const WorkflowConfig = (props) => {
 
     const verifyCurrentStage = async () => {
         setIsLoading(true)
-        let tmpStages = orgRecord.stages
-        await Promise.all(stages[currentStep-1].tasks.map(async (task, index) => {
-            let taskSource = task.rule.source
-            let taskTarget = task.rule.target
-            let taskSourceQueriesIndex = stages[currentStep-1].data.findIndex(item => item.name === taskSource) 
-            let taskTargetQueriesIndex = stages[currentStep-1].data.findIndex(item => item.name === taskTarget)
-            let taskSourceItem = stages[currentStep-1].data[taskSourceQueriesIndex]
-            let taskTargetItem = stages[currentStep-1].data[taskTargetQueriesIndex]
-            let taskSourceQueries = taskSourceItem.queries 
-            let taskTargetQueries = taskTargetItem.queries
-            let taskSourceResourceId = taskSourceItem.resourceId
-            let taskTargetResourceId = taskTargetItem.resourceId
-            let taskSourceQueriesDict = {}
-            taskSourceQueries.forEach(query => {
-                if (query.property === 'filters.period') {
-                    query.value = currentAdmin.period
-                }
-                taskSourceQueriesDict[query.property] = query.value
-            })   
-            let taskTargetQueriesDict = {}
-            taskTargetQueries.forEach(query => {
-                if (query.property === 'filters.period') {
-                    query.value = currentAdmin.period
-                }
-                taskTargetQueriesDict[query.property] = query.value
-            })   
-            const resultSource = await api.resourceAction({
-                resourceId: taskSourceResourceId,
-                actionName: 'list',
-                params: taskSourceQueriesDict
-            })
-            const resultTarget = await api.resourceAction({
-                resourceId: taskTargetResourceId,
-                actionName: 'list',
-                params: taskTargetQueriesDict
-            })
-            if (!tmpStages[currentStep-1].data[taskSourceQueriesIndex].locked) {
-                tmpStages[currentStep-1].data[taskSourceQueriesIndex].value = resultSource.data.meta.total
-            }
-            if (!tmpStages[currentStep-1].data[taskTargetQueriesIndex].locked) {
-                tmpStages[currentStep-1].data[taskTargetQueriesIndex].value = resultTarget.data.meta.total 
-            }
-            let sourceTotal = tmpStages[currentStep-1].data[taskSourceQueriesIndex].value * taskSourceItem.factor
-            let targetTotal = tmpStages[currentStep-1].data[taskTargetQueriesIndex].value * taskTargetItem.factor
-            tmpStages[currentStep-1].tasks[index].stat = `${targetTotal } / ${sourceTotal}`
-            if (sourceTotal === targetTotal && targetTotal > 0 && sourceTotal > 0 && tmpStages[currentStep-1].tasks[index].status === 'pending') {
-                tmpStages[currentStep-1].tasks[index].status = 'completed'
-                tmpStages[currentStep-1].data[taskSourceQueriesIndex].locked = true
-                tmpStages[currentStep-1].data[taskTargetQueriesIndex].locked = true
-            }
-        }))
-        let completedTasksCount = tmpStages[currentStep-1].tasks.filter(task => task.status === 'completed').length
-        if (completedTasksCount === tmpStages[currentStep-1].tasks.length) {
-            tmpStages[currentStep-1].completed = true
-        }
-
-        setStages([...tmpStages])
-        await api.recordAction({
+        const result = await api.recordAction({
             resourceId: 'Workflow Configuration',
             recordId: record.id,
-            actionName: 'edit',
-            data: {
-                stages: tmpStages
-            }
+            actionName: 'verify',
+            data: {}
         })
+        const newRecord = flat.get(result.data.record.params)
+        setStages([...newRecord.stages])
         setIsLoading(false)
     }
+
     
     return (
         <>

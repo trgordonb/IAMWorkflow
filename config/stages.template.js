@@ -6,10 +6,15 @@ const stages = [
         data: [
             {
                 name: 'CustodianAccountsCount',
-                resourceId: 'AccountPolicy',
+                modelName: 'AccountPolicy',
                 queries: [{
-                    property: 'filters.status',
-                    value: 'Active'
+                    property: 'status',
+                    value: 'Active',
+                    operator: 'equal'
+                }, {
+                    property: 'accountStartDate',
+                    value: 'placeholder',
+                    operator: 'lessthanorequal'
                 }],
                 factor: 3,
                 value: 0,
@@ -17,15 +22,17 @@ const stages = [
             }, 
             {
                 name: 'PendCustodianStatementsCount',
-                resourceId: 'Custodian Statement',
+                modelName: 'CustodianStatement',
                 queries: [
                 {
-                    property: 'filters.status',
-                    value: 'pending'
+                    property: 'status',
+                    value: 'pending',
+                    operator: 'equal'
                 }, 
                 {
-                    property: 'filters.period',
-                    value: 'current'
+                    property: 'period',
+                    value: 'placeholder',
+                    operator: 'equal'
                 }],
                 factor: 1,
                 value: 0,
@@ -33,15 +40,17 @@ const stages = [
             },
             {
                 name: 'ApprovedCustodianStatementsCount',
-                resourceId: 'Custodian Statement',
+                modelName: 'CustodianStatement',
                 queries: [
                 {
-                    property: 'filters.status',
-                    value: 'approved'
+                    property: 'status',
+                    value: 'approved',
+                    operator: 'equal'
                 },
                 {
-                    property: 'filters.period',
-                    value: 'current'
+                    property: 'period',
+                    value: 'placeholder',
+                    operator: 'equal'
                 }],
                 factor: 1,
                 value: 0,
@@ -78,10 +87,11 @@ const stages = [
         data: [
             {
                 name: 'CustodianAccountsCount',
-                resourceId: 'AccountPolicy',
+                modelName: 'AccountPolicy',
                 queries: [{
-                    property: 'filters.status',
-                    value: 'Active'
+                    property: 'status',
+                    value: 'Active',
+                    operator: 'equal'
                 }],
                 factor: 3,
                 value: 0,
@@ -89,15 +99,17 @@ const stages = [
             }, 
             {
                 name: 'PendCustodianStatementsCount',
-                resourceId: 'Custodian Statement',
+                modelName: 'CustodianStatement',
                 queries: [
                 {
-                    property: 'filters.status',
-                    value: 'pending'
+                    property: 'status',
+                    value: 'pending',
+                    operator: 'equal'
                 }, 
                 {
-                    property: 'filters.period',
-                    value: 'current'
+                    property: 'period',
+                    value: 'placeholder',
+                    operator: 'equal'
                 }],
                 factor: 1,
                 value: 0,
@@ -105,15 +117,17 @@ const stages = [
             },
             {
                 name: 'ApprovedCustodianStatementsCount',
-                resourceId: 'Custodian Statement',
+                modelName: 'CustodianStatement',
                 queries: [
                 {
-                    property: 'filters.status',
-                    value: 'approved'
+                    property: 'status',
+                    value: 'approved',
+                    operator: 'equal'
                 },
                 {
-                    property: 'filters.period',
-                    value: 'current'
+                    property: 'period',
+                    value: 'placeholder',
+                    operator: 'equal'
                 }],
                 factor: 1,
                 value: 0,
@@ -150,10 +164,11 @@ const stages = [
         data: [
             {
                 name: 'CustodianAccountsCount',
-                resourceId: 'AccountPolicy',
+                modelName: 'AccountPolicy',
                 queries: [{
-                    property: 'filters.status',
-                    value: 'Active'
+                    property: 'status',
+                    value: 'Active',
+                    operator: 'equal'
                 }],
                 factor: 3,
                 value: 0,
@@ -161,15 +176,17 @@ const stages = [
             }, 
             {
                 name: 'PendCustodianStatementsCount',
-                resourceId: 'Custodian Statement',
+                modelName: 'CustodianStatement',
                 queries: [
                 {
-                    property: 'filters.status',
-                    value: 'pending'
+                    property: 'status',
+                    value: 'pending',
+                    operator: 'equal'
                 }, 
                 {
-                    property: 'filters.period',
-                    value: 'current'
+                    property: 'period',
+                    value: 'placeholder',
+                    operator: 'equal'
                 }],
                 factor: 1,
                 value: 0,
@@ -177,15 +194,17 @@ const stages = [
             },
             {
                 name: 'ApprovedCustodianStatementsCount',
-                resourceId: 'Custodian Statement',
+                modelName: 'CustodianStatement',
                 queries: [
                 {
-                    property: 'filters.status',
-                    value: 'approved'
+                    property: 'status',
+                    value: 'approved',
+                    operator: 'equal'
                 },
                 {
-                    property: 'filters.period',
-                    value: 'current'
+                    property: 'period',
+                    value: 'placeholder',
+                    operator: 'equal'
                 }],
                 factor: 1,
                 value: 0,
