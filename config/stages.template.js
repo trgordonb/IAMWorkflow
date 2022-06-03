@@ -13,7 +13,7 @@ const stages = [
                     operator: 'equal'
                 }, {
                     property: 'accountStartDate',
-                    value: 'placeholder',
+                    value: 'placeholder:tmpRecord.subPeriodEndDates[idx]',
                     operator: 'lessthanorequal'
                 }],
                 factor: 3,
@@ -31,7 +31,7 @@ const stages = [
                 }, 
                 {
                     property: 'period',
-                    value: 'placeholder',
+                    value: 'placeholder:tmpRecord.period',
                     operator: 'equal'
                 }],
                 factor: 1,
@@ -49,7 +49,7 @@ const stages = [
                 },
                 {
                     property: 'period',
-                    value: 'placeholder',
+                    value: 'placeholder:tmpRecord.period',
                     operator: 'equal'
                 }],
                 factor: 1,
@@ -108,7 +108,7 @@ const stages = [
                 }, 
                 {
                     property: 'period',
-                    value: 'placeholder',
+                    value: 'placeholder:xyz',
                     operator: 'equal'
                 }],
                 factor: 1,
@@ -126,7 +126,7 @@ const stages = [
                 },
                 {
                     property: 'period',
-                    value: 'placeholder',
+                    value: 'placeholder:xyz',
                     operator: 'equal'
                 }],
                 factor: 1,
@@ -185,7 +185,7 @@ const stages = [
                 }, 
                 {
                     property: 'period',
-                    value: 'placeholder',
+                    value: 'placeholder:xyz',
                     operator: 'equal'
                 }],
                 factor: 1,
@@ -203,7 +203,7 @@ const stages = [
                 },
                 {
                     property: 'period',
-                    value: 'placeholder',
+                    value: 'placeholder:xyz',
                     operator: 'equal'
                 }],
                 factor: 1,

@@ -81,6 +81,7 @@ const WorkflowConfigResource = {
                 let tmpRecord = require('adminjs').flat.get(record.params)
                 const currentStep = tmpRecord.currentStage
                 let tmpStages = tmpRecord.stages
+                
                 await Promise.all(tmpStages[currentStep-1].tasks.map(async (task, index) => {
                     let taskSource = task.rule.source
                     let taskTarget = task.rule.target
@@ -103,16 +104,14 @@ const WorkflowConfigResource = {
 
                     await Promise.all(sourceArray.map(async (idx) => {
                         taskSourceQueries.forEach(query => {
-                            if (query.property === 'period') {
-                                query.value = record.params.period
-                            }
-                            if (query.property === 'accountStartDate') {
-                                query.value = tmpRecord.subPeriodEndDates[idx]
+                            let value = query.value
+                            if (query.value.startsWith('placeholder')) {
+                                value = eval(query.value.split(':')[1])
                             }
                             if (query.operator === 'equal') {
-                                taskSourceQueriesDict[query.property] = query.value
+                                taskSourceQueriesDict[query.property] = value
                             } else if (query.operator === 'lessthanorequal') {
-                                taskSourceQueriesDict[query.property] = { $lte: query.value }
+                                taskSourceQueriesDict[query.property] = { $lte: value }
                             }
                         })   
                         const resultSource = await taskSouceModel.find(taskSourceQueriesDict)
@@ -124,16 +123,14 @@ const WorkflowConfigResource = {
 
                     await Promise.all(targetArray.map(async (idx) => {
                         taskTargetQueries.forEach(query => {
-                            if (query.property === 'period') {
-                                query.value = record.params.period
-                            }
-                            if (query.property === 'accountStartDate') {
-                                query.value = tmpRecord.subPeriodEndDates[idx]
+                            let value = query.value
+                            if (query.value.startsWith('placeholder')) {
+                                value = eval(query.value.split(':')[1])
                             }
                             if (query.operator === 'equal') {
-                                taskTargetQueriesDict[query.property] = query.value
+                                taskTargetQueriesDict[query.property] = value
                             } else if (query.operator === 'lessthanorequal') {
-                                taskTargetQueriesDict[query.property] = { $lte: query.value }
+                                taskTargetQueriesDict[query.property] = { $lte: value }
                             }
                         })   
                         const resultTarget = await taskTargetModel.find(taskTargetQueriesDict)             
