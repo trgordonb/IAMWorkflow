@@ -6,7 +6,16 @@ const FeeCodeResource = {
     },
     actions: {
         list: {
-            isAccessible: false
+            isAccessible: true
+        },
+        edit: {
+            showInDrawer: true
+        },
+        new: {
+            showInDrawer: true
+        },
+        show: {
+            showInDrawer: true
         }
     }
 }

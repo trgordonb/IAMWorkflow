@@ -1,8 +1,7 @@
 const AdminJS = require('adminjs')
-const CustomerPortfolio = require('../models/customer-portfolio.model')
-const CustomerTransaction = require('../models/customer-transaction.model')
-const CustomerUnitizedPerformance = require('../models/customer-unitized-performance.model')
-const AssetAllocation = require('../models/asset-allocation.model')
+const mongoose = require('mongoose')
+const sendNotificationEmail = require('../utils/email')
+const { io } = require('../app')
 
 const CustomerUnitizedPerformanceResource = {
     id: 'CustomerUnitizedPerformance',
@@ -10,49 +9,70 @@ const CustomerUnitizedPerformanceResource = {
         _id: {
             isVisible: { list: false, filter: false, show: false, edit: false },
         },
-        date: {
+        period: {
+            isVisible: { list: false, filter: false, show: false, edit: false },
+        },
+        customer: {
+            isVisible: true,
+            position: 1
+        },
+        lastSubPeriodDate: {
+            type: 'date',
+            isVisible: { list: false, filter: true, show: true, edit: false },
+            position: 2
+        },
+        lastSubPeriodUnit: {
+            isVisible: { list: false, filter: false, show: true, edit: false },
+            position: 3
+        },
+        lastSubPeriodNAV: {
+            isVisible: { list: false, filter: false, show: true, edit: false },
+            position: 4
+        },
+        currentSubPeriodDate: {
             type: 'date',
             isVisible: { list: true, filter: true, show: true, edit: false },
+            position: 5
         },
-        lastPeriodDate: {
-            type: 'date',
-            isVisible: { list: false, filter: true, show: true, edit: false },
-        },
-        currency: {
-            isVisible: { list: false, filter: true, show: true, edit: false },
-        },
-        currentPeriodDeposited: {
-            isVisible: { list: false, filter: false, show: true, edit: false },
-        },
-        currentPeriodWithdrawn: {
-            isVisible: { list: false, filter: false, show: true, edit: false },
-        },
-        currentPeriodUnitsDeposited: {
-            isVisible: { list: false, filter: false, show: true, edit: false },
-        },
-        currentPeriodUnitsWithdrawn: {
-            isVisible: { list: false, filter: false, show: true, edit: false },
-        },
-        lastPeriodUnit: {
-            isVisible: { list: false, filter: false, show: true, edit: false },
-        },
-        currentPeriodUnit: {
+        currentSubPeriodUnit: {
             isVisible: { list: true, filter: false, show: true, edit: false },
+            position: 6
         },
-        currentPeriodNAVPerUnit: {
+        currentSubPeriodNAV: {
             isVisible: { list: true, filter: false, show: true, edit: false },
+            position: 7
         },
-        lastPeriodNAV: {
+        currentSubPeriodNAVPerUnit: {
+            isVisible: { list: true, filter: false, show: true, edit: false },
+            position: 8
+        },
+        currentSubPeriodDeposited: {
             isVisible: { list: false, filter: false, show: true, edit: false },
+            position: 9
         },
-        currentPeriodNAV: {
-            isVisible: { list: true, filter: false, show: true, edit: false },
+        currentSubPeriodWithdrawn: {
+            isVisible: { list: false, filter: false, show: true, edit: false },
+            position: 10
+        },
+        currentSubPeriodUnitsDeposited: {
+            isVisible: { list: false, filter: false, show: true, edit: false },
+            position: 11
+        },
+        currentSubPeriodUnitsWithdrawn: {
+            isVisible: { list: false, filter: false, show: true, edit: false },
+            position: 12
         },
         netChange: {
             isVisible: { list: false, filter: false, show: true, edit: false },
+            position: 13
         },
         unitizedChange: {
             isVisible: { list: true, filter: false, show: true, edit: false },
+            position: 14
+        },
+        alert: {
+            isVisible: { list: false, filter: true, show: true, edit: false },
+            position: 15
         }
     },
     actions: {
@@ -69,104 +89,113 @@ const CustomerUnitizedPerformanceResource = {
             isAccessible: false
         }, 
         list: {
-            isAccessible: false
+            isAccessible: true
         },
-        calc: {
-            actionType: 'resource',
-            isVisible: false,
-            isAccessible: true,
-            component: AdminJS.bundle('../components/Approval.jsx'),
+        show: {
+            showInDrawer: false,
+            component: AdminJS.bundle('../components/UnitizedPerformance.jsx'),
+        },
+        approve: {
+            actionType: 'record',
+            isAccessible: ({ currentAdmin, record }) => {
+                return (currentAdmin && currentAdmin.role === 'admin') 
+            },
+            component: false,
             handler: async(request, response, context) => {
-                let currentDate = request.payload.currentDate
-                let lastDate = request.payload.lastDate
-                if (currentDate && !lastDate) {
-                    //initilization of records
-                    let customerPortfolioRecords = await CustomerPortfolio.find({startDate: currentDate})
-                    await Promise.all(customerPortfolioRecords.map(async (record) => {
-                        let newCustomerUnitizedRecord = {}
-                        newCustomerUnitizedRecord.customer = record.customer
-                        newCustomerUnitizedRecord.date = currentDate
-                        newCustomerUnitizedRecord.currency = record.currency
-                        newCustomerUnitizedRecord.lastPeriodUnit = 0
-                        newCustomerUnitizedRecord.lastPeriodNAV = 0
-                        newCustomerUnitizedRecord.currentPeriodUnit = record.startUnit
-                        newCustomerUnitizedRecord.netChange = 0
-                        newCustomerUnitizedRecord.unitizedChange = 0
-                        newCustomerUnitizedRecord.currentPeriodDeposited = 0
-                        newCustomerUnitizedRecord.currentPeriodWithdrawn = 0
-                        newCustomerUnitizedRecord.currentPeriodUnitsDeposited = 0
-                        newCustomerUnitizedRecord.currentPeriodUnitsWithdrawn = 0
-                        let total = 0
-                        await Promise.all(record.accountPolicyNumber.map(async (account) => {
-                            let assetAllocationRecord = await AssetAllocation.findOne({date: currentDate, isReconciled: true, accountPolicyNumber: account})
-                            if (assetAllocationRecord && record.currency.toString() === assetAllocationRecord.currency.toString()) {
-                                total = total + assetAllocationRecord.total
-                            } 
-                            else if (assetAllocationRecord && record.currency.toString() !== assetAllocationRecord.currency.toString()) {
-                                total = total + assetAllocationRecord.total / 7.8
-                            }
-                        }))
-                        newCustomerUnitizedRecord.currentPeriodNAV = Math.round(total*100,2)/100
-                        newCustomerUnitizedRecord.currentPeriodNAVPerUnit = Math.round(100* total / record.startUnit,2)/100
-                        const unitizedRecord = new CustomerUnitizedPerformance(newCustomerUnitizedRecord)
-                        await unitizedRecord.save()
-                    }))
-                    return { result: { success: 'Operation complete' } }
-                } else if (currentDate && lastDate) {
-                    const unitizedRecords = await CustomerUnitizedPerformance.find({date: lastDate})
-                    await Promise.all(unitizedRecords.map(async (record) => {
-                        let newCustomerUnitizedRecord = {}
-                        newCustomerUnitizedRecord.customer = record.customer
-                        newCustomerUnitizedRecord.date = currentDate
-                        newCustomerUnitizedRecord.currency = record.currency
-                        newCustomerUnitizedRecord.lastPeriodDate = lastDate
-                        newCustomerUnitizedRecord.lastPeriodUnit = record.currentPeriodUnit
-                        newCustomerUnitizedRecord.lastPeriodNAV = record.currentPeriodNAV
-                        let customerPortfolioRecord = await CustomerPortfolio.findOne({customer: record.customer})
-                        let total = 0
-                        let totalDeposit = 0
-                        let totalWithdraw = 0
-                        await Promise.all(customerPortfolioRecord.accountPolicyNumber.map(async (account) => {
-                            let assetAllocationRecord = await AssetAllocation.findOne({date: currentDate, isReconciled: true, accountPolicyNumber: account})
-                            if (assetAllocationRecord && record.currency.toString() === assetAllocationRecord.currency.toString()) {
-                                total = total + assetAllocationRecord.total
-                            } 
-                            else if (assetAllocationRecord && record.currency.toString() !== assetAllocationRecord.currency.toString()) {
-                                total = total + assetAllocationRecord.total / 7.8
-                            }
-                        }))   
-                        let CustomerTransactionRecords = await CustomerTransaction.find({date: currentDate, isReconciled: true, customer: record.customer})
-                        await Promise.all(CustomerTransactionRecords.map(async (tran) => {
-                            if (record.currency.toString() === tran.currency.toString()) {
-                                if (tran.nominalValue > 0) {
-                                    totalDeposit = totalDeposit + tran.nominalValue
-                                } else if (tran.nominalValue < 0) {
-                                    totalWithdraw = totalWithdraw - tran.nominalValue
-                                }
-                            } else {
-                                if (tran.nominalValue > 0) {
-                                    totalDeposit = totalDeposit + tran.nominalValue / 7.8
-                                } else if (tran.nominalValue < 0) {
-                                    totalWithdraw = totalWithdraw - tran.nominalValue / 7.8
-                                }
-                            }
-                        }))
-                        newCustomerUnitizedRecord.currentPeriodDeposited = Math.round(100*totalDeposit,2)/100
-                        newCustomerUnitizedRecord.currentPeriodWithdrawn = Math.round(100*totalWithdraw,2)/100
-                        newCustomerUnitizedRecord.currentPeriodUnitsDeposited = Math.round(10000*newCustomerUnitizedRecord.currentPeriodDeposited / record.currentPeriodNAVPerUnit,4)/10000
-                        newCustomerUnitizedRecord.currentPeriodUnitsWithdrawn = Math.round(10000*newCustomerUnitizedRecord.currentPeriodWithdrawn / record.currentPeriodNAVPerUnit,4)/10000
-                        newCustomerUnitizedRecord.currentPeriodNAV = Math.round(total*100,2)/100
-                        newCustomerUnitizedRecord.currentPeriodUnit = newCustomerUnitizedRecord.lastPeriodUnit - newCustomerUnitizedRecord.currentPeriodUnitsWithdrawn + newCustomerUnitizedRecord.currentPeriodUnitsDeposited
-                        newCustomerUnitizedRecord.currentPeriodNAVPerUnit = Math.round(100* total / newCustomerUnitizedRecord.currentPeriodUnit,2)/100
-                        newCustomerUnitizedRecord.netChange = Math.round(100*((newCustomerUnitizedRecord.currentPeriodNAV - newCustomerUnitizedRecord.lastPeriodNAV) - newCustomerUnitizedRecord.currentPeriodDeposited + newCustomerUnitizedRecord.currentPeriodWithdrawn),2)/100
-                        newCustomerUnitizedRecord.unitizedChange = Math.round(1000*(100*(newCustomerUnitizedRecord.currentPeriodNAVPerUnit - record.currentPeriodNAVPerUnit) / record.currentPeriodNAVPerUnit),3)/1000
-                        const unitizedRecord = new CustomerUnitizedPerformance(newCustomerUnitizedRecord)
-                        await unitizedRecord.save()
-                    }))
-                    return { result: { success: 'Operation complete' } }
-                } else {
-                    return { result: { error: 'Invalid date' } }
+                const { record, resource, currentAdmin } = context
+                await record.update({ status: 'approved' })
+                return { 
+                    record: record.toJSON(currentAdmin),
+                    notice: { message: 'Approval done', type: 'success' }
                 }
+            }
+        },
+        reject: {
+            actionType: 'record',
+            isAccessible: ({ currentAdmin, record }) => {
+                return (currentAdmin && currentAdmin.role === 'admin') 
+            },
+            component: false,
+            handler: async(request, response, context) => {
+                const { record, resource, currentAdmin } = context
+                await record.update({ status: 'rejected' })
+                return { 
+                    record: record.toJSON(currentAdmin),
+                    notice: { message: 'Reject done', type: 'success' }
+                }
+            }
+        },
+        notify: {
+            actionType: 'resource',
+            component: false,
+            handler: async (request, response, context) => {
+                const { record, resource, currentAdmin } = context
+                let userModel = mongoose.connection.models['User']
+                let messageModel = mongoose.connection.models['Message']
+                if (currentAdmin.role === 'user') {
+                    let results = await resource.MongooseModel.find({
+                        status: 'pending',
+                        period: currentAdmin.period
+                    })
+                    let alertRecords = results.filter(record => {return Math.abs(record.unitizedChange) > 10})
+                    let totalCount = results.length
+
+                    await Promise.all(alertRecords.map(async (record) => {
+                        await resource.MongooseModel.findByIdAndUpdate(record.id, {
+                            alert: true
+                        })
+                    }))
+                    let msg = `There are ${totalCount} unitized performance records to be approved`
+                    if (alertRecords.length > 0) {
+                        msg = msg + ` and ${alertRecords.length} are marked as alert and require your attention`
+                    }
+                    let adminusers = await userModel.find({role: 'admin'})
+                    let adminusersEmail = adminusers.filter(record => { return (record.role === 'admin')}).map(record => record.email).join(',')
+                    await sendNotificationEmail(msg, adminusersEmail)
+                    await Promise.all(adminusers.map(async (user) => {
+                        if (user.role === 'admin') {
+                            const message = new messageModel({
+                                text: msg,
+                                link: '/admin/resources/CustomerUnitizedPerformance?filters.status=pending&page=1',
+                                target: user.id
+                            })
+                            await message.save()
+                        }
+                    }))
+                    io.to('admin').emit('System', {
+                        type: 'Message',
+                        data: {
+                            text: 'New message'
+                        }
+                    })
+                } else if (currentAdmin.role === 'admin') {
+                    let results = await resource.MongooseModel.find({
+                        status: 'rejected',
+                        period: currentAdmin.period
+                    })
+                    let count = results.length
+                    let msg = `There are ${count} unitized performance records rejected by admin. Please review and amend.`
+                    let usersEmail = rejected.join(',')
+                    await sendNotificationEmail(msg, usersEmail)
+                    let users = await userModel.find({role: 'user'})
+                    await Promise.all(users.map(async (user) => {
+                        if (user.role === 'user') {
+                            const message = new messageModel({
+                                text: msg,
+                                link: '/admin/resources/CustomerUnitizedPerformance?filters.status=rejected&page=1',
+                                target: user.id
+                            })
+                            await message.save()
+                        }
+                    }))
+                    io.to('user').emit('System', {
+                        type: 'Message',
+                        data: {
+                            text: 'New message'
+                        }
+                    })
+                }
+                return { notice: { message: 'Notification sent', type: 'success' } }
             }
         }
     }

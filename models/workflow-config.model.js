@@ -40,6 +40,10 @@ const WorkflowConfigSchema = new Schema({
         label: {
             type: String
         },
+        actions: [{
+            actionName: String,
+            label: String,
+        }],
         data: [{
             name: String,
             modelName: String,
@@ -48,7 +52,6 @@ const WorkflowConfigSchema = new Schema({
                 value: String,
                 operator: String
             }],
-            factor: Number,
             value: Number,
             locked: Boolean
         }],   

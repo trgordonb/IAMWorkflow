@@ -4,25 +4,43 @@ const Schema = mongoose.Schema
 const CustomerTransactionSchema = new Schema({
     customer: {
         type: Schema.Types.ObjectId,
-        ref: 'Customer'
+        ref: 'Customer',
+        index: true
     },
-    date: Date,
+    date: {
+        type: Date,
+        index: true
+    },
     currency: {
         type: Schema.Types.ObjectId,
-        ref: 'Currency'
+        ref: 'Currency',
+        index: true
     },
     nominalValue: {
         type: Number,
-        default: 0
+        index: true
     },
-    remark: String,
-    isReconciled: {
-        type: Boolean,
-        default: false
+    remark: {
+        type: String,
+        index: true
+    },
+    transactionType: {
+        type: String,
+        index: true,
+        enum: ['deposit','withdraw']
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        index: true
     },
     recordEnteredBy: {
         type: Schema.Types.ObjectId,
         ref: 'User'
+    },
+    period: {
+        type: Schema.Types.ObjectId,
+        ref: 'Period'
     }
 })
 

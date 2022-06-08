@@ -1,5 +1,8 @@
 const AdminJS = require('adminjs')
-const CustomerTransaction = require('../models/customer-transaction.model')
+const User = require('../models/user.model')
+const Message = require('../models/message-model')
+const sendNotificationEmail = require('../utils/email')
+const { io } = require('../app')
 
 const CustomerTransactionResource = {
     id: 'CustomerTransaction',
@@ -8,50 +11,101 @@ const CustomerTransactionResource = {
             isVisible: { list: false, filter: false, show: false, edit: false },
         },
         recordEnteredBy: {
-            isVisible: { list: false, filter: false, show: true, edit: false },
+            isVisible: { list: false, filter: false, show: false, edit: false },
         },
-        isReconciled: {
+        status: {
             isVisible: { list: false, filter: true, show: true, edit: false },
+            position: 6,
+        },
+        customer: {
+            isVisible: true,
+            position: 2,
         },
         nominalValue: {
             isVisible: { list: true, filter: false, show: true, edit: true },
+            position: 4,
+        },
+        transactionType: {
+            isVisible: { list: true, filter: true, show: true, edit: true },
         },
         currency: {
             isVisible: { list: true, filter: true, show: true, edit: true },
+            position: 3,
         },
         date: {
             type: 'date',
+            components: {
+                edit: AdminJS.bundle('../components/DateControl.jsx')
+            },
+            position: 1,
             isVisible: { list: true, filter: true, show: true, edit: true },
         },
         remark: {
-            isVisible: { list: false, filter: false, show: true, edit: true},
+            isVisible: { list: false, filter: false, show: true, edit: true },
+            position: 6,
+            type: 'textarea'
+        },
+        period: {
+            isVisible: { list: false, filter: true, show: true, edit: false },
         }
     },
     actions: {
         new: {
-            isAccessible: false
+            before: async(request, context) => {
+                const { currentAdmin } = context
+                request.payload = {
+                    ...request.payload,
+                    recordEnteredBy: currentAdmin.id,
+                    period: currentAdmin.period,
+                    status: 'pending'
+                }
+                return request
+            },
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && (
+                  currentAdmin.role === 'admin' || currentAdmin.role === 'user'
+                )
+            },
+            showInDrawer: true,
+            layout: [
+                ['date', { ml: 'xxl' }], 
+                ['customer', { ml: 'xxl' }],
+                ['currency', { ml: 'xxl' }],
+                ['transactionType', { ml: 'xxl' }],
+                ['nominalValue', { ml: 'xxl' }],
+                ['remark', { ml: 'xxl' }]
+            ]
         },
         list: {
-            //isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
-            isAccessible: false,
-            before: async (request, context) => {
-                const { currentAdmin } = context
-                return {
-                    ...request,
-                    query: {
-                       ...request.query,
-                       'filters.isReconciled': false
-                    }
-                }
-            }
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && (
+                  currentAdmin.role === 'admin' || currentAdmin.role === 'user'
+                )
+            },
         },
         edit: {
+            before: async (request, context) => {
+                request.payload = {
+                    ...request.payload,
+                    status: 'pending'
+                }
+                return request
+            },
             isAccessible: ({ currentAdmin, record }) => {
                 return currentAdmin && (
                   currentAdmin.role === 'admin'
                   || (currentAdmin.id === record.param('recordEnteredBy') && !record.param('isReconciled'))
                 )
-            }
+            },
+            showInDrawer: true,
+            layout: [
+                ['date', { ml: 'xxl' }], 
+                ['customer', { ml: 'xxl' }],
+                ['currency', { ml: 'xxl' }],
+                ['transactionType', { ml: 'xxl' }],
+                ['nominalValue', { ml: 'xxl' }],
+                ['remark', { ml: 'xxl' }]
+            ]
         },
         delete: {
             isAccessible: false
@@ -59,17 +113,94 @@ const CustomerTransactionResource = {
         bulkDelete: {
             isAccessible: false
         },
-        bulkApprove: {
-            actionType: 'bulk',
-            component: AdminJS.bundle('../components/Approval'),
+        show: {
+            showInDrawer: true
+        },
+        approve: {
+            actionType: 'record',
+            isAccessible: ({ currentAdmin, record }) => {
+                return (currentAdmin && currentAdmin.role === 'admin') 
+            },
+            component: false,
             handler: async(request, response, context) => {
-                const recordIds = request.query.recordIds.split(',')
-                await Promise.all(recordIds.map(async (id) => {
-                    let record = await CustomerTransaction.findById(id)
-                    record.isReconciled = true
-                    await record.save()
-                }))
-                return {records: [new AdminJS.BaseRecord({}, context.resource).toJSON(context.currentAdmin)] }
+                const { record, resource, currentAdmin } = context
+                await record.update({ status: 'approved', alert: false })
+                return { 
+                    record: record.toJSON(currentAdmin),
+                    notice: { message: 'Approval done', type: 'success' }
+                }
+            }
+        },
+        reject: {
+            actionType: 'record',
+            isAccessible: ({ currentAdmin, record }) => {
+                return (currentAdmin && currentAdmin.role === 'admin') 
+            },
+            component: false,
+            handler: async(request, response, context) => {
+                const { record, resource, currentAdmin } = context
+                await record.update({ status: 'rejected', alert: false })
+                return { 
+                    record: record.toJSON(currentAdmin),
+                    notice: { message: 'Reject done', type: 'success' }
+                }
+            }
+        },
+        notify: {
+            actionType: 'resource',
+            component: false,
+            handler: async (request, response, context) => {
+                const { record, resource, currentAdmin } = context
+                if (currentAdmin.role === 'user') {
+                    let results = await resource.MongooseModel.find()
+                    let pending = results.filter(record => {return record.status === 'pending'})
+                    let totalCount = pending.length
+                    let msg = `There are ${totalCount} customer transaction records to be approved`
+                    let adminusers = await User.find({role: 'admin'})
+                    let adminusersEmail = adminusers.filter(record => { return (record.role === 'admin')}).map(record => record.email).join(',')
+                    await sendNotificationEmail(msg, adminusersEmail)
+                    await Promise.all(adminusers.map(async (user) => {
+                        if (user.role === 'admin') {
+                            const message = new Message({
+                                text: msg,
+                                link: '/admin/resources/CustomerTransaction?filters.status=pending&page=1',
+                                target: user.id
+                            })
+                            await message.save()
+                        }
+                    }))
+                    io.to('admin').emit('System', {
+                        type: 'Message',
+                        data: {
+                            text: 'New message'
+                        }
+                    })
+                } else if (currentAdmin.role === 'admin') {
+                    let results = await resource.MongooseModel.find().populate('recordEnteredBy')
+                    let rejected = results.filter(record => { return (record.status === 'rejected')}).map(record => record.recordEnteredBy.email)
+                    let count = rejected.length
+                    let msg = `There are ${count} customer transaction records rejected by admin. Please review and amend.`
+                    let usersEmail = rejected.join(',')
+                    await sendNotificationEmail(msg, usersEmail)
+                    let users = await User.find({role: 'user'})
+                    await Promise.all(users.map(async (user) => {
+                        if (user.role === 'user') {
+                            const message = new Message({
+                                text: msg,
+                                link: '/admin/resources/CustomerTransaction?filters.status=rejected&page=1',
+                                target: user.id
+                            })
+                            await message.save()
+                        }
+                    }))
+                    io.to('user').emit('System', {
+                        type: 'Message',
+                        data: {
+                            text: 'New message'
+                        }
+                    })
+                }
+                return { notice: { message: 'Notification sent', type: 'success' } }
             }
         }
     }

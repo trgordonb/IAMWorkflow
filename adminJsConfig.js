@@ -32,6 +32,7 @@ const PolicyFeeSetting = require('./models/policyfee-setting.model')
 const CustodianStatement = require('./models/custodian-statement-model')
 const Message = require('./models/message-model')
 const WorkflowConfig = require('./models/workflow-config.model')
+const DemandNoteItem = require('./models/demandnote-item.model')
 const UserResource = require('./resources/user')
 const AssetAllocationResource = require('./resources/asset-allocation')
 const AllAssetAllocationResource = require('./resources/all-asset-allocation')
@@ -64,6 +65,7 @@ const CustodianStatementResource = require('./resources/custodian-statement')
 const MessageResource = require('./resources/message')
 const LogResource = require('./resources/log')
 const WorkflowConfigResource = require('./resources/workflow-config')
+const DemandNoteItemResource = require('./resources/demand-note-item')
 
 const menu = {
     Admin: { name: 'Admin/Reports' },
@@ -118,16 +120,20 @@ const adminJsConfig = {
         { resource: CurrencyHistory, options: { parent: menu.Master, ...CurrencyHistoryResource } },
         { resource: Customer, options: { navigation: 'Admin Module', ...CustomerResource } },
         { resource: CustomerTransaction, options: { parent: menu.Account, ...AllCustomerTransactionResource }},
-        { resource: CustomerTransaction, options: { parent: menu.Account, ...CustomerTransactionResource }},
-        { resource: CustomerPortfolio, options: { parent: menu.Account, ...CustomerPortfolioResource }},
-        { resource: CustomerUnitizedPerformance, options: { parent: menu.Account, ...CustomerUnitizedPerformanceResource }},
+        { resource: CustomerTransaction, options: { navigation: 'Quarterly Workflow Module', ...CustomerTransactionResource },
+            features: [
+                loggerFeature(loggerConfig), ModifiedLogger('CustomerTransaction')
+            ]
+        },
+        { resource: CustomerPortfolio, options: { navigation: 'Admin Module', ...CustomerPortfolioResource }},
+        { resource: CustomerUnitizedPerformance, options: { navigation: 'Quarterly Workflow Module', ...CustomerUnitizedPerformanceResource }},
         { resource: CounterParty, options: { parent: menu.Master, ...CounterPartyResource } },
         { resource: Period, options: { navigation: 'Admin Module', ...PeriodResource } },
         { resource: Role, options: { parent: menu.Master, ...RoleResource } },
         { resource: Payee, options: { parent: menu.Master, ...PayeeResource } },
         { resource: Custodian, options: { navigation: 'Admin Module', ...CustodianResource } },
         { resource: AccountCustodian, options: { parent: menu.Custodian, ...AccountCustodianResource } },
-        { resource: FeeCode, options: { parent: menu.Fees, ...FeeCodeResource } },
+        { resource: FeeCode, options: { navigation: 'Admin Module', ...FeeCodeResource } },
         { resource: AccountFee, options: { parent: menu.Fees, ...AccountFeeResource } },
         { resource: StatementParticular, options: { parent: menu.Fees, ...StatementParticularResource } },
         { resource: FeeSharing, options: { parent: menu.Fees, ...FeeSharingResource } },
@@ -143,6 +149,7 @@ const adminJsConfig = {
         },
         { resource: Message, options: { navigation: 'Admin Module', ...MessageResource }},
         { resource: WorkflowConfig, options: { navigation: 'Quarterly Workflow Module', ...WorkflowConfigResource }},
+        { resource: DemandNoteItem, options: { navigation: 'Quarterly Workflow Module', ...DemandNoteItemResource }},
     ],
     locale: {
         translations: {
@@ -169,13 +176,18 @@ const adminJsConfig = {
                 AccountLedgerBalance: 'Account Ledger Balances',
                 AccountCustodian: 'Custodian Policy Settings',
                 FeeShareHistory: 'Fee Shares Results',
-                FeeCode: 'Fee Codes Maintainence',
+                FeeCode: 'Fee Codes',
                 PolicyFeeSetting: 'Policy Fees Setting',
                 FeeSharingScheme: 'Fee Share Schemes',
                 AccountFee: 'Statement Particular Fee Sharing Settings',
                 AssetAllocation: 'Asset Allocation (unchecked)',
-                CustomerTransaction: 'Customer Transaction (unchecked)',
-                Message: 'System Messages'
+                CustomerTransaction: 'Customer Transactions',
+                Message: 'System Messages',
+                CustomerPortfolio: 'Portfolio Unit Definition',
+                DemandNoteItem: 'Demand Note Records',
+                'Workflow Configuration': 'Workflow',
+                CustomerUnitizedPerformance: 'Unitized Performance',
+                CustomerTransaction: 'Deposit/Withdrawal'
             },
             properties: {
                 email: 'User Id'
@@ -208,6 +220,30 @@ const adminJsConfig = {
                         alternativesValue: 'Alternatives',
                         custodianAccount: 'Account',
                         statementDate: 'Date'
+                    }
+                },
+                CustomerPortfolio: {
+                    properties: {
+                        currency: 'Reporting Currency',
+                        startUnit: 'Initial number of units',
+                        accountPolicyNumber: 'Custodian Accounts'
+                    }
+                },
+                CustomerUnitizedPerformance: {
+                    properties: {
+                        lastSubPeriodDate: 'Last Period',
+                        lastSubPeriodUnit: 'Last Period Unit',
+                        lastSubPeriodNAV: 'Last Period NAV',
+                        currentSubPeriodDate: 'Date',
+                        currentSubPeriodUnit: 'Unit', 
+                        currentSubPeriodNAV: 'NAV',
+                        currentSubPeriodNAVPerUnit: 'Unit NAV',
+                        currentSubPeriodDeposited: 'Deposit Amount',
+                        currentSubPeriodWithdrawn: 'Withdraw Amount',
+                        currentSubPeriodUnitsDeposited: 'Unit deposited',
+                        currentSubPeriodUnitsWithdrawn: 'Unit withdrawn',
+                        netChange: 'Net Change',
+                        unitizedChange: 'Unitized Change'
                     }
                 }
             }

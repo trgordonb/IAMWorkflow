@@ -125,16 +125,7 @@ const Dashboard = (data) => {
                 <H4>Assetonchain Technology Ltd I-AMS</H4>
                 <img src='https://oh-estore.s3.amazonaws.com/AOCLogo.png' />
             </Box>
-            {
-                currentAdmin && currentAdmin.role !== 'reader' &&
-                <Box style={{marginTop:10, color: alertCount > 0 ? 'red': 'green'}} display="flex" variant="white">
-                    <H5>{`Custodian Records rejected: ${alertCount}`}</H5>
-                    {alertCount > 0 && <NavigationElement
-                        href="/admin/resources/Custodian Statement?filters.status=rejected&page=1"
-                        label='See the records'
-                    />}
-                </Box>
-            }
+
             {
                 /**currentAdmin && currentAdmin.role !== 'reader' &&
                 <Box style={{marginTop:10}} variant="white">

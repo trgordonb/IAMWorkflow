@@ -16,6 +16,7 @@ import moment from 'moment'
 ChartJS.register(CategoryScale,LinearScale,BarElement,Title,Tooltip,Legend)
 const options = {
     responsive: true,
+    indexAxis: 'y',
     plugins: {
       legend: {
         position: 'top'

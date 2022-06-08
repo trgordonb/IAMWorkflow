@@ -27,7 +27,12 @@ const AccountPolicyResource = {
             type: 'date',
             position: 5,
             isVisible: { list: false, filter: false, show: true, edit: true },
-        }
+        },
+        accountCloseDate: {
+            type: 'date',
+            position: 7,
+            isVisible: { list: false, filter: false, show: true, edit: true },
+        },
     },
     actions: {
         new: {

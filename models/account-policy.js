@@ -24,10 +24,19 @@ const AccountPolicySchema = new Schema({
     status: {
         type: String,
         index: true,
-        enum: ['Active','Paused','Terminated']
+        enum: ['Active','Closed']
     },
     accountStartDate: {
         type: Date,
+        index: true
+    },
+    accountCloseDate: {
+        type: Date,
+        index: true
+    },
+    feeCode: {
+        type: Schema.Types.ObjectId,
+        ref: 'FeeCode',
         index: true
     }
 })
