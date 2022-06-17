@@ -110,7 +110,7 @@ const CustomerTransactionResource = {
             ]
         },
         delete: {
-            isAccessible: false
+            isAccessible: true
         },
         bulkDelete: {
             isAccessible: false

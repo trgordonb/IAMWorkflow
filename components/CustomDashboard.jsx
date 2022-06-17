@@ -88,8 +88,8 @@ const CustomDashboard = () => {
   return (
     <Box variant="grey">
       <Box variant="white">
-          <H4>Assetonchain Technology Ltd I-AMS</H4>
-          <img src='https://oh-estore.s3.amazonaws.com/AOCLogo.png' />
+          <H4>I-AMS powered by AssetOnChain</H4>
+          <img src='https://iamlegacy.s3.ap-northeast-2.amazonaws.com/IAMLogo.jpg' />
       </Box>
       <Box style={{marginTop:10}} display="flex" variant="white">
           <H5>Reconcile bank statement amounts with custodian statements</H5>

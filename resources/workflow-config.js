@@ -721,9 +721,6 @@ const WorkflowConfigResource = {
             isAccessible: true,
             isVisible: false
         },
-        delete: {
-            isAccessible: false
-        },
         bulkDelete: {
             isAccessible: false
         }

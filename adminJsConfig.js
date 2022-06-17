@@ -104,7 +104,7 @@ const adminJsConfig = {
         app: '1.0.0'
     },
     branding: {
-        logo: 'https://oh-estore.s3.amazonaws.com/AOCLogo.png',
+        logo: 'https://iamlegacy.s3.ap-northeast-2.amazonaws.com/IAMLogo.jpg',
         companyName: 'I-AMS',
         softwareBrothers: false,
         theme: {

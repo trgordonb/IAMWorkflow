@@ -1,4 +1,4 @@
-import { Box, H4, H5, H6, Button, DatePicker, Modal, Input } from '@adminjs/design-system'
+import { Box, H4, H2, H6, Button, DatePicker, Modal, Input } from '@adminjs/design-system'
 import React, { useState, useEffect } from 'react'
 import { ApiClient, useCurrentAdmin } from 'adminjs'
 
@@ -122,8 +122,9 @@ const Dashboard = (data) => {
     return (
         <Box variant="grey">
             <Box variant="white">
-                <H4>Assetonchain Technology Ltd I-AMS</H4>
-                <img src='https://oh-estore.s3.amazonaws.com/AOCLogo.png' />
+                <H2>I-AMS</H2>
+                <H6>powered by AssetOnChain Technology</H6>
+                <img src='https://iamlegacy.s3.ap-northeast-2.amazonaws.com/IAMLogo.jpg' />
             </Box>
 
             {
