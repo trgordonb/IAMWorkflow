@@ -1,20 +1,16 @@
-const AdminJS = require('adminjs')
-
-const CurrencyResource = {
+const CurrencyPairResource = {
     properties: {
         _id: {
             isVisible: { list: false, filter: false, show: false, edit: false },
-        }
+        },
+        name: { isVisible: true },
+        quote: { isVisible: true },
+        base: { isVisible: true },
+        defaultValue: { isVisible: true }
     },
     actions: {
         list: {
             isAccessible: ({ currentAdmin }) => currentAdmin && (currentAdmin.role === 'admin' || currentAdmin.role === 'user'),
-            before: async(request, context) => {
-                const { query = {} } = request
-                const { sortBy, direction, filters = {} } = AdminJS.flat.unflatten(query || {});
-                console.log(filters)
-                return request
-            }
         },
         edit: {
             showInDrawer: true
@@ -28,4 +24,4 @@ const CurrencyResource = {
     }
 }
 
-module.exports = CurrencyResource
+module.exports = CurrencyPairResource

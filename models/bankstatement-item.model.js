@@ -1,47 +1,62 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-const Statement = require('./statement.model')
 
 const BankStatementItemSchema = new Schema({
     bank: {
         type: Schema.Types.ObjectId,
-        ref: 'Bank'
+        ref: 'Bank',
+        index: true
     },
-    bankstatementId: String,
-    statement: {
+    bankStatementRef: {
+        type: String,
+        index: true
+    },
+    period: {
         type: Schema.Types.ObjectId,
-        ref: 'Statement'
+        ref: 'Period',
+        index: true
     },
-    date: Date,
+    statementDate: {
+        type: Date,
+        index: true
+    },
     currency: {
         type: Schema.Types.ObjectId,
-        ref: 'Currency'
+        ref: 'Currency',
+        index: true
     },
-    party: {
+    companyAccount: {
         type: Schema.Types.ObjectId,
-        ref: 'Payee'
+        ref: 'CompanyAccount'
     },
-    counterparty: {
+    counterParty: {
         type: Schema.Types.ObjectId,
         ref: 'CounterParty'
     },
-    grossamount: Number,
-    netamount: Number,
-    bankcharges: Number,
+    matchedStatement: {
+        type: Schema.Types.ObjectId,
+        ref: 'StatementSummary',
+        index: true
+    },
+    grossAmount: {
+        type: Number,
+    },
+    itemCharge: {
+        type: Number
+    },
+    status: {
+        type: String,
+        index: true,
+        enum: ['pending','approved']
+    },
+    remark: {
+        type: String
+    },
     isLocked: {
         type: Boolean,
         default: false
     }
 })
-
-BankStatementItemSchema.pre('save', async function() {
-    this.netamount = this.grossamount - this.bankcharges
-})
-
-BankStatementItemSchema.pre('findOneAndUpdate', async function() {
-    this._update.$set.netamount = this._update.$set.grossamount - this._update.$set.bankcharges
-})
-
 
 const BankStatementItem = mongoose.model('BankStatementItem', BankStatementItemSchema, 'BankStatementItems')
 

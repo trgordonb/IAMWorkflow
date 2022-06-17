@@ -1,6 +1,12 @@
 import { Box, Button, Stepper, Step, CheckBox, Label, Table, TableHead, TableRow, TableBody, TableCell, Loader } from '@adminjs/design-system'
 import { useRecord, BasePropertyComponent, ApiClient, useNotice } from 'adminjs'
 import { flat } from 'adminjs'
+import styled from 'styled-components'
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+import { Pie } from 'react-chartjs-2'
+
+const NewTableRow = styled.tr`background: papayawhip;`
+ChartJS.register(ArcElement, Tooltip, Legend)
 
 const WorkflowConfig = (props) => {
     const sendNotice = useNotice()
@@ -13,7 +19,9 @@ const WorkflowConfig = (props) => {
     const [isLoading, setIsLoading] = React.useState(false)
     const [byPass, setByPass] = React.useState(false)
     const [showPDF, setShowPDF] = React.useState(false)
+    const [showPie, setShowPie] = React.useState(false)
     const [pdfUrl, setPdfUrl] = React.useState([])
+    const [pieData, setPieData] = React.useState({})
 
     const currentStepCheck = async () => {
         if (stages[currentStep-1].completed) {
@@ -29,14 +37,24 @@ const WorkflowConfig = (props) => {
         }
     }
 
-    const verifyCurrentStage = async () => {
+    const verifyCurrentStage = async (skip) => {
         setIsLoading(true)
-        const result = await api.recordAction({
-            resourceId: 'Workflow Configuration',
-            recordId: record.id,
-            actionName: 'verify',
-            data: {byPass}
-        })
+        let result
+        if (!skip) {
+            result = await api.recordAction({
+                resourceId: 'Workflow Configuration',
+                recordId: record.id,
+                actionName: 'verify',
+                data: {byPass}
+            })
+        } else {
+            result = await api.recordAction({
+                resourceId: 'Workflow Configuration',
+                recordId: record.id,
+                actionName: 'verify',
+                data: {byPass: true}
+            })
+        }
         const newRecord = flat.get(result.data.record.params)
         setByPass(false)
         setStages([...newRecord.stages])
@@ -51,14 +69,66 @@ const WorkflowConfig = (props) => {
             actionName: action,
             data: {}
         })
-        console.log(result)
-        if (result.data.record.params.pdfData) {
+        const actionRecord = flat.get(result.data.record.params)
+        if (actionRecord.pdfData) {
             setShowPDF(true)
+            setShowPie(false)
             const blob = new Blob([result.data.record.params.pdfData], {type: 'application/pdf'})
             const docUrl = URL.createObjectURL(blob)
             setPdfUrl(docUrl)
+        } else if (actionRecord.graphData) {
+            setShowPDF(false)
+            let graphData = actionRecord.graphData
+            let labels = graphData.map(item => item.recipient)
+            let dataitems = graphData.map(item => item.amount)
+            setPieData({
+                labels: labels,
+                datasets: [{
+                    label: 'Fee Shares',
+                    data: dataitems,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)',
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            })
+            setShowPie(true)
+        } else {
+            setShowPDF(false)
+            setShowPie(false)
         }
+        await verifyCurrentStage(true)
         setIsLoading(false)
+    }
+
+    const getButton = (taskCode) => {
+        return (
+            stages[currentStep-1].actions.filter(action => {
+                return (action.taskCode === taskCode)
+            }).map(action => (
+                <Button 
+                    key={action.actionName}
+                    mt="default"
+                    mr="default"
+                    onClick={() => callAction(action.actionName)}
+                >
+                    {action.label}
+                </Button>
+            ))
+        )
     }
 
     return (
@@ -91,17 +161,9 @@ const WorkflowConfig = (props) => {
                     </Box>
                     <Box flexGrow={0}>
                         <Button
-                            disabled={currentStep === 1}
                             mt={15}
                             mr="default"
-                            onClick={() => setCurrentStep(currentStep - 1)}
-                        >
-                            Previous Step
-                        </Button>
-                        <Button
-                            mt={15}
-                            mr="default"
-                            onClick={() => verifyCurrentStage()}
+                            onClick={() => verifyCurrentStage(false)}
                         >
                             Check Current Stage
                         </Button>
@@ -152,18 +214,6 @@ const WorkflowConfig = (props) => {
                     <Label inline htmlFor="stageCB" ml="default">Completed</Label>
                 </Box>
                 <Box mt="xxl">
-                    {
-                        stages[currentStep-1].actions.map((action) => (
-                            <Button 
-                                key={action.actionName}
-                                mt="xxl"
-                                mr="default"
-                                onClick={() => callAction(action.actionName)}
-                            >
-                                {action.label}
-                            </Button>
-                        ))
-                    }
                 </Box>
                 <Box mt="xxl">
                     <Table>
@@ -175,17 +225,41 @@ const WorkflowConfig = (props) => {
                         </TableHead>            
                         <TableBody>
                         {
-                            stages[currentStep-1].tasks.map((task) => (
-                            <TableRow key={task.code}>
-                                <TableCell>{task.code}</TableCell>
-                                <TableCell>{task.description}</TableCell>
-                                <TableCell>{task.stat}</TableCell>
-                                <TableCell>{task.status}</TableCell>
-                            </TableRow>
+                            stages[currentStep-1].tasks.map((task, idx) => (
+                            task.type && task.type === 'action' ?
+                            idx === stages[currentStep-1].currentTaskNumber ?
+                                <NewTableRow key={task.code}>
+                                    <TableCell>{task.code}</TableCell>
+                                    <TableCell>{getButton(task.code)}</TableCell>
+                                    <TableCell></TableCell>
+                                    <TableCell>{task.status}</TableCell>
+                                </NewTableRow> :
+                                <TableRow key={task.code}>
+                                    <TableCell>{task.code}</TableCell>
+                                    <TableCell>{getButton(task.code)}</TableCell>
+                                    <TableCell></TableCell>
+                                    <TableCell>{task.status}</TableCell>
+                                </TableRow> :
+                            idx === stages[currentStep-1].currentTaskNumber ?
+                                <NewTableRow key={task.code}>
+                                    <TableCell>{task.code}</TableCell>
+                                    <TableCell>{task.description}</TableCell>
+                                    <TableCell>{task.stat}</TableCell>
+                                    <TableCell>{task.status}</TableCell>
+                                </NewTableRow>:
+                                <TableRow key={task.code}>
+                                    <TableCell>{task.code}</TableCell>
+                                    <TableCell>{task.description}</TableCell>
+                                    <TableCell>{task.stat}</TableCell>
+                                    <TableCell>{task.status}</TableCell>
+                                </TableRow>
                         ))
                         }
                         </TableBody>
                     </Table>
+                </Box>
+                <Box mt='xxl' width={800} height={800}>
+                    { showPie && <Pie data={pieData} />}
                 </Box>
                 <Box mt='xxl'>
                     { showPDF && <iframe width={1400} height={800} src={pdfUrl} type="application/pdf"/>}

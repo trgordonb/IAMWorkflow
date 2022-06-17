@@ -2,7 +2,7 @@ import { Box, Button, Text } from '@adminjs/design-system'
 import { useRecord, BasePropertyComponent, useTranslation, ApiClient } from 'adminjs'
 import { useHistory } from 'react-router'
 import { useDropzone } from 'react-dropzone'
-import DateControl from './DateControl'
+import DateSelect from './DateSelect'
 
 const CustodianStatement = (props) => {
     const { record: initialRecord, resource, action } = props
@@ -14,9 +14,8 @@ const CustodianStatement = (props) => {
     const [bondsAllocation, setBondsAllocation] = React.useState(0)
     const [alternativesAllocation, setAlternativesAllocation] = React.useState(0)
     let valuesList = []
-    const [docURL, setDocURL] = React.useState([]);
+    const [docURL, setDocURL] = React.useState([])
     const onDrop = React.useCallback(acceptedFiles => {
-        console.log(acceptedFiles[0])
         setDocURL(URL.createObjectURL(acceptedFiles[0]))
     }, [])
     const {getRootProps, getInputProps} = useDropzone({onDrop})
@@ -28,13 +27,14 @@ const CustodianStatement = (props) => {
     const { translateButton } = useTranslation()
 
     const handleSubmit = event => {
-        history.push('/admin/resources/Custodian%20Statement');
-        submit().then(response => {console.log(response)});
+        submit().then(response => {
+            history.push('/admin/resources/Custodian%20Statement');
+        });
         return true;
     }
 
     const customChange = async (propertyRecord, value, selectedRecord) => {
-        if (allKeys.indexOf(propertyRecord) >= 0) {
+        if (allKeys.indexOf(propertyRecord) >= 0 && value !== '') {
             valuesList.push({[propertyRecord]: value})
         }
         if (selectedRecord && selectedRecord.params && selectedRecord.params.customer) {
@@ -43,15 +43,10 @@ const CustodianStatement = (props) => {
                 recordId: selectedRecord.params.customer,
                 actionName: 'show'
             })
-            console.log(result)
-            //if (result.request && result.request.statusText === 'OK') {
-            //    setClientId(result.data.record.params.clientId)
-            //}
             if (result && result.status === 200) {
                 setClientId(result.data.record.params.clientId)
             }
         }
-        
         handleChange(propertyRecord, value, selectedRecord)
     }
 
@@ -79,8 +74,10 @@ const CustodianStatement = (props) => {
             fetchCustomer()
         }
         let curTotal = 0
-        Object.keys(record.params).filter(key => (allKeys.indexOf(key) >= 0)).forEach(key => {
-            curTotal = curTotal + parseFloat(record.params[key])
+        Object.keys(record.params).filter(key => allKeys.indexOf(key) >= 0).forEach(key => {
+            if (record.params[key] !== '') {
+                curTotal = curTotal + parseFloat(record.params[key])
+            }
         })
         setTotal(curTotal)
         setCashAllocation(record.params.cashValue ? (100 * parseFloat(record.params.cashValue) / curTotal).toFixed(2) : 0)
@@ -102,22 +99,12 @@ const CustodianStatement = (props) => {
         <Box py='lg' marginX={25} as="form" onSubmit={handleSubmit}>          
             <Box flex flexDirection={'row'}>
                 <Box flexGrow={0} marginRight={15}>
-                    <DateControl 
-                        where="edit"
+                    <DateSelect
                         onChange={handleChange}
                         property={resource.properties.statementDate}
                         resource={resource}
                         record={record}
-                    />
-                </Box>
-                <Box flexGrow={0}>
-                    <BasePropertyComponent
-                        where="edit"
-                        onChange={handleChange}
-                        property={resource.properties.currency}
-                        resource={resource}
-                        record={record}
-                    />
+                    />        
                 </Box>                   
             </Box>
             <Box flex flexDirection={'row'}>

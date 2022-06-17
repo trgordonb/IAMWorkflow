@@ -33,6 +33,16 @@ const AccountPolicyResource = {
             position: 7,
             isVisible: { list: false, filter: false, show: true, edit: true },
         },
+        feeSharing: {
+            position: 8,
+            isVisible: { list: false, filter: false, show: true, edit: true },
+        },
+        'feeSharing.feeType': {
+            isVisible: { list: false, filter: false, show: true, edit: true }
+        },
+        'feeSharing.feeSharingScheme': {
+            isVisible: { list: false, filter: false, show: true, edit: true }
+        }
     },
     actions: {
         new: {

@@ -38,7 +38,17 @@ const AccountPolicySchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'FeeCode',
         index: true
-    }
+    },
+    feeSharing: [{
+        feeType: {
+            type: String,
+            enum: ['ManagementFee','RetrocessionFee']
+        },
+        feeSharingScheme: {
+            type: Schema.Types.ObjectId,
+            ref: 'FeeSharingScheme'
+        }
+    }]
 })
 
 const AccountPolicy = mongoose.model('AccountPolicy', AccountPolicySchema, 'AccountPolicies' )

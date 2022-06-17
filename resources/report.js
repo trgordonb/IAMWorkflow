@@ -1,13 +1,13 @@
 const AdminJS = require('adminjs')
 const AccountLedgerBalance = require('../models/account-ledger-balance.model')
-const FeeSharingHistory = require('../models/feeshare-history.model')
+const FeeShareResult = require('../models/feeshare-result.model')
 const AccountPolicy = require('../models/account-policy')
 const Customer = require('../models/customer-model')
 const Currency = require('../models/currency.model')
 const Custodian = require('../models/custodian.model')
 const Statement = require('../models/statement.model')
 const Role = require('../models/role.model')
-const Payee = require('../models/payee-model')
+const Payee = require('../models/company-account-model')
 const moment = require('moment')
 const { customRound } = require('../lib/utils')
 const { jsPDF } = require('jspdf/dist/jspdf.node')
@@ -24,7 +24,7 @@ const ReportResosurce = {
             component: AdminJS.bundle('../components/MiniExport.jsx'),
             handler: async (request, response, context) => {
                 const { record, resource, currentAdmin } = context
-                let exportModel = record.params.source === 'AccountLedgerBalances' ? AccountLedgerBalance : FeeSharingHistory
+                let exportModel = record.params.source === 'AccountLedgerBalances' ? AccountLedgerBalance : FeeShareResult
                 let parsed = null
                 let transformedRecords = []
                 let pdfData = null
@@ -51,7 +51,7 @@ const ReportResosurce = {
                             customer: resultCustomer? resultCustomer.clientId: ''
                         }
                         transformedRecords.push(transformedRecord)
-                    } else if (record.params.source === 'FeeShareHistory') {
+                    } else if (record.params.source === 'FeeShareResult') {
                         reportTypes = ['pdf']
                         let resultAccountPolicy = await AccountPolicy.findById(doc.accountnumber)
                         let resultCurrency = await Currency.findById(doc.currency)
@@ -127,7 +127,7 @@ const ReportResosurce = {
                     })
                     pdfData = pdfDoc.output()
                 }
-                if (reportTypes.includes('pdf') && record.params.source === 'FeeShareHistory') {
+                if (reportTypes.includes('pdf') && record.params.source === 'FeeShareResult') {
                     let feeShareList = []
                     for (key in feeShareTotals) {
                         feeShareList.push([key, customRound(feeShareTotals[key])])

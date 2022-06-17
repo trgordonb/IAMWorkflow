@@ -2,11 +2,14 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const FeeSharingSchemeSchema = new Schema({
-    code: String,
+    code: {
+        type: String,
+        index: true
+    },
     feerecipients: [{
         recipient: {
             type: Schema.Types.ObjectId,
-            ref: 'Payee'
+            ref: 'FeeRecipient'
         },
         percentage: Number,
         role: {

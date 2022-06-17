@@ -2,7 +2,10 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const RoleSchema = new Schema({
-    name: String
+    name: {
+        type: String,
+        index: true
+    }
 })
 
 const Role = mongoose.model('Role', RoleSchema, 'Roles')

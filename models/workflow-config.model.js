@@ -43,6 +43,7 @@ const WorkflowConfigSchema = new Schema({
         actions: [{
             actionName: String,
             label: String,
+            taskCode: String,
         }],
         data: [{
             name: String,
@@ -53,8 +54,10 @@ const WorkflowConfigSchema = new Schema({
                 operator: String
             }],
             value: Number,
+            subPath: String,
             locked: Boolean
         }],   
+        currentTaskNumber: Number,
         tasks: [{
             code: {
                 type: String
@@ -71,6 +74,9 @@ const WorkflowConfigSchema = new Schema({
                 target: String
             },
             stat: {
+                type: String
+            },
+            type: {
                 type: String
             }
         }]

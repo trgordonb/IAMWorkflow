@@ -22,6 +22,9 @@ const PeriodResource = {
         },
         subPeriodEndDates: {
             type: 'date',
+        },
+        exchangeRates: {
+            isVisible: { list: false, filter: false, show: true, edit: true }
         }
     },
     actions: {
@@ -36,7 +39,8 @@ const PeriodResource = {
                     ['start', { pr: 'default', flexGrow: 1 }],
                     ['end', { flexGrow: 1 }],
                 ]], 
-                ['subPeriodEndDates', {ml: 'xxl'}]
+                ['subPeriodEndDates', {ml: 'xxl'}],
+                ['exchangeRates', {ml: 'xxl'}]
             ]
         },
         edit: {
@@ -47,7 +51,8 @@ const PeriodResource = {
                     ['start', { pr: 'default', flexGrow: 1 }],
                     ['end', { flexGrow: 1 }],
                 ]], 
-                ['subPeriodEndDates']
+                ['subPeriodEndDates', {ml: 'xxl'}],
+                ['exchangeRates', {ml: 'xxl'}]
             ]
         },
         show: {

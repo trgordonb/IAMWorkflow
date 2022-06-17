@@ -6,7 +6,7 @@ const Period = require('../models/period-model')
 const Currency = require('../models/currency.model')
 const CurrencyHistory = require('../models/currency-history.model')
 const FeeSharing = require('../models/fee-sharing.model')
-const FeeSharingHistory = require('../models/feeshare-history.model')
+const FeeShareResult = require('../models/feeshare-result.model')
 const AccountLedgerBalance = require('../models/account-ledger-balance.model')
 
 const StatementResource = {
@@ -222,7 +222,7 @@ const StatementResource = {
                                     amount: amount
                                 })
                             })
-                            const feeShareHistory = new FeeSharingHistory({
+                            const feeShareHistory = new FeeShareResult({
                                 statement: statement._id,
                                 accountnumber: item.accountnumber,
                                 amount: item.netamount,

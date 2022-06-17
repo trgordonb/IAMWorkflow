@@ -2,6 +2,7 @@ const AdminJS = require('adminjs')
 const User = require('../models/user.model')
 const Message = require('../models/message-model')
 const sendNotificationEmail = require('../utils/email')
+const mongoose = require('mongoose')
 const { io } = require('../app')
 
 const CustomerTransactionResource = {
@@ -53,11 +54,14 @@ const CustomerTransactionResource = {
         new: {
             before: async(request, context) => {
                 const { currentAdmin } = context
+                let custPortfolioModel = mongoose.connection.models['CustomerPortfolio']
+                let custAcct = await custPortfolioModel.findOne({customer: request.payload.customer})
                 request.payload = {
                     ...request.payload,
                     recordEnteredBy: currentAdmin.id,
                     period: currentAdmin.period,
-                    status: 'pending'
+                    status: 'pending',
+                    currency: custAcct.currency
                 }
                 return request
             },
@@ -70,7 +74,6 @@ const CustomerTransactionResource = {
             layout: [
                 ['date', { ml: 'xxl' }], 
                 ['customer', { ml: 'xxl' }],
-                ['currency', { ml: 'xxl' }],
                 ['transactionType', { ml: 'xxl' }],
                 ['nominalValue', { ml: 'xxl' }],
                 ['remark', { ml: 'xxl' }]
@@ -87,7 +90,7 @@ const CustomerTransactionResource = {
             before: async (request, context) => {
                 request.payload = {
                     ...request.payload,
-                    status: 'pending'
+                    status: 'pending',
                 }
                 return request
             },
@@ -101,7 +104,6 @@ const CustomerTransactionResource = {
             layout: [
                 ['date', { ml: 'xxl' }], 
                 ['customer', { ml: 'xxl' }],
-                ['currency', { ml: 'xxl' }],
                 ['transactionType', { ml: 'xxl' }],
                 ['nominalValue', { ml: 'xxl' }],
                 ['remark', { ml: 'xxl' }]

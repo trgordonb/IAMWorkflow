@@ -5,8 +5,10 @@ const stages = [
         label: 'Month 1',
         actions: [{
             actionName: 'genuperf',
-            label: 'Generate unitized performance records'
+            label: 'Generate unitized performance records',
+            taskCode: 'S1T4',
         }],
+        currentTaskNumber: 0,
         data: [
             {
                 name: 'CustodianAccountsCount',
@@ -20,6 +22,7 @@ const stages = [
                     value: 'placeholder:tmpRecord.subPeriodEndDates[0]',
                     operator: 'lessthanorequal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false
             }, 
@@ -42,6 +45,7 @@ const stages = [
                     value: 'or:pending,approved',
                     operator: 'orequal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false         
             },
@@ -64,6 +68,7 @@ const stages = [
                     value: 'placeholder:tmpRecord.period',
                     operator: 'equal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false
             },
@@ -81,6 +86,7 @@ const stages = [
                     value: 'placeholder:period.start,tmpRecord.subPeriodEndDates[0]',
                     operator: 'range'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false
             }, 
@@ -103,6 +109,7 @@ const stages = [
                     value: 'approved',
                     operator: 'equal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false         
             }, 
@@ -115,6 +122,7 @@ const stages = [
                     value: 'placeholder:tmpRecord.subPeriodEndDates[0]',
                     operator: 'lessthanorequal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false
             },
@@ -138,6 +146,7 @@ const stages = [
                         operator: 'orequal'
                     }
                 ],
+                subPath: '',
                 value: 0,
                 locked: false
             },
@@ -161,6 +170,7 @@ const stages = [
                         operator: 'equal'
                     }
                 ],
+                subPath: '',
                 value: 0,
                 locked: false
             }
@@ -198,6 +208,11 @@ const stages = [
             },
             {
                 code: 'S1T4',
+                type: 'action',
+                status: 'pending',
+            },
+            {
+                code: 'S1T5',
                 description: 'All customer unitized performance records have been generated',
                 status: 'pending',
                 rule: {
@@ -207,7 +222,7 @@ const stages = [
                 stat: '0 / 0'
             },
             {
-                code: 'S1T5',
+                code: 'S1T6',
                 description: 'All unitized performance records has been approved',
                 status: 'pending',
                 rule: {
@@ -224,8 +239,10 @@ const stages = [
         label: 'Month 2',
         actions: [{
             actionName: 'genuperf',
-            label: 'Generate unitized performance records'
+            label: 'Generate unitized performance records',
+            taskCode: 'S2T4',
         }],
+        currentTaskNumber: 0,
         data: [
             {
                 name: 'CustodianAccountsCount',
@@ -239,6 +256,7 @@ const stages = [
                     value: 'placeholder:tmpRecord.subPeriodEndDates[1]',
                     operator: 'lessthanorequal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false
             }, 
@@ -261,6 +279,7 @@ const stages = [
                     value: 'or:pending,approved',
                     operator: 'orequal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false         
             },
@@ -283,6 +302,7 @@ const stages = [
                     value: 'placeholder:tmpRecord.period',
                     operator: 'equal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false
             },
@@ -300,6 +320,7 @@ const stages = [
                     value: 'placeholder:tmpRecord.subPeriodEndDates[0],tmpRecord.subPeriodEndDates[1]',
                     operator: 'range'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false
             }, 
@@ -322,6 +343,7 @@ const stages = [
                     value: 'approved',
                     operator: 'equal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false         
             }, 
@@ -334,6 +356,7 @@ const stages = [
                     value: 'placeholder:tmpRecord.subPeriodEndDates[1]',
                     operator: 'lessthanorequal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false
             },
@@ -357,6 +380,7 @@ const stages = [
                         operator: 'orequal'
                     }
                 ],
+                subPath: '',
                 value: 0,
                 locked: false
             },
@@ -380,6 +404,7 @@ const stages = [
                         operator: 'equal'
                     }
                 ],
+                subPath: '',
                 value: 0,
                 locked: false
             }
@@ -417,6 +442,11 @@ const stages = [
             },
             {
                 code: 'S2T4',
+                type: 'action',
+                status: 'pending',
+            },
+            {
+                code: 'S2T5',
                 description: 'All customer unitized performance records have been generated',
                 status: 'pending',
                 rule: {
@@ -426,7 +456,7 @@ const stages = [
                 stat: '0 / 0'
             },
             {
-                code: 'S2T5',
+                code: 'S2T6',
                 description: 'All unitized performance records has been approved',
                 status: 'pending',
                 rule: {
@@ -443,11 +473,14 @@ const stages = [
         label: 'Month 3',
         actions: [{
             actionName: 'genuperf',
-            label: 'Generate unitized performance records'
+            label: 'Generate unitized performance records',
+            taskCode: 'S3T4',
         },{
             actionName: 'gendnote',
-            label: 'Generate demand note records'
+            label: 'Generate demand note records',
+            taskCode: 'S3T7',
         }],
+        currentTaskNumber: 0,
         data: [
             {
                 name: 'CustodianAccountsCount',
@@ -461,6 +494,7 @@ const stages = [
                     value: 'placeholder:tmpRecord.subPeriodEndDates[2]',
                     operator: 'lessthanorequal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false
             }, 
@@ -483,6 +517,7 @@ const stages = [
                     value: 'or:pending,approved',
                     operator: 'orequal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false         
             },
@@ -505,6 +540,7 @@ const stages = [
                     value: 'placeholder:tmpRecord.period',
                     operator: 'equal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false
             },
@@ -522,6 +558,7 @@ const stages = [
                     value: 'placeholder:tmpRecord.subPeriodEndDates[1],tmpRecord.subPeriodEndDates[2]',
                     operator: 'range'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false
             }, 
@@ -544,6 +581,7 @@ const stages = [
                     value: 'approved',
                     operator: 'equal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false         
             },
@@ -556,6 +594,7 @@ const stages = [
                     value: 'placeholder:tmpRecord.subPeriodEndDates[2]',
                     operator: 'lessthanorequal'
                 }],
+                subPath: '',
                 value: 0,
                 locked: false
             },
@@ -579,6 +618,7 @@ const stages = [
                         operator: 'orequal'
                     }
                 ],
+                subPath: '',
                 value: 0,
                 locked: false
             },
@@ -602,6 +642,7 @@ const stages = [
                         operator: 'equal'
                     }
                 ],
+                subPath: '',
                 value: 0,
                 locked: false
             }
@@ -639,6 +680,11 @@ const stages = [
             },
             {
                 code: 'S3T4',
+                type: 'action',
+                status: 'pending',
+            },
+            {
+                code: 'S3T5',
                 description: 'All customer unitized performance records have been generated',
                 status: 'pending',
                 rule: {
@@ -648,7 +694,7 @@ const stages = [
                 stat: '0 / 0'
             },
             {
-                code: 'S3T5',
+                code: 'S3T6',
                 description: 'All unitized performance records has been approved',
                 status: 'pending',
                 rule: {
@@ -656,7 +702,12 @@ const stages = [
                     target: 'UnitizedPerfRecordApprovedCount'
                 },
                 stat: '0 / 0'
-            }
+            },
+            {
+                code: 'S3T7',
+                type: 'action',
+                status: 'pending',
+            },
         ],
     },
     {
@@ -665,9 +716,33 @@ const stages = [
         label: 'Demand Note',
         actions: [{
             actionName: 'printdn',
-            label: 'Print Demand Notes'
+            label: 'Print Demand Notes',
+            taskCode: 'S4T4',
         }],
+        currentTaskNumber: 0,
         data: [
+            {
+                name: 'ExistingCurrencyPairs',
+                modelName: 'CurrencyPair',
+                queries: [],
+                subPath: '',
+                value: 0,
+                locked: false
+            },
+            {
+                name: 'CurrentPeriodCurrencyPairs',
+                modelName: 'Period',
+                queries: [
+                    {
+                        property: '_id',
+                        value: 'placeholder:tmpRecord.period',
+                        operator: 'equal'
+                    }
+                ],
+                subPath: 'exchangeRates',
+                value: 0,
+                locked: false
+            },
             {
                 name: 'AllActiveCustodianAccounts',
                 modelName: 'AccountPolicy',
@@ -678,16 +753,254 @@ const stages = [
                         operator: 'equal'
                     },
                 ],
+                subPath: '',
                 value: 0,
                 locked: false
             },
             {
                 name: 'AllDemandNotesItems',
-                modelName: 'DemandNoteItem',
+                modelName: 'StatementSummary',
                 queries: [
                     {
                         property: 'period',
                         value: 'placeholder:tmpRecord.period',
+                        operator: 'equal'
+                    },
+                    {
+                        property: 'type',
+                        value: 'ManagementFee',
+                        operator: 'equal'
+                    },
+                    {
+                        property: 'status',
+                        value: 'or:pending,approved',
+                        operator: 'equal'
+                    }
+                ],
+                subPath: 'details',
+                value: 0,
+                locked: false
+            },
+            {
+                name: 'AllRetrocessionItems',
+                modelName: 'StatementSummary',
+                queries: [
+                    {
+                        property: 'period',
+                        value: 'placeholder:tmpRecord.period',
+                        operator: 'equal'
+                    },
+                    {
+                        property: 'type',
+                        value: 'RetrocessionFee',
+                        operator: 'equal'
+                    },
+                    {
+                        property: 'status',
+                        value: 'or:pending,approved',
+                        operator: 'equal'
+                    }
+                ],
+                subPath: 'details',
+                value: 0,
+                locked: false
+            },
+            {
+                name: 'ApprovedDemandNotesItems',
+                modelName: 'StatementSummary',
+                queries: [
+                    {
+                        property: 'period',
+                        value: 'placeholder:tmpRecord.period',
+                        operator: 'equal'
+                    },
+                    {
+                        property: 'type',
+                        value: 'ManagementFee',
+                        operator: 'equal'
+                    },
+                    {
+                        property: 'status',
+                        value: 'approved',
+                        operator: 'equal'
+                    }
+                ],
+                subPath: 'details',
+                value: 0,
+                locked: false
+            },
+            {
+                name: 'ApprovedRetrocessionItems',
+                modelName: 'StatementSummary',
+                queries: [
+                    {
+                        property: 'period',
+                        value: 'placeholder:tmpRecord.period',
+                        operator: 'equal'
+                    },
+                    {
+                        property: 'type',
+                        value: 'RetrocessionFee',
+                        operator: 'equal'
+                    },
+                    {
+                        property: 'status',
+                        value: 'approved',
+                        operator: 'equal'
+                    }
+                ],
+                subPath: 'details',
+                value: 0,
+                locked: false
+            },
+        ],
+        tasks: [
+            {
+                code: 'S4T1',
+                description: 'All end-of-period exchange rates have been entered',
+                status: 'pending',
+                rule: {
+                    source: 'ExistingCurrencyPairs',
+                    target: 'CurrentPeriodCurrencyPairs'
+                },
+                stat: '0 / 0'
+            },
+            {
+                code: 'S4T2',
+                description: 'All accounts have been included in demand notes',
+                status: 'pending',
+                rule: {
+                    source: 'AllActiveCustodianAccounts',
+                    target: 'AllDemandNotesItems'
+                },
+                stat: '0 / 0'
+            },
+            {
+                code: 'S4T3',
+                description: 'All demand notes records have been approved',
+                status: 'pending',
+                rule: {
+                    source: 'AllDemandNotesItems',
+                    target: 'ApprovedDemandNotesItems'
+                },
+                stat: '0 / 0'
+            },
+            {
+                code: 'S4T4',
+                type: 'action',
+                status: 'pending',
+            },
+            {
+                code: 'S4T5',
+                description: 'All retrocession fees items have been entered and approved',
+                status: 'pending',
+                rule: {
+                    source: 'AllRetrocessionItems',
+                    target: 'ApprovedRetrocessionItems'
+                },
+                stat: '0 / 0'
+            }
+        ]
+    }, 
+    {
+        number: 5,
+        completed: false,
+        label: 'Bank Statements Handling',
+        actions: [{
+            actionName: 'bankchargecalc',
+            label: 'Allocate Bank Charges',
+            taskCode: 'S5T3',
+        }],
+        currentTaskNumber: 0,
+        data: [
+            {
+                name: 'MatchedBankStatementItems',
+                modelName: 'BankStatementItem',
+                queries: [
+                    {
+                        property: 'period',
+                        value: 'placeholder:tmpRecord.period',
+                        operator: 'equal'
+                    },
+                    {
+                        property: 'status',
+                        value: 'or:pending,approved',
+                        operator: 'equal'
+                    }
+                ],
+                subPath: '',
+                value: 0,
+                locked: false
+            },
+            {
+                name: 'AllStatementSummaries',
+                modelName: 'StatementSummary',
+                queries: [
+                    {
+                        property: 'period',
+                        value: 'placeholder:tmpRecord.period',
+                        operator: 'equal'
+                    },
+                    {
+                        property: 'status',
+                        value: 'approved',
+                        operator: 'equal'
+                    },
+                    {
+                        property: 'type',
+                        value: 'or:ManagementFee,RetrocessionFee',
+                        operator: 'equal'
+                    }
+                ],
+                subPath: '',
+                value: 0,
+                locked: false
+            },
+            {
+                name: 'ApprovedBankStatementItems',
+                modelName: 'BankStatementItem',
+                queries: [
+                    {
+                        property: 'period',
+                        value: 'placeholder:tmpRecord.period',
+                        operator: 'equal'
+                    },
+                    {
+                        property: 'status',
+                        value: 'approved',
+                        operator: 'equal'
+                    }
+                ],
+                subPath: '',
+                value: 0,
+                locked: false
+            },
+            {
+                name: 'AllStatementItems',
+                modelName: 'StatementItem',
+                queries: [
+                    {
+                        property: 'period',
+                        value: 'placeholder:tmpRecord.period',
+                        operator: 'equal'
+                    },
+                ],
+                subPath: '',
+                value: 0,
+                locked: false
+            },
+            {
+                name: 'AllAllocatedStatementItems',
+                modelName: 'StatementItem',
+                queries: [
+                    {
+                        property: 'period',
+                        value: 'placeholder:tmpRecord.period',
+                        operator: 'equal'
+                    },
+                    {
+                        property: 'reconcilation.completed',
+                        value: true,
                         operator: 'equal'
                     }
                 ],
@@ -697,14 +1010,76 @@ const stages = [
         ],
         tasks: [
             {
-                code: 'S4T1',
-                description: 'All accounts have been included in demand notes',
+                code: 'S5T1',
+                description: 'All retrocession / demand notes have been matched against',
                 status: 'pending',
                 rule: {
-                    source: 'AllActiveCustodianAccounts',
-                    target: 'AllDemandNotesItems'
+                    source: 'AllStatementSummaries',
+                    target: 'MatchedBankStatementItems'
                 },
                 stat: '0 / 0'
+            },
+            {
+                code: 'S5T2',
+                description: 'All matched bank statement items have been approved',
+                status: 'pending',
+                rule: {
+                    source: 'MatchedBankStatementItems',
+                    target: 'ApprovedBankStatementItems'
+                },
+                stat: '0 / 0'
+            },
+            {
+                code: 'S5T3',
+                type: 'action',
+                status: 'pending',
+            },
+            {
+                code: 'S5T4',
+                description: 'All statement items have been allocated bank charges',
+                status: 'pending',
+                rule: {
+                    source: 'AllStatementItems',
+                    target: 'AllAllocatedStatementItems'
+                },
+                stat: '0 / 0'
+            }
+        ]
+    },
+    {
+        number: 6,
+        completed: false,
+        label: 'Fees Distribution',
+        actions: [{
+            actionName: 'feedist',
+            label: 'Distribute fees',
+            taskCode: 'S6T1',
+        }, {
+            actionName: 'printdist',
+            label: 'Print Fee Distribution Report',
+            taskCode: 'S6T2',
+        }, {
+            actionName: 'showgraph',
+            label: 'Show Fee Distribution Stat',
+            taskCode: 'S6T3',
+        }],
+        currentTaskNumber: 0,
+        data: [],
+        tasks: [
+            {
+                code: 'S6T1',
+                type: 'action',
+                status: 'pending',
+            },
+            {
+                code: 'S6T2',
+                type: 'action',
+                status: 'pending',
+            },
+            {
+                code: 'S6T3',
+                type: 'action',
+                status: 'pending',
             }
         ]
     }

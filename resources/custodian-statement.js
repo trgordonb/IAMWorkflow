@@ -2,6 +2,7 @@ const AdminJS = require('adminjs')
 const User = require('../models/user.model')
 const Message = require('../models/message-model')
 const sendNotificationEmail = require('../utils/email')
+const mongoose = require('mongoose')
 const { io } = require('../app')
 
 const CustodianStatementResource = {
@@ -67,11 +68,14 @@ const CustodianStatementResource = {
         new: {
             before: async (request, context) => {
                 const { currentAdmin } = context
+                let custodianAccountModel = mongoose.connection.models['AccountPolicy']
+                let custAcct = await custodianAccountModel.findById(request.payload.custodianAccount)
                 request.payload = {
                     ...request.payload,
                     recordEnteredBy: currentAdmin.id,
                     status: 'pending',
-                    period: currentAdmin.period
+                    period: currentAdmin.period,
+                    currency: custAcct.currency
                 }
                 return request
             },
@@ -90,9 +94,10 @@ const CustodianStatementResource = {
                 )
             },
             before: async (request, context) => {
+                let custodianAccountModel = mongoose.connection.models['AccountPolicy']
                 request.payload = {
                     ...request.payload,
-                    status: 'pending'
+                    status: 'pending',
                 }
                 return request
             },

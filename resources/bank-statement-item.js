@@ -1,24 +1,66 @@
-const Statement = require('../models/statement.model')
-const BankStatementItem = require('../models/bankstatement-item.model')
 const AdminJS = require('adminjs')
+const mongoose = require('mongoose')
 
 const BankStatementItemResource = {
+    id: 'BankStatementItem',
     actions: {
+        new: {
+            isAccessible: ({ currentAdmin, record }) => {
+                return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
+            },
+            before: async(request, context) => {
+                const { currentAdmin } = context
+                let statementSummaryModel = mongoose.connection.models['StatementSummary']
+                await statementSummaryModel.findByIdAndUpdate(request.payload.matchedStatement, {
+                    matched: true
+                })
+                request.payload = {
+                    ...request.payload,
+                    period: currentAdmin.period,
+                    status: 'pending',
+                }
+                return request
+            },
+            component: AdminJS.bundle('../components/BankStatementItem.jsx')
+        },
         edit: {
-            actionType: 'record',
             before: async(request) => {
                 console.log('Payload:',request.payload)
                 return request
             },
             isAccessible: ({ currentAdmin, record }) => {
-                return true
-                //return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
+                return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
             },
+            component: AdminJS.bundle('../components/BankStatementItem.jsx')
         },
         list: {
+            isAccessible: true
+        },
+        show: {
+            showInDrawer: true
+        },
+        delete: {
+            isAccessible: true
+        },
+        bulkDelete: {
             isAccessible: false
         },
-        bulkApprove: {
+        approve: {
+            actionType: 'record',
+            isAccessible: ({ currentAdmin, record }) => {
+                return (currentAdmin && currentAdmin.role === 'admin') 
+            },
+            component: false,
+            handler: async(request, response, context) => {
+                const { record, resource, currentAdmin } = context
+                await record.update({ status: 'approved' })
+                return { 
+                    record: record.toJSON(currentAdmin),
+                    notice: { message: 'Approval done', type: 'success' }
+                }
+            }
+        },
+        /**bulkApprove: {
             actionType: 'bulk',
             isAccessible: ({ currentAdmin, record }) => {
                 return (currentAdmin && currentAdmin.role === 'admin') 
@@ -27,8 +69,8 @@ const BankStatementItemResource = {
             handler: async(request, response, context) => {
                 return {records: [new AdminJS.BaseRecord({}, context.resource).toJSON(context.currentAdmin)] }
             }
-        },
-        reconcile: {
+        },*/
+        /**reconcile: {
             actionType: 'resource',
             isVisible: false,
             isAccessible: true,
@@ -62,24 +104,68 @@ const BankStatementItemResource = {
                     return { notice: { message: 'Fail', type: 'error', data: unmatched } }
                 }   
             }
-        }
+        }*/
     },
     properties: {
         _id: {
             isVisible: { list: false, filter: false, show: false, edit: false },
         },
-        date: {
+        bank: {
+            isVisible: { list: true, filter: true, show: true, edit: true },
+            position: 1
+        },
+        bankStatementRef: {
+            isVisible: { list: true, filter: true, show: true, edit: true },
+            position: 2
+        },
+        period: {
+            isVisible: { list: false, filter: true, show: true, edit: false },
+            position: 3
+        },
+        statementDate: {
             type: 'date',
             isVisible: { list: false, filter: true, show: true, edit: true },
+            position: 4,
+            components: { 
+                edit: AdminJS.bundle('../components/DateControl.jsx')
+            },
         },
-        netamount: {
-            isVisible: { list: false, filter: false, show: true, edit: false },
-        },
-        party: {
+        currency: {
             isVisible: { list: false, filter: true, show: true, edit: true },
+            position: 5
+        },
+        grossAmount: {
+            isVisible: { list: false, filter: false, show: true, edit: true },
+            position: 8
+        },
+        itemCharge: {
+            isVisible: { list: false, filter: false, show: true, edit: true },
+            position: 9
+        },
+        companyAccount: {
+            isVisible: { list: false, filter: true, show: true, edit: true },
+            position: 6,
+        },
+        counterParty: {
+            isVisible: { list: false, filter: true, show: true, edit: true },
+            position: 7,
+        },
+        status: {
+            isVisible: { list: true, filter: true, show: true, edit: false },
+            position: 11
         },
         isLocked: {
             isVisible: { list: true, filter: true, show: true, edit: false },
+            position: 12
+        },
+        matchedStatement: {
+            isVisible: { list: true, filter: true, show: true, edit: true },
+            position: 13
+        },
+        remark: {
+            type: 'textarea',
+            isVisible: { list: false, filter: false, show: true, edit: true },
+            position: 14
         }
     }
 }

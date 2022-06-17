@@ -17,6 +17,15 @@ const PeriodSchema = new Schema({
     },
     subPeriodEndDates: [Date],
     factor: Number,
+    exchangeRates: [{
+        currencyPair: {
+            type: Schema.Types.ObjectId,
+            ref: 'CurrencyPair'
+        },
+        value: {
+            type: Number,
+        }
+    }]
 })
 
 PeriodSchema.pre('save', function() {

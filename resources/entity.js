@@ -1,17 +1,17 @@
-const RoleResource = {
+const EntityResource = {
     properties: {
         _id: {
             isVisible: { list: false, filter: false, show: false, edit: false },
+        },
+        name: {
+            isVisible: { list: true, filter: false, show: true, edit: true },
         }
     },
     actions: {
-        list: {
-            isAccessible: true,
-        },
-        new: {
+        edit: {
             showInDrawer: true
         },
-        edit: {
+        new: {
             showInDrawer: true
         },
         show: {
@@ -20,4 +20,4 @@ const RoleResource = {
     }
 }
 
-module.exports = RoleResource
+module.exports = EntityResource

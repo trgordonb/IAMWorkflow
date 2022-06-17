@@ -6,7 +6,10 @@ const BankResource = {
     },
     actions: {
         list: {
-            isAccessible: false
+            isAccessible: true
+        },
+        new: {
+            showInDrawer: true
         }
     }
 }

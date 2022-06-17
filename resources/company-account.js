@@ -1,6 +1,7 @@
-const CounterPartyResource = {
+const CompanyAccountResource = {
+    id: 'CompanyAccount',
     properties: {
-        _id: {
+        _id : {
             isVisible: { list: false, filter: false, show: false, edit: false },
         }
     },
@@ -10,8 +11,14 @@ const CounterPartyResource = {
         },
         new: {
             showInDrawer: true
+        },
+        show: {
+            showInDrawer: true
+        },
+        edit: {
+            showInDrawer: true
         }
     }
 }
 
-module.exports = CounterPartyResource
+module.exports = CompanyAccountResource

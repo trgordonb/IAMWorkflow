@@ -21,18 +21,23 @@ const Bank = require('./models/bank.model')
 const Period = require('./models/period-model')
 const Report = require('./models/report.model')
 const Role = require('./models/role.model')
-const Payee = require('./models/payee-model')
+const CompanyAccount = require('./models/company-account-model')
 const FeeCode = require('./models/fee-code.model')
 const CounterParty = require('./models/counterparty.model')
 const StatementParticular = require('./models/statement-particular.model')
 const FeeSharing = require('./models/fee-sharing.model')
-const FeeSharingHistory = require('./models/feeshare-history.model')
+const FeeShareResult = require('./models/feeshare-result.model')
 const Statement = require('./models/statement.model')
 const PolicyFeeSetting = require('./models/policyfee-setting.model')
 const CustodianStatement = require('./models/custodian-statement-model')
 const Message = require('./models/message-model')
 const WorkflowConfig = require('./models/workflow-config.model')
-const DemandNoteItem = require('./models/demandnote-item.model')
+const { StatementItem } = require('./models/statement-item.model')
+const CurrencyPair = require('./models/currency-pair.model')
+const StatementSummary = require('./models/statement-summary-model')
+const Entity = require('./models/entity.model')
+const FeeRecipient = require('./models/fee-recipient.model')
+const RecipientFeeShare = require('./models/recipient-feeshare.model')
 const UserResource = require('./resources/user')
 const AssetAllocationResource = require('./resources/asset-allocation')
 const AllAssetAllocationResource = require('./resources/all-asset-allocation')
@@ -47,7 +52,7 @@ const CustomerUnitizedPerformanceResource = require('./resources/customer-unitiz
 const BankResource = require('./resources/bank')
 const PeriodResource = require('./resources/period')
 const RoleResource = require('./resources/role')
-const PayeeResource = require('./resources/payee')
+const CompanyAccountResource = require('./resources/company-account')
 const CustodianResource = require('./resources/custodian')
 const FeeCodeResource = require('./resources/feecode')
 const CounterPartyResource = require('./resources/counterparty')
@@ -58,14 +63,19 @@ const FeeSharingResource = require('./resources/fee-sharing')
 const StatementResource = require('./resources/statement')
 const BankStatementItemResource = require('./resources/bank-statement-item')
 const CurrencyHistoryResource = require('./resources/currency-history')
-const FeeSharingHistoryResource = require('./resources/fee-sharing-history')
+const FeeShareResultResource = require('./resources/feeshare-result')
 const PolicyFeeSettingResource = require('./resources/policy-fee-setting')
 const ReportResource = require('./resources/report')
 const CustodianStatementResource = require('./resources/custodian-statement')
 const MessageResource = require('./resources/message')
 const LogResource = require('./resources/log')
 const WorkflowConfigResource = require('./resources/workflow-config')
-const DemandNoteItemResource = require('./resources/demand-note-item')
+const StatementItemResource = require('./resources/statement-item')
+const CurrencyPairResource = require('./resources/currency-pair')
+const StatementSummaryResource = require('./resources/statement-summary')
+const EntityResource = require('./resources/entity')
+const FeeRecipientResource = require('./resources/fee-recipient')
+const RecipientFeeShareResource = require('./resources/recipient-feeshare')
 
 const menu = {
     Admin: { name: 'Admin/Reports' },
@@ -115,7 +125,7 @@ const adminJsConfig = {
         { resource: AssetAllocation, options: { parent: menu.Account, ...AllAssetAllocationResource }},
         { resource: AccountLedgerBalance, options: { parent: menu.Account, ...AccountLedgerBalanceResource } },
         { resource: AccountPolicy, options: { navigation: 'Admin Module', ...AccountPolicyResource } },
-        { resource: Bank, options: { parent: menu.Master, ...BankResource } },
+        { resource: Bank, options: { navigation: 'Admin Module', ...BankResource } },
         { resource: Currency, options: { navigation: 'Admin Module', ...CurrencyResource } },
         { resource: CurrencyHistory, options: { parent: menu.Master, ...CurrencyHistoryResource } },
         { resource: Customer, options: { navigation: 'Admin Module', ...CustomerResource } },
@@ -127,18 +137,18 @@ const adminJsConfig = {
         },
         { resource: CustomerPortfolio, options: { navigation: 'Admin Module', ...CustomerPortfolioResource }},
         { resource: CustomerUnitizedPerformance, options: { navigation: 'Quarterly Workflow Module', ...CustomerUnitizedPerformanceResource }},
-        { resource: CounterParty, options: { parent: menu.Master, ...CounterPartyResource } },
+        { resource: CounterParty, options: { navigation: 'Admin Module', ...CounterPartyResource } },
         { resource: Period, options: { navigation: 'Admin Module', ...PeriodResource } },
-        { resource: Role, options: { parent: menu.Master, ...RoleResource } },
-        { resource: Payee, options: { parent: menu.Master, ...PayeeResource } },
+        { resource: Role, options: { navigation: 'Admin Module', ...RoleResource } },
+        { resource: CompanyAccount, options: { navigation: 'Admin Module', ...CompanyAccountResource } },
         { resource: Custodian, options: { navigation: 'Admin Module', ...CustodianResource } },
         { resource: AccountCustodian, options: { parent: menu.Custodian, ...AccountCustodianResource } },
         { resource: FeeCode, options: { navigation: 'Admin Module', ...FeeCodeResource } },
         { resource: AccountFee, options: { parent: menu.Fees, ...AccountFeeResource } },
         { resource: StatementParticular, options: { parent: menu.Fees, ...StatementParticularResource } },
-        { resource: FeeSharing, options: { parent: menu.Fees, ...FeeSharingResource } },
-        { resource: FeeSharingHistory, options: { parent: menu.Fees, ...FeeSharingHistoryResource } },
-        { resource: BankStatementItem, options: { parent: menu.Fees, ...BankStatementItemResource } },
+        { resource: FeeSharing, options: { navigation: 'Admin Module', ...FeeSharingResource } },
+        { resource: FeeShareResult, options: { navigation: 'Quarterly Workflow Module', ...FeeShareResultResource } },
+        { resource: BankStatementItem, options: { navigation: 'Quarterly Workflow Module', ...BankStatementItemResource } },
         { resource: Statement, options: { parent: menu.Fees, ...StatementResource } },
         { resource: PolicyFeeSetting, options: { parent: menu.Fees, ...PolicyFeeSettingResource } },
         { resource: Report, options: { parent: menu.Admin, ...ReportResource }},
@@ -149,7 +159,12 @@ const adminJsConfig = {
         },
         { resource: Message, options: { navigation: 'Admin Module', ...MessageResource }},
         { resource: WorkflowConfig, options: { navigation: 'Quarterly Workflow Module', ...WorkflowConfigResource }},
-        { resource: DemandNoteItem, options: { navigation: 'Quarterly Workflow Module', ...DemandNoteItemResource }},
+        { resource: StatementItem, options: { navigation: 'Quarterly Workflow Module', ...StatementItemResource }},
+        { resource: CurrencyPair, options: { navigation: 'Admin Module', ...CurrencyPairResource }},
+        { resource: StatementSummary, options: { navigation: 'Quarterly Workflow Module', ...StatementSummaryResource }},
+        { resource: Entity, options: { navigation: 'Admin Module', ...EntityResource }},
+        { resource: FeeRecipient, options: { navigation: 'Admin Module', ...FeeRecipientResource }},
+        { resource: RecipientFeeShare, options: { navigation: 'Quarterly Workflow Module', ...RecipientFeeShareResource }},
     ],
     locale: {
         translations: {
@@ -160,27 +175,25 @@ const adminJsConfig = {
                 loginWelcome: 'I-AMS',
                 CurrencyHistory: 'Currency Histories',
                 Currency: 'Currencies',
-                Period: 'Report Periods',
-                CounterParty: 'Custodians',
+                Period: 'Periods',
+                CounterParty: 'Counter Party',
                 Bank: 'Settlement Banks',
-                Role: 'Company Roles',
+                Role: 'Entity Roles',
                 User: 'Portal Users',
                 Report: 'Reports',
                 Custodian: 'Custodians',
                 Customer: 'Customers',
                 Statement: 'Custodian Statements',
                 StatementParticular: 'Custodian Particulars',
-                Payee: 'Company Payees',
+                Payee: 'Company Accounts',
                 BankStatementItem: 'Bank Statements',
                 AccountPolicy: 'Custodian Accounts',
-                AccountLedgerBalance: 'Account Ledger Balances',
                 AccountCustodian: 'Custodian Policy Settings',
                 FeeShareHistory: 'Fee Shares Results',
                 FeeCode: 'Fee Codes',
                 PolicyFeeSetting: 'Policy Fees Setting',
                 FeeSharingScheme: 'Fee Share Schemes',
                 AccountFee: 'Statement Particular Fee Sharing Settings',
-                AssetAllocation: 'Asset Allocation (unchecked)',
                 CustomerTransaction: 'Customer Transactions',
                 Message: 'System Messages',
                 CustomerPortfolio: 'Portfolio Unit Definition',
@@ -208,7 +221,9 @@ const adminJsConfig = {
                     properties: {
                         number: 'Custodian Account Number',
                         customer: 'IAM Customer Number',
-                        currency: 'Currency'
+                        currency: 'Currency',
+                        'feeSharing.feeType': 'Transaction Type',
+                        'feeSharing.feeSharingScheme': 'Scheme Code'
                     }
                 },
                 'Custodian Statement': {
@@ -244,6 +259,17 @@ const adminJsConfig = {
                         currentSubPeriodUnitsWithdrawn: 'Unit withdrawn',
                         netChange: 'Net Change',
                         unitizedChange: 'Unitized Change'
+                    }
+                },
+                StatementSummary: {
+                    properties: {
+                        'details.custodianAccount': 'Custodian Account',
+                        'details.amount': 'Amount'
+                    }
+                },
+                BankStatementItem: {
+                    properties: {
+                        companyAccount: 'Company Account'
                     }
                 }
             }
