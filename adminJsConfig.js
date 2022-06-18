@@ -4,13 +4,8 @@ const loggerConfig = require('./config/logger.config')
 const loggerFeature = require('@adminjs/logger').default
 const ModifiedLogger = require('./features/logger/modifiedLogger')
 const User = require('./models/user.model')
-const AssetAllocation = require('./models/asset-allocation.model')
 const AccountPolicy = require('./models/account-policy')
-const AccountCustodian = require('./models/account-custodian.model')
-const AccountLedgerBalance = require('./models/account-ledger-balance.model')
-const AccountFee = require('./models/account-fee.model')
 const Currency = require('./models/currency.model')
-const CurrencyHistory = require('./models/currency-history.model')
 const Customer = require('./models/customer-model')
 const CustomerTransaction = require('./models/customer-transaction.model')
 const CustomerPortfolio = require('./models/customer-portfolio.model')
@@ -19,16 +14,12 @@ const BankStatementItem = require('./models/bankstatement-item.model')
 const Custodian = require('./models/custodian.model')
 const Bank = require('./models/bank.model')
 const Period = require('./models/period-model')
-const Report = require('./models/report.model')
 const Role = require('./models/role.model')
 const CompanyAccount = require('./models/company-account-model')
 const FeeCode = require('./models/fee-code.model')
 const CounterParty = require('./models/counterparty.model')
-const StatementParticular = require('./models/statement-particular.model')
 const FeeSharing = require('./models/fee-sharing.model')
 const FeeShareResult = require('./models/feeshare-result.model')
-const Statement = require('./models/statement.model')
-const PolicyFeeSetting = require('./models/policyfee-setting.model')
 const CustodianStatement = require('./models/custodian-statement-model')
 const Message = require('./models/message-model')
 const WorkflowConfig = require('./models/workflow-config.model')
@@ -39,13 +30,9 @@ const Entity = require('./models/entity.model')
 const FeeRecipient = require('./models/fee-recipient.model')
 const RecipientFeeShare = require('./models/recipient-feeshare.model')
 const UserResource = require('./resources/user')
-const AssetAllocationResource = require('./resources/asset-allocation')
-const AllAssetAllocationResource = require('./resources/all-asset-allocation')
 const AccountPolicyResource = require('./resources/account-policy')
-const AccountCustodianResource = require('./resources/accountcustodian')
 const CurrencyResource = require('./resources/currency')
 const CustomerResource = require('./resources/customer')
-const AllCustomerTransactionResource = require('./resources/all-customer-transaction')
 const CustomerTransactionResource = require('./resources/customer-transaction')
 const CustomerPortfolioResource = require('./resources/customer-portfolio')
 const CustomerUnitizedPerformanceResource = require('./resources/customer-unitized-performance')
@@ -56,16 +43,9 @@ const CompanyAccountResource = require('./resources/company-account')
 const CustodianResource = require('./resources/custodian')
 const FeeCodeResource = require('./resources/feecode')
 const CounterPartyResource = require('./resources/counterparty')
-const AccountFeeResource = require('./resources/account-fee')
-const AccountLedgerBalanceResource = require('./resources/account-ledger-balance')
-const StatementParticularResource = require('./resources/statement-particular')
 const FeeSharingResource = require('./resources/fee-sharing')
-const StatementResource = require('./resources/statement')
 const BankStatementItemResource = require('./resources/bank-statement-item')
-const CurrencyHistoryResource = require('./resources/currency-history')
 const FeeShareResultResource = require('./resources/feeshare-result')
-const PolicyFeeSettingResource = require('./resources/policy-fee-setting')
-const ReportResource = require('./resources/report')
 const CustodianStatementResource = require('./resources/custodian-statement')
 const MessageResource = require('./resources/message')
 const LogResource = require('./resources/log')
@@ -121,15 +101,10 @@ const adminJsConfig = {
     resources: [
         { ...LogResource, options: { ...LogResource.options, navigation: 'Admin Module' } },
         { resource: User, options: { navigation: 'Admin Module', ...UserResource } },
-        { resource: AssetAllocation, options: { parent: menu.Account, ...AssetAllocationResource} },
-        { resource: AssetAllocation, options: { parent: menu.Account, ...AllAssetAllocationResource }},
-        { resource: AccountLedgerBalance, options: { parent: menu.Account, ...AccountLedgerBalanceResource } },
         { resource: AccountPolicy, options: { navigation: 'Admin Module', ...AccountPolicyResource } },
         { resource: Bank, options: { navigation: 'Admin Module', ...BankResource } },
         { resource: Currency, options: { navigation: 'Admin Module', ...CurrencyResource } },
-        { resource: CurrencyHistory, options: { parent: menu.Master, ...CurrencyHistoryResource } },
         { resource: Customer, options: { navigation: 'Admin Module', ...CustomerResource } },
-        { resource: CustomerTransaction, options: { parent: menu.Account, ...AllCustomerTransactionResource }},
         { resource: CustomerTransaction, options: { navigation: 'Quarterly Workflow Module', ...CustomerTransactionResource },
             features: [
                 loggerFeature(loggerConfig), ModifiedLogger('CustomerTransaction')
@@ -142,16 +117,10 @@ const adminJsConfig = {
         { resource: Role, options: { navigation: 'Admin Module', ...RoleResource } },
         { resource: CompanyAccount, options: { navigation: 'Admin Module', ...CompanyAccountResource } },
         { resource: Custodian, options: { navigation: 'Admin Module', ...CustodianResource } },
-        { resource: AccountCustodian, options: { parent: menu.Custodian, ...AccountCustodianResource } },
         { resource: FeeCode, options: { navigation: 'Admin Module', ...FeeCodeResource } },
-        { resource: AccountFee, options: { parent: menu.Fees, ...AccountFeeResource } },
-        { resource: StatementParticular, options: { parent: menu.Fees, ...StatementParticularResource } },
         { resource: FeeSharing, options: { navigation: 'Admin Module', ...FeeSharingResource } },
         { resource: FeeShareResult, options: { navigation: 'Quarterly Workflow Module', ...FeeShareResultResource } },
         { resource: BankStatementItem, options: { navigation: 'Quarterly Workflow Module', ...BankStatementItemResource } },
-        { resource: Statement, options: { parent: menu.Fees, ...StatementResource } },
-        { resource: PolicyFeeSetting, options: { parent: menu.Fees, ...PolicyFeeSettingResource } },
-        { resource: Report, options: { parent: menu.Admin, ...ReportResource }},
         { resource: CustodianStatement, options: { navigation: 'Quarterly Workflow Module', ...CustodianStatementResource }, 
             features: [
                 loggerFeature(loggerConfig), ModifiedLogger('Custodian Statement')
