@@ -114,12 +114,13 @@ const WorkflowConfig = (props) => {
         setIsLoading(false)
     }
 
-    const getButton = (taskCode) => {
+    const getButton = (taskCode, taskIndex) => {
         return (
             stages[currentStep-1].actions.filter(action => {
                 return (action.taskCode === taskCode)
-            }).map(action => (
+            }).map((action,idx) => (
                 <Button 
+                    disabled={taskIndex !== stages[currentStep-1].currentTaskNumber}
                     key={action.actionName}
                     mt="default"
                     mr="default"
@@ -230,13 +231,13 @@ const WorkflowConfig = (props) => {
                             idx === stages[currentStep-1].currentTaskNumber ?
                                 <NewTableRow key={task.code}>
                                     <TableCell>{task.code}</TableCell>
-                                    <TableCell>{getButton(task.code)}</TableCell>
+                                    <TableCell>{getButton(task.code, idx)}</TableCell>
                                     <TableCell></TableCell>
                                     <TableCell>{task.status}</TableCell>
                                 </NewTableRow> :
                                 <TableRow key={task.code}>
                                     <TableCell>{task.code}</TableCell>
-                                    <TableCell>{getButton(task.code)}</TableCell>
+                                    <TableCell>{getButton(task.code, idx)}</TableCell>
                                     <TableCell></TableCell>
                                     <TableCell>{task.status}</TableCell>
                                 </TableRow> :
