@@ -6,7 +6,7 @@ const BankStatementItemResource = {
     actions: {
         new: {
             isAccessible: ({ currentAdmin, record }) => {
-                return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user' && !record.param('isLocked')))
+                return ((currentAdmin && currentAdmin.role === 'admin') || (currentAdmin && currentAdmin.role === 'user'))
             },
             before: async(request, context) => {
                 const { currentAdmin } = context
