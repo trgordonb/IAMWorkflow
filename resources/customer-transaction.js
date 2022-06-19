@@ -16,7 +16,7 @@ const CustomerTransactionResource = {
         },
         status: {
             isVisible: { list: false, filter: true, show: true, edit: false },
-            position: 6,
+            position: 8,
         },
         customer: {
             isVisible: true,
@@ -41,9 +41,17 @@ const CustomerTransactionResource = {
             position: 1,
             isVisible: { list: true, filter: true, show: true, edit: true },
         },
+        isSeedMoney: {
+            isVisible: { list: false, filter: true, show: true, edit: true },
+            position: 5
+        },
+        subscribeUnitNumber: {
+            isVisible: { list: false, filter: false, show: true, edit: true },
+            position: 7
+        },
         remark: {
             isVisible: { list: false, filter: false, show: true, edit: true },
-            position: 6,
+            position: 7,
             type: 'textarea'
         },
         period: {
@@ -76,6 +84,8 @@ const CustomerTransactionResource = {
                 ['customer', { ml: 'xxl' }],
                 ['transactionType', { ml: 'xxl' }],
                 ['nominalValue', { ml: 'xxl' }],
+                ['isSeedMoney', { ml: 'xxl '}],
+                ['subscribeUnitNumber', { ml: 'xxl'}],
                 ['remark', { ml: 'xxl' }]
             ]
         },
@@ -106,6 +116,8 @@ const CustomerTransactionResource = {
                 ['customer', { ml: 'xxl' }],
                 ['transactionType', { ml: 'xxl' }],
                 ['nominalValue', { ml: 'xxl' }],
+                ['isSeedMoney', { ml: 'xxl '}],
+                ['subscribeUnitNumber', { ml: 'xxl'}],
                 ['remark', { ml: 'xxl' }]
             ]
         },

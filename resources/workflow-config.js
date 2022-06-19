@@ -483,6 +483,7 @@ const WorkflowConfigResource = {
                         
                         let totalDeposit = 0
                         let totalWithdraw = 0
+                        let startNAVPerUnit = pRecord.startNAV/pRecord.startUnit
                         let CustomerTransactionRecords = await customerTransModel.find({date: {$lte: endDate, $gt: newCustomerUnitizedRecord.lastSubPeriodDate}, status: 'approved', customer: pRecord.customer})
                         await Promise.all(CustomerTransactionRecords.map(async (tran) => {
                             let exRate = 1
@@ -495,6 +496,9 @@ const WorkflowConfigResource = {
                                     exRate = exRateRecord.value
                                 }
                                 totalDeposit = totalDeposit + tran.nominalValue * exRate
+                                if (tran.isSeedMoney) {
+                                    startNAVPerUnit = totalDeposit / tran.subscribeUnitNumber
+                                }
                             } else if (tran.transactionType === 'withdraw') {
                                 if (!exRateRecord) {
                                     let defaultRecord = await currencyPairModel.findOne({base: pRecord.currency, quote: tran.currency})
@@ -508,8 +512,8 @@ const WorkflowConfigResource = {
                         newCustomerUnitizedRecord.currentSubPeriodDeposited = Math.round(100*totalDeposit,2)/100
                         newCustomerUnitizedRecord.currentSubPeriodWithdrawn = Math.round(100*totalWithdraw,2)/100
                         if (prevUnitizedRecord.length === 0) {
-                            newCustomerUnitizedRecord.currentSubPeriodUnitsDeposited = Math.round(10000*newCustomerUnitizedRecord.currentSubPeriodDeposited / (pRecord.startNAV/pRecord.startUnit),4)/10000
-                            newCustomerUnitizedRecord.currentSubPeriodUnitsWithdrawn = Math.round(10000*newCustomerUnitizedRecord.currentSubPeriodWithdrawn / (pRecord.startNAV/pRecord.startUnit),4)/10000
+                            newCustomerUnitizedRecord.currentSubPeriodUnitsDeposited = Math.round(10000*newCustomerUnitizedRecord.currentSubPeriodDeposited / startNAVPerUnit,4)/10000
+                            newCustomerUnitizedRecord.currentSubPeriodUnitsWithdrawn = Math.round(10000*newCustomerUnitizedRecord.currentSubPeriodWithdrawn / startNAVPerUnit,4)/10000
                         } else {
                             newCustomerUnitizedRecord.currentSubPeriodUnitsDeposited = Math.round(10000*newCustomerUnitizedRecord.currentSubPeriodDeposited / prevUnitizedRecord[0].currentSubPeriodNAVPerUnit,4)/10000
                             newCustomerUnitizedRecord.currentSubPeriodUnitsWithdrawn = Math.round(10000*newCustomerUnitizedRecord.currentSubPeriodWithdrawn / prevUnitizedRecord[0].currentSubPeriodNAVPerUnit,4)/10000    
@@ -519,7 +523,7 @@ const WorkflowConfigResource = {
                         newCustomerUnitizedRecord.currentSubPeriodNAVPerUnit = Math.round(100* total / newCustomerUnitizedRecord.currentSubPeriodUnit,2)/100
                         newCustomerUnitizedRecord.netChange = Math.round(100*((newCustomerUnitizedRecord.currentSubPeriodNAV - newCustomerUnitizedRecord.lastSubPeriodNAV) - newCustomerUnitizedRecord.currentSubPeriodDeposited + newCustomerUnitizedRecord.currentSubPeriodWithdrawn),2)/100
                         if (prevUnitizedRecord.length === 0) {
-                            newCustomerUnitizedRecord.unitizedChange = Math.round(1000*(100*(newCustomerUnitizedRecord.currentSubPeriodNAVPerUnit - (pRecord.startNAV/pRecord.startUnit)) / (pRecord.startNAV/pRecord.startUnit)),3)/1000
+                            newCustomerUnitizedRecord.unitizedChange = Math.round(1000*(100*(newCustomerUnitizedRecord.currentSubPeriodNAVPerUnit - startNAVPerUnit) / startNAVPerUnit),3)/1000
                         } else {
                             newCustomerUnitizedRecord.unitizedChange = Math.round(1000*(100*(newCustomerUnitizedRecord.currentSubPeriodNAVPerUnit - prevUnitizedRecord[0].currentSubPeriodNAVPerUnit) / prevUnitizedRecord[0].currentSubPeriodNAVPerUnit),3)/1000
                         }

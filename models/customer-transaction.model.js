@@ -29,6 +29,14 @@ const CustomerTransactionSchema = new Schema({
         index: true,
         enum: ['deposit','withdraw']
     },
+    isSeedMoney: {
+        type: Boolean, 
+        index: true
+    },
+    subscribeUnitNumber: {
+        type: Number,
+        index: true,
+    },
     status: {
         type: String,
         enum: ['pending', 'approved', 'rejected'],
