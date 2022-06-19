@@ -164,6 +164,9 @@ const WorkflowConfigResource = {
                     'reconcilation.completed': true
                 }).populate({path: 'custodianAccount', populate: {path: 'feeSharing', populate: {path: 'feeSharingScheme'}}})
                 let recipientShare = {}
+                await feeShareResultModel.remove({
+                    period: currentAdmin.period
+                })
                 await Promise.all(statementItems.map(async (item) => {
                     let result = {}
                     result.statementItem = item._id.toString()
@@ -202,6 +205,9 @@ const WorkflowConfigResource = {
                     const fShareResult = new feeShareResultModel(result)
                     await fShareResult.save()
                 }))
+                await recipientFeeShareModel.remove({
+                    period: currentAdmin.admin
+                })
                 await Promise.all(Object.keys(recipientShare).map(async (recipient) => {
                     let rShare = recipientShare[recipient]
                     const rShareResult = new recipientFeeShareModel(rShare)
@@ -226,6 +232,8 @@ const WorkflowConfigResource = {
                 let statementSummaryModel = mongoose.connection.models['StatementSummary']
                 let allTags = []
                 let endDate = tmpRecord.subPeriodEndDates[currentStage-1]
+                await statementItemModel.remove({period: currentAdmin.period})
+                await statementSummaryModel.remove({period: currentAdmin.period})
                 let customerPortfolioRecords = await custodianStatementModel.find({
                     period: period,
                     statementDate: endDate,
@@ -432,6 +440,10 @@ const WorkflowConfigResource = {
                 let currencyPairModel = mongoose.connection.models['CurrencyPair']
                 let periodRecord = await periodModel.findById(currentAdmin.period).populate({path: 'exchangeRates', populate: {path: 'currencyPair'}})     
                 let customerPortfolioRecords = await customerModel.find({startDate: {$lte: endDate}})
+                await portfolioModel.remove({
+                    period: currentAdmin.period,
+                    currentSubPeriodDate: endDate
+                })
                     
                 await Promise.all(customerPortfolioRecords.map(async (pRecord) => {
                     let newCustomerUnitizedRecord = {}
