@@ -4,6 +4,7 @@ import { useHistory } from 'react-router'
 import { useDropzone } from 'react-dropzone'
 import { flat } from 'adminjs'
 import DateControl from './DateControl'
+import { appendForceRefresh } from '../utils/append-force-refresh'
 
 const BankStatementItem = (props) => {
     const { record: initialRecord, resource } = props
@@ -12,7 +13,7 @@ const BankStatementItem = (props) => {
         setDocURL(URL.createObjectURL(acceptedFiles[0]))
     }, [])
     const {getRootProps, getInputProps} = useDropzone({onDrop})
-    const { record, handleChange, submit } = useRecord(initialRecord, resource.id)
+    const { record, handleChange, submit: handleSubmit } = useRecord(initialRecord, resource.id)
     const history = useHistory()
     const { translateButton } = useTranslation()
     const initialGross = 0
@@ -23,7 +24,8 @@ const BankStatementItem = (props) => {
     const [currency, setCurrency] = React.useState('')
     const sendNotice = useNotice()
 
-    const handleSubmit = event => {
+    const submit = event => {
+        event.preventDefault()
         let verifyOK = true
         if (record.params.currency !== currency) {
             verifyOK = false
@@ -36,10 +38,15 @@ const BankStatementItem = (props) => {
             return false
         }
         if (verifyOK) {
-            submit().then(response => {
-                history.push('/admin/resources/BankStatementItem');
+            handleSubmit().then(response => {
+                if (response.data.redirectUrl) {
+                    history.push(appendForceRefresh(response.data.redirectUrl))
+                }
+                if (response.data.record.id && !Object.keys(response.data.record.errors).length) {
+                    handleChange({ params: {}, populated: {}, errors: {} })
+                }
             })
-            return true
+            return false
         } else {
             return false
         }      
@@ -68,7 +75,7 @@ const BankStatementItem = (props) => {
             </div>
             <iframe width={1000} height={800} src={docURL} type="application/pdf"/>
         </Box>
-        <Box flexGrow={1} py='lg' marginX={25} as="form" onSubmit={handleSubmit}>          
+        <Box flexGrow={1} py='lg' marginX={25} as="form" onSubmit={submit}>          
             <BasePropertyComponent
                 where="edit"
                 onChange={handleChange}

@@ -3,6 +3,7 @@ import { useRecord, BasePropertyComponent, useTranslation, ApiClient } from 'adm
 import { useHistory } from 'react-router'
 import { useDropzone } from 'react-dropzone'
 import DateSelect from './DateSelect'
+import { appendForceRefresh } from '../utils/append-force-refresh'
 
 const CustodianStatement = (props) => {
     const { record: initialRecord, resource, action } = props
@@ -21,16 +22,22 @@ const CustodianStatement = (props) => {
     const {getRootProps, getInputProps} = useDropzone({onDrop})
     const allKeys = ['cashValue','equitiesValue','derivativesValue','bondsValue','alternativesValue']
 
-    const { record, handleChange, submit } = useRecord(initialRecord, resource.id)
+    const { record, handleChange, submit: handleSubmit } = useRecord(initialRecord, resource.id)
     const history = useHistory()
     const api = new ApiClient()
     const { translateButton } = useTranslation()
 
-    const handleSubmit = event => {
-        submit().then(response => {
-            history.push('/admin/resources/Custodian%20Statement');
+    const submit = event => {
+        event.preventDefault()
+        handleSubmit().then((response) => {
+            if (response.data.redirectUrl) {
+                history.push(appendForceRefresh(response.data.redirectUrl))
+            }
+            if (response.data.record.id && !Object.keys(response.data.record.errors).length) {
+                handleChange({ params: {}, populated: {}, errors: {} })
+            }
         });
-        return true;
+        return false;
     }
 
     const customChange = async (propertyRecord, value, selectedRecord) => {
@@ -96,7 +103,7 @@ const CustodianStatement = (props) => {
             </div>
             <iframe width={1000} height={800} src={docURL} type="application/pdf"/>
         </Box>
-        <Box py='lg' marginX={25} as="form" onSubmit={handleSubmit}>          
+        <Box py='lg' marginX={25} as="form" onSubmit={submit}>          
             <Box flex flexDirection={'row'}>
                 <Box flexGrow={0} marginRight={15}>
                     <DateSelect
