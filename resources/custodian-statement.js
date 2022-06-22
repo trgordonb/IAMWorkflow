@@ -15,32 +15,45 @@ const CustodianStatementResource = {
             isVisible: { list: false, filter: false, show: true, edit: false },
         },
         custodianAccount: {
-            isTitle: true
+            isTitle: true,
+            position: 1
         },
         statementDate: {
             type: 'date',
             isVisible: { list: true, filter: true, show: true, edit: true },
+            position: 2
         },
         currency: {
-            isVisible: { list: false, filter: true, show: true, edit: true },
+            isVisible: { list: true, filter: true, show: true, edit: true },
+            position: 3
+        },
+        status: {
+            isVisible:{ list: true, filter: true, show: true, edit: false },
+            position: 4
+        },
+        total: {
+            isVisible:{ list: true, filter: false, show: true, edit: true },
+            position: 5
         },
         cashValue: {
             isVisible: { list: true, filter: false, show: true, edit: true },
+            position: 6
         },
         equitiesValue: {
             isVisible: { list: true, filter: false, show: true, edit: true },
+            position: 7
         },
         derivativesValue: {
             isVisible: { list: true, filter: false, show: true, edit: true },
+            position: 8
         },
         bondsValue: {
             isVisible: { list: true, filter: false, show: true, edit: true },
+            position: 9
         },
         alternativesValue: {
             isVisible: { list: true, filter: false, show: true, edit: true },
-        },
-        total: {
-            isVisible:{ list: true, filter: false, show: true, edit: true }
+            positionL: 10
         },
         cashAllocation: {
             isVisible:{ list: false, filter: false, show: true, edit: true }
@@ -56,9 +69,6 @@ const CustodianStatementResource = {
         },
         alternativesAllocation: {
             isVisible:{ list: false, filter: false, show: true, edit: true }
-        },
-        status: {
-            isVisible:{ list: true, filter: true, show: true, edit: false }
         },
         alert: {
             isVisible: { list: false, filter: true, show: true, edit: false }
@@ -120,6 +130,9 @@ const CustodianStatementResource = {
             },
             showInDrawer: false,
             component: AdminJS.bundle('../components/CustodianStatementShow.jsx'),
+        },
+        list: {
+            component: AdminJS.bundle('../components/CustodianStatementList.jsx')
         },
         stat: {
             isAccessible: ({ currentAdmin }) => {

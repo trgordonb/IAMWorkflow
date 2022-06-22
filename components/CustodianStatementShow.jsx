@@ -4,9 +4,9 @@ import { useHistory } from 'react-router'
 import { useDropzone } from 'react-dropzone'
 
 const CustodianStatementShow = (props) => {
-    const { record: initialRecord, resource, action } = props
+    let { record: initialRecord, resource, action } = props
     const [clientId, setClientId] = React.useState('')
-    const [total, setTotal] = React.useState(0)
+    const [total, setTotal] = React.useState('')
     const [cashAllocation, setCashAllocation] = React.useState(0)
     const [equitiesAllocation, setEquitiesAllocation] = React.useState(0)
     const [derivativesAllocation, setDerivativesAllocation] = React.useState(0)
@@ -20,7 +20,13 @@ const CustodianStatementShow = (props) => {
     const {getRootProps, getInputProps} = useDropzone({onDrop})
     const allKeys = ['cashValue','equitiesValue','derivativesValue','bondsValue','alternativesValue']
 
+    console.log(initialRecord.params)
+    initialRecord.params.total = initialRecord.params.total.toLocaleString()
+    allKeys.forEach(key => {
+        initialRecord.params[key] = initialRecord.params[key].toLocaleString()
+    })
     const { record, handleChange, submit } = useRecord(initialRecord, resource.id)
+
     const history = useHistory()
     const api = new ApiClient()
 
@@ -50,7 +56,7 @@ const CustodianStatementShow = (props) => {
         Object.keys(record.params).filter(key => (allKeys.indexOf(key) >= 0)).forEach(key => {
             curTotal = curTotal + parseFloat(record.params[key])
         })
-        setTotal(curTotal)
+        //setTotal(curTotal)
         setCashAllocation(record.params.cashValue ? (100 * parseFloat(record.params.cashValue) / curTotal).toFixed(2) : 0)
         setEquitiesAllocation(record.params.equitiesValue ? (100 * parseFloat(record.params.equitiesValue) / curTotal).toFixed(2) : 0)
         setDerivativesAllocation(record.params.derivativesValue ? (100 * parseFloat(record.params.derivativesValue) / curTotal).toFixed(2) : 0)
