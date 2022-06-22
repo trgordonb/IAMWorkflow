@@ -1,4 +1,4 @@
-import { Box, Button, Text } from '@adminjs/design-system'
+import { Box, Button, Text, Modal } from '@adminjs/design-system'
 import { useRecord, BasePropertyComponent, useTranslation, ApiClient } from 'adminjs'
 import { useHistory } from 'react-router'
 import { useDropzone } from 'react-dropzone'
@@ -17,6 +17,7 @@ const CustodianStatement = (props) => {
     const [alternativesAllocation, setAlternativesAllocation] = React.useState(0)
     const [custAcct, setCustAcct] = React.useState('')
     const [currentPeriodDate, setCurrentPeriodDate] = React.useState()
+    const [showModal, setShowModal] = React.useState(false)
     let valuesList = [] 
     const [docURL, setDocURL] = React.useState([])
     const onDrop = React.useCallback(acceptedFiles => {
@@ -32,15 +33,30 @@ const CustodianStatement = (props) => {
 
     const submit = event => {
         event.preventDefault()
-        handleSubmit().then((response) => {
-            if (response.data.redirectUrl) {
-                history.push(appendForceRefresh(response.data.redirectUrl))
-            }
-            if (response.data.record.id && !Object.keys(response.data.record.errors).length) {
-                handleChange({ params: {}, populated: {}, errors: {} })
-            }
-        });
-        return false;
+        if (checkTotal()) {
+            handleSubmit().then((response) => {
+                if (response.data.redirectUrl) {
+                    history.push(appendForceRefresh(response.data.redirectUrl))
+                }
+                if (response.data.record.id && !Object.keys(response.data.record.errors).length) {
+                    handleChange({ params: {}, populated: {}, errors: {} })
+                }
+            });
+            return false;
+        } else {
+            setShowModal(true)
+        }  
+    }
+
+    const checkTotal = () => {
+        if (lastPeriodTotal === 0) {
+            return true
+        }
+        if (Math.abs(100 * (total - lastPeriodTotal) / lastPeriodTotal) > 10) {
+            return false
+        } else {
+            return true
+        }
     }
 
     const customChange = async (propertyRecord, value, selectedRecord) => {
@@ -123,6 +139,36 @@ const CustodianStatement = (props) => {
 
     return (
     <>
+    { showModal &&
+        <Modal
+          title="System Message"
+          onOverlayClick={()=> setShowModal(false)}
+          variant='danger'
+          subTitle='Total AUM deviate 10% from last month value, continue?'
+          buttons={[
+            {
+              label: 'Yes',
+              onClick: () => {
+                setShowModal(false)
+                handleSubmit().then((response) => {
+                    if (response.data.redirectUrl) {
+                        history.push(appendForceRefresh(response.data.redirectUrl))
+                    }
+                    if (response.data.record.id && !Object.keys(response.data.record.errors).length) {
+                        handleChange({ params: {}, populated: {}, errors: {} })
+                    }
+                });
+              }
+            },
+            {
+              label: 'Cancel',
+              onClick: () => {
+                setShowModal(false)
+              }
+            }
+          ]}
+        />
+    }
     <Box flex flexDirection={'row'}>
         <Box>
             <div {...getRootProps()} style={{borderWidth: 5}}>
