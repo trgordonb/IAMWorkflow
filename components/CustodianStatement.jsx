@@ -9,12 +9,15 @@ const CustodianStatement = (props) => {
     const { record: initialRecord, resource, action } = props
     const [clientId, setClientId] = React.useState('')
     const [total, setTotal] = React.useState(0)
+    const [lastPeriodTotal, setLastPeriodTotal] = React.useState(0)
     const [cashAllocation, setCashAllocation] = React.useState(0)
     const [equitiesAllocation, setEquitiesAllocation] = React.useState(0)
     const [derivativesAllocation, setDerivativesAllocation] = React.useState(0)
     const [bondsAllocation, setBondsAllocation] = React.useState(0)
     const [alternativesAllocation, setAlternativesAllocation] = React.useState(0)
-    let valuesList = []
+    const [custAcct, setCustAcct] = React.useState('')
+    const [currentPeriodDate, setCurrentPeriodDate] = React.useState()
+    let valuesList = [] 
     const [docURL, setDocURL] = React.useState([])
     const onDrop = React.useCallback(acceptedFiles => {
         setDocURL(URL.createObjectURL(acceptedFiles[0]))
@@ -44,6 +47,12 @@ const CustodianStatement = (props) => {
         if (allKeys.indexOf(propertyRecord) >= 0 && value !== '') {
             valuesList.push({[propertyRecord]: value})
         }
+        if (propertyRecord === 'custodianAccount') {
+            setCustAcct(value)
+        }
+        if (propertyRecord === 'statementDate') {
+            setCurrentPeriodDate(value)
+        }
         if (selectedRecord && selectedRecord.params && selectedRecord.params.customer) {
             const result = await api.recordAction({
                 resourceId: 'Customer',
@@ -57,6 +66,24 @@ const CustodianStatement = (props) => {
         handleChange(propertyRecord, value, selectedRecord)
     }
 
+    React.useEffect(() => {
+        const getLastPeriodAUM = async () => {
+            const result = await api.resourceAction({
+                resourceId: 'Custodian Statement',
+                actionName: 'getlast',
+                data: {
+                    custodianAccount: custAcct,
+                    currentPeriodDate: currentPeriodDate
+                }
+            })
+            if (result && result.status === 200 && result.data.total) {
+                setLastPeriodTotal(result.data.total)
+            }
+        }
+        if (currentPeriodDate && custAcct !== '') {
+            getLastPeriodAUM()
+        }
+    },[currentPeriodDate, custAcct])
 
     React.useEffect(() => {
         const fetchCustomer = async() => {
@@ -107,7 +134,7 @@ const CustodianStatement = (props) => {
             <Box flex flexDirection={'row'}>
                 <Box flexGrow={0} marginRight={15}>
                     <DateSelect
-                        onChange={handleChange}
+                        onChange={customChange}
                         property={resource.properties.statementDate}
                         resource={resource}
                         record={record}
@@ -209,10 +236,17 @@ const CustodianStatement = (props) => {
                 </Box>
             </Box>
 
-            <Box marginY={10}>
-                <Text>{`Total: ${total}`}</Text>
+            <Box marginY={10} flex flexDirection={'row'}>
+                <Box flexGrow={0} marginRight={15}>
+                    <Text marginY={10}>This month total</Text>
+                    <Text>{total.toLocaleString()}</Text>
+                </Box>
+                <Box flexGrow={0} alignSelf='auto'>
+                    <Text marginY={10}>Last month total</Text>
+                    <Text>{lastPeriodTotal.toLocaleString()}</Text>
+                </Box>
             </Box>
-            <Button variant="primary" size="lg">
+            <Button marginY={10} variant="primary" size="lg">
                 {translateButton('save', resource.id)}
             </Button>
         </Box>

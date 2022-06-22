@@ -176,6 +176,20 @@ const CustodianStatementResource = {
                 }
             }
         },
+        getlast: {
+            actionType: 'resource',
+            isVisible: false,
+            isAccessible: true,
+            component: false,
+            handler: async(request, response, context) => {
+                const { record, resource, currentAdmin } = context
+                const records = await resource.MongooseModel.find({
+                    custodianAccount: request.payload.custodianAccount,
+                    statementDate: {$lt: request.payload.currentPeriodDate}
+                }).sort({statementDate: -1}).limit(1)
+                return records.length === 1 ? records[0]: {}
+            }
+        },
         count: {
             actionType: 'resource',
             isVisible: false,
