@@ -4,7 +4,7 @@ const Schema = mongoose.Schema
 const RecipientFeeShareSchema = new Schema({
     recipient: {
         type: Schema.Types.ObjectId,
-        ref: 'FeeRecipient',
+        ref: 'Party',
         index: true
     },
     period: {

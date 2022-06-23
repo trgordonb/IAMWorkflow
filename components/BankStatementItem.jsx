@@ -5,6 +5,7 @@ import { useDropzone } from 'react-dropzone'
 import { flat } from 'adminjs'
 import DateControl from './DateControl'
 import { appendForceRefresh } from '../utils/append-force-refresh'
+import PartySelect from './PartySelect'
 
 const BankStatementItem = (props) => {
     const { record: initialRecord, resource } = props
@@ -76,9 +77,15 @@ const BankStatementItem = (props) => {
             <iframe width={1000} height={800} src={docURL} type="application/pdf"/>
         </Box>
         <Box flexGrow={1} py='lg' marginX={25} as="form" onSubmit={submit}>          
-            <BasePropertyComponent
-                where="edit"
+            <DateControl
                 onChange={handleChange}
+                property={resource.properties.statementDate}
+                resource={resource}
+                record={record}
+            />
+            <PartySelect
+                type='Bank'
+                onChange={customChange}
                 property={resource.properties.bank}
                 resource={resource}
                 record={record}
@@ -90,12 +97,6 @@ const BankStatementItem = (props) => {
                 resource={resource}
                 record={record}
             />
-            <DateControl
-                onChange={handleChange}
-                property={resource.properties.statementDate}
-                resource={resource}
-                record={record}
-            />
             <BasePropertyComponent
                 where="edit"
                 onChange={customChange}
@@ -103,17 +104,17 @@ const BankStatementItem = (props) => {
                 resource={resource}
                 record={record}
             />
-            <BasePropertyComponent
-                where="edit"
-                onChange={handleChange}
-                property={resource.properties.counterParty}
+            <PartySelect
+                type='Company'
+                onChange={customChange}
+                property={resource.properties.companyAccount}
                 resource={resource}
                 record={record}
             />
-            <BasePropertyComponent
-                where="edit"
-                onChange={handleChange}
-                property={resource.properties.companyAccount}
+            <PartySelect
+                type='Custodian'
+                onChange={customChange}
+                property={resource.properties.counterParty}
                 resource={resource}
                 record={record}
             />

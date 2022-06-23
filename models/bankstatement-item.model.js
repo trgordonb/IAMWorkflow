@@ -4,7 +4,7 @@ const Schema = mongoose.Schema
 const BankStatementItemSchema = new Schema({
     bank: {
         type: Schema.Types.ObjectId,
-        ref: 'Bank',
+        ref: 'Party',
         index: true
     },
     bankStatementRef: {
@@ -27,11 +27,11 @@ const BankStatementItemSchema = new Schema({
     },
     companyAccount: {
         type: Schema.Types.ObjectId,
-        ref: 'CompanyAccount'
+        ref: 'Party'
     },
     counterParty: {
         type: Schema.Types.ObjectId,
-        ref: 'CounterParty'
+        ref: 'Party'
     },
     matchedStatement: {
         type: Schema.Types.ObjectId,

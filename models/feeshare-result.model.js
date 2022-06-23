@@ -32,7 +32,7 @@ const FeeShareResultSchema = new Schema({
     feeShares: [{
         recipient: {
             type: Schema.Types.ObjectId,
-            ref: 'FeeRecipient'
+            ref: 'Party'
         },
         share: {
             type: Number

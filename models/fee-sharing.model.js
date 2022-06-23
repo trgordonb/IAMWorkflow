@@ -9,7 +9,7 @@ const FeeSharingSchemeSchema = new Schema({
     feerecipients: [{
         recipient: {
             type: Schema.Types.ObjectId,
-            ref: 'FeeRecipient'
+            ref: 'Party'
         },
         percentage: Number,
         role: {

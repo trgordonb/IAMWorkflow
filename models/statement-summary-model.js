@@ -13,7 +13,7 @@ const StatementSummarySchema = new Schema({
     },
     custodian: {
         type: Schema.Types.ObjectId,
-        ref: 'Custodian',
+        ref: 'Party',
         index: true
     },
     currency: {

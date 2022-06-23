@@ -1,5 +1,5 @@
 import { Box, Button, Stepper, Step, CheckBox, Label, Table, TableHead, TableRow, TableBody, TableCell, Loader } from '@adminjs/design-system'
-import { useRecord, BasePropertyComponent, ApiClient, useNotice } from 'adminjs'
+import { useRecord, BasePropertyComponent, ApiClient, useNotice, useCurrentAdmin } from 'adminjs'
 import { flat } from 'adminjs'
 import styled from 'styled-components'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
@@ -15,6 +15,7 @@ const WorkflowConfig = (props) => {
     const { record } = useRecord(initialRecord, resource.id)
     const orgRecord = flat.get(record.params)
     const [currentStep, setCurrentStep] = React.useState(orgRecord.currentStage)
+    const [currentAdmin, setCurrentAdmin] = useCurrentAdmin()
     const [stages, setStages] = React.useState(orgRecord.stages)
     const [isLoading, setIsLoading] = React.useState(false)
     const [byPass, setByPass] = React.useState(false)
@@ -186,14 +187,18 @@ const WorkflowConfig = (props) => {
                         >
                             Next Step
                         </Button>
-                        <CheckBox 
-                            mt={30}
-                            id="byPass"
-                            label='Bypass current task'
-                            checked={byPass}
-                            onChange={() => setByPass(!byPass)}
-                        />
-                        <Label inline htmlFor="byPass" ml="default">Bypass current check</Label>     
+                        { currentAdmin.role === 'admin' &&
+                        <>
+                            <CheckBox 
+                                mt={30}
+                                id="byPass"
+                                label='Bypass current task'
+                                checked={byPass}
+                                onChange={() => setByPass(!byPass)}
+                            />
+                            <Label inline htmlFor="byPass" ml="default">Bypass current check</Label>
+                        </> 
+                        }
                     </Box>
                 </Box>
                 {isLoading && <Loader/>}
@@ -259,9 +264,13 @@ const WorkflowConfig = (props) => {
                         </TableBody>
                     </Table>
                 </Box>
-                <Box mt='xxl' width={800} height={800}>
-                    { showPie && <Pie data={pieData} />}
-                </Box>
+                {
+                    showPie &&
+                    <Box mt='xxl' width={800} height={800}>
+                        <Pie data={pieData} />
+                    </Box>
+                }
+                
                 <Box mt='xxl'>
                     { showPDF && <iframe width={1400} height={800} src={pdfUrl} type="application/pdf"/>}
                 </Box>

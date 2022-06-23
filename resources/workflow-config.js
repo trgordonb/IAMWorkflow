@@ -206,7 +206,7 @@ const WorkflowConfigResource = {
                     await fShareResult.save()
                 }))
                 await recipientFeeShareModel.remove({
-                    period: currentAdmin.admin
+                    period: currentAdmin.period
                 })
                 await Promise.all(Object.keys(recipientShare).map(async (recipient) => {
                     let rShare = recipientShare[recipient]
@@ -444,10 +444,9 @@ const WorkflowConfigResource = {
                     period: currentAdmin.period,
                     currentSubPeriodDate: endDate
                 })
-                    
                 await Promise.all(customerPortfolioRecords.map(async (pRecord) => {
                     let newCustomerUnitizedRecord = {}
-                    let prevUnitizedRecord = await portfolioModel.find({customer: pRecord.customer}).sort({currentSubPeriodDate:-1}).limit(1)
+                    let prevUnitizedRecord = await portfolioModel.find({customer: pRecord.customer, currentSubPeriodDate: {$lt: endDate}}).sort({currentSubPeriodDate:-1}).limit(1)
                     newCustomerUnitizedRecord.customer = pRecord.customer
                     newCustomerUnitizedRecord.period = currentAdmin.period
                     newCustomerUnitizedRecord.currentSubPeriodDate = endDate
