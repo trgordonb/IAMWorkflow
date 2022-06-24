@@ -108,7 +108,8 @@ const StatementSummaryResource = {
             component: AdminJS.bundle('../components/Statement.jsx'),
         },
         list: {
-            isAccessible: true
+            isAccessible: true,
+            component: AdminJS.bundle('../components/StatementSummaryList.jsx')
         },
         search: {
             before: async(request, context) => {

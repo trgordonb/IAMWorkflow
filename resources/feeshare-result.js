@@ -1,3 +1,5 @@
+const AdminJS = require('adminjs')
+
 const FeeShareResultResource = {
     actions: {
         new: {
@@ -18,6 +20,9 @@ const FeeShareResultResource = {
         },
         show: {
             showInDrawer: true
+        },
+        list: {
+            component: AdminJS.bundle('../components/FeeShareResult.jsx')
         }
     },
     properties: {

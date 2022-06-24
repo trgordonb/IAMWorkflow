@@ -363,7 +363,7 @@ const WorkflowConfigResource = {
                                 }
                                 return 0
                               }).
-                              map(record => ([record.custodianAccount.customer.clientId, record.custodianAccount.accountNumber, record.type, record.amount]))
+                              map(record => ([record.custodianAccount.customer.clientId, record.custodianAccount.accountNumber, record.type, record.amount.toLocaleString()]))
                     })
                     if (idx < recipientFeeShares.length - 1) {
                         pdfDoc.addPage('a4')
@@ -408,10 +408,10 @@ const WorkflowConfigResource = {
                         columnStyles: {
                             3: { halign: 'left' }
                         },
-                        body: item.details.map(record => ([record.custodianAccount.accountNumber, record.amount]))
+                        body: item.details.map(record => ([record.custodianAccount.accountNumber, record.amount.toLocaleString()]))
                     })
                     pdfDoc.setFontSize(12)
-                    pdfDoc.text(`Total:        ${item.sum}`, 102, pdfDoc.lastAutoTable.finalY + 10)
+                    pdfDoc.text(`Total:        ${item.sum.toLocaleString()}`, 102, pdfDoc.lastAutoTable.finalY + 10)
                     if (idx < Object.keys(statementItems).length - 1) {
                         pdfDoc.addPage('a4')
                     }

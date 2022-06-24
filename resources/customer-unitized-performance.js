@@ -89,7 +89,8 @@ const CustomerUnitizedPerformanceResource = {
             isAccessible: false
         }, 
         list: {
-            isAccessible: true
+            isAccessible: true,
+            component: AdminJS.bundle('../components/CustomerUnitizedPerformanceList.jsx')
         },
         show: {
             showInDrawer: false,

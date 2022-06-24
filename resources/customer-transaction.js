@@ -15,7 +15,7 @@ const CustomerTransactionResource = {
             isVisible: { list: false, filter: false, show: false, edit: false },
         },
         status: {
-            isVisible: { list: false, filter: true, show: true, edit: false },
+            isVisible: { list: true, filter: true, show: true, edit: false },
             position: 8,
         },
         customer: {
@@ -95,6 +95,7 @@ const CustomerTransactionResource = {
                   currentAdmin.role === 'admin' || currentAdmin.role === 'user'
                 )
             },
+            component: AdminJS.bundle('../components/CustomerTransactionList.jsx')
         },
         edit: {
             before: async (request, context) => {

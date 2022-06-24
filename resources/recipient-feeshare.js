@@ -1,3 +1,5 @@
+const AdminJS = require('adminjs')
+
 const RecipientFeeShareResource = {
     id: 'RecipientFeeShare',
     properties: {
@@ -35,6 +37,9 @@ const RecipientFeeShareResource = {
         },
         show: {
             showInDrawer: true
+        },
+        list: {
+            component: AdminJS.bundle('../components/RecipientFeeShareList.jsx')
         }
     }
 }
