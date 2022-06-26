@@ -97,6 +97,27 @@ const CustodianStatementResource = {
             showInDrawer: false,        
             component: AdminJS.bundle('../components/CustodianStatement.jsx'),
         },
+        bulkApprove: {
+            actionType: 'bulk',
+            isAccessible: ({ currentAdmin, record }) => {
+                return (currentAdmin && currentAdmin.role === 'admin') 
+            },
+            component: false,
+            handler: async(request, response, context) => {
+                const { record, resource, currentAdmin, h } = context
+                const statementModel = mongoose.connection.models['CustodianStatement']
+                await Promise.all(request.query.recordIds.split(',').map(async (recordId) => {
+                    await statementModel.findByIdAndUpdate(recordId, {
+                        status: 'approved'
+                    })
+                }))
+                return {
+                    records: [new AdminJS.BaseRecord({}, context.resource).toJSON(context.currentAdmin)],
+                    notice: { message: 'Bulk approve completed', type: 'success' },
+                    redirectUrl: h.listUrl('Custodian Statement')
+                }
+            }
+        },
         edit: {
             isAccessible: ({ currentAdmin }) => {
                 return currentAdmin && (

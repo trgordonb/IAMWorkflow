@@ -146,6 +146,27 @@ const CustomerTransactionResource = {
                 }
             }
         },
+        bulkApprove: {
+            actionType: 'bulk',
+            isAccessible: ({ currentAdmin, record }) => {
+                return (currentAdmin && currentAdmin.role === 'admin') 
+            },
+            component: false,
+            handler: async(request, response, context) => {
+                const { record, resource, currentAdmin, h } = context
+                const trasnactionModel = mongoose.connection.models['CustomerTransaction']
+                await Promise.all(request.query.recordIds.split(',').map(async (recordId) => {
+                    await trasnactionModel.findByIdAndUpdate(recordId, {
+                        status: 'approved'
+                    })
+                }))
+                return {
+                    records: [new AdminJS.BaseRecord({}, context.resource).toJSON(context.currentAdmin)],
+                    notice: { message: 'Bulk approve completed', type: 'success' },
+                    redirectUrl: h.listUrl('CustomerTransaction')
+                }
+            }
+        },
         reject: {
             actionType: 'record',
             isAccessible: ({ currentAdmin, record }) => {

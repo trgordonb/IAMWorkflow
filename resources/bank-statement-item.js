@@ -60,16 +60,27 @@ const BankStatementItemResource = {
                 }
             }
         },
-        /**bulkApprove: {
+        bulkApprove: {
             actionType: 'bulk',
             isAccessible: ({ currentAdmin, record }) => {
                 return (currentAdmin && currentAdmin.role === 'admin') 
             },
-            component: AdminJS.bundle('../components/Approval'),
+            component: false,
             handler: async(request, response, context) => {
-                return {records: [new AdminJS.BaseRecord({}, context.resource).toJSON(context.currentAdmin)] }
+                const { record, resource, currentAdmin, h } = context
+                const statementModel = mongoose.connection.models['BankStatementItem']
+                await Promise.all(request.query.recordIds.split(',').map(async (recordId) => {
+                    await statementModel.findByIdAndUpdate(recordId, {
+                        status: 'approved'
+                    })
+                }))
+                return {
+                    records: [new AdminJS.BaseRecord({}, context.resource).toJSON(context.currentAdmin)],
+                    notice: { message: 'Bulk approve completed', type: 'success' },
+                    redirectUrl: h.listUrl('BankStatementItem')
+                }
             }
-        },*/
+        },
         /**reconcile: {
             actionType: 'resource',
             isVisible: false,
