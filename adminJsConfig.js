@@ -103,24 +103,20 @@ const adminJsConfig = {
     resources: [
         { ...LogResource, options: { ...LogResource.options, navigation: 'Admin Module' } },
         { resource: User, options: { navigation: 'Admin Module', ...UserResource } },
-        { resource: AccountPolicy, options: { navigation: 'Admin Module', ...AccountPolicyResource } },
-        //{ resource: Bank, options: { navigation: 'Admin Module', ...BankResource } },
-        { resource: Currency, options: { navigation: 'Admin Module', ...CurrencyResource } },
-        { resource: Customer, options: { navigation: 'Admin Module', ...CustomerResource } },
+        { resource: AccountPolicy, options: { navigation: 'Master Module', ...AccountPolicyResource } },
+        { resource: Currency, options: { navigation: 'Master Module', ...CurrencyResource } },
+        { resource: Customer, options: { navigation: 'Master Module', ...CustomerResource } },
         { resource: CustomerTransaction, options: { navigation: 'Quarterly Workflow Module', ...CustomerTransactionResource },
             features: [
                 loggerFeature(loggerConfig), ModifiedLogger('CustomerTransaction')
             ]
         },
-        { resource: CustomerPortfolio, options: { navigation: 'Admin Module', ...CustomerPortfolioResource }},
+        { resource: CustomerPortfolio, options: { navigation: 'Master Module', ...CustomerPortfolioResource }},
         { resource: CustomerUnitizedPerformance, options: { navigation: 'Quarterly Workflow Module', ...CustomerUnitizedPerformanceResource }},
-        //{ resource: CounterParty, options: { navigation: 'Admin Module', ...CounterPartyResource } },
-        { resource: Period, options: { navigation: 'Admin Module', ...PeriodResource } },
-        { resource: Role, options: { navigation: 'Admin Module', ...RoleResource } },
-        //{ resource: CompanyAccount, options: { navigation: 'Admin Module', ...CompanyAccountResource } },
-        //{ resource: Custodian, options: { navigation: 'Admin Module', ...CustodianResource } },
-        { resource: FeeCode, options: { navigation: 'Admin Module', ...FeeCodeResource } },
-        { resource: FeeSharing, options: { navigation: 'Admin Module', ...FeeSharingResource } },
+        { resource: Period, options: { navigation: 'Master Module', ...PeriodResource } },
+        { resource: Role, options: { navigation: 'Master Module', ...RoleResource } },
+        { resource: FeeCode, options: { navigation: 'Master Module', ...FeeCodeResource } },
+        { resource: FeeSharing, options: { navigation: 'Master Module', ...FeeSharingResource } },
         { resource: FeeShareResult, options: { navigation: 'Quarterly Workflow Module', ...FeeShareResultResource } },
         { resource: BankStatementItem, options: { navigation: 'Quarterly Workflow Module', ...BankStatementItemResource } },
         { resource: CustodianStatement, options: { navigation: 'Quarterly Workflow Module', ...CustodianStatementResource }, 
@@ -131,11 +127,9 @@ const adminJsConfig = {
         { resource: Message, options: { navigation: 'Admin Module', ...MessageResource }},
         { resource: WorkflowConfig, options: { navigation: 'Quarterly Workflow Module', ...WorkflowConfigResource }},
         { resource: StatementItem, options: { navigation: 'Quarterly Workflow Module', ...StatementItemResource }},
-        { resource: CurrencyPair, options: { navigation: 'Admin Module', ...CurrencyPairResource }},
+        { resource: CurrencyPair, options: { navigation: 'Master Module', ...CurrencyPairResource }},
         { resource: StatementSummary, options: { navigation: 'Quarterly Workflow Module', ...StatementSummaryResource }},
-        //{ resource: Entity, options: { navigation: 'Admin Module', ...EntityResource }},
-        { resource: Party, options: { navigation: 'Admin Module', ...PartyResource }},
-        //{ resource: FeeRecipient, options: { navigation: 'Admin Module', ...FeeRecipientResource }},
+        { resource: Party, options: { navigation: 'Master Module', ...PartyResource }},
         { resource: RecipientFeeShare, options: { navigation: 'Quarterly Workflow Module', ...RecipientFeeShareResource }},
     ],
     locale: {
@@ -194,8 +188,16 @@ const adminJsConfig = {
                         number: 'Custodian Account Number',
                         customer: 'IAM Customer Number',
                         currency: 'Currency',
+                        feeCode: 'Mgt Fee Code',
                         'feeSharing.feeType': 'Transaction Type',
                         'feeSharing.feeSharingScheme': 'Scheme Code'
+                    }
+                },
+                Period: {
+                    properties: {
+                        subPeriodEndDates: 'Sub Periods',
+                        'subPeriodEndDates.date': 'Date',
+                        'subPeriodEndDates.name': 'Name'
                     }
                 },
                 'Custodian Statement': {
@@ -214,6 +216,11 @@ const adminJsConfig = {
                         currency: 'Reporting Currency',
                         startUnit: 'Initial number of units',
                         accountPolicyNumber: 'Custodian Accounts'
+                    }
+                },
+                Log: {
+                    properties: {
+                        createdAt: 'Last Modified At'
                     }
                 },
                 CustomerUnitizedPerformance: {
@@ -236,7 +243,16 @@ const adminJsConfig = {
                 StatementSummary: {
                     properties: {
                         'details.custodianAccount': 'Custodian Account',
-                        'details.amount': 'Amount'
+                        'details.amount': 'Amount',
+                        'details.feeCodeApplied': 'Fee Code'
+                    }
+                },
+                FeeSharingScheme: {
+                    properties: {
+                        feerecipients: 'Fee Recipients',
+                        'feerecipients.role': 'Role',
+                        'feerecipients.percentage': 'Percenatge',
+                        'feerecipients.recipient': 'Recipient'
                     }
                 },
                 BankStatementItem: {

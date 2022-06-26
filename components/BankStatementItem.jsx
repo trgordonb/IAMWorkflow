@@ -17,7 +17,7 @@ const BankStatementItem = (props) => {
     const { record, handleChange, submit: handleSubmit } = useRecord(initialRecord, resource.id)
     const history = useHistory()
     const { translateButton } = useTranslation()
-    const initialGross = 0
+    let initialGross = 0
     if (initialRecord && initialRecord.params && initialRecord.params.grossAmount) {
         initialGross = initialRecord.params.grossAmount
     }
@@ -120,6 +120,16 @@ const BankStatementItem = (props) => {
             />
             <BasePropertyComponent
                 where="edit"
+                onChange={customChange}
+                property={resource.properties.matchedStatement}
+                resource={resource}
+                record={record}
+            />
+            <Box marginBottom={20} alignSelf='auto'>
+                <Text>{`Statement Item Amount: ${total}`}</Text>
+            </Box>
+            <BasePropertyComponent
+                where="edit"
                 onChange={handleChange}
                 property={resource.properties.grossAmount}
                 resource={resource}
@@ -132,16 +142,6 @@ const BankStatementItem = (props) => {
                 resource={resource}
                 record={record}
             />
-            <BasePropertyComponent
-                where="edit"
-                onChange={customChange}
-                property={resource.properties.matchedStatement}
-                resource={resource}
-                record={record}
-            />
-            <Box marginBottom={20} alignSelf='auto'>
-                <Text>{`Statement Item Amount: ${total}`}</Text>
-            </Box>
             <BasePropertyComponent
                 where="edit"
                 onChange={handleChange}

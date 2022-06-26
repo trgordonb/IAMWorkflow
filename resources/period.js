@@ -21,7 +21,10 @@ const PeriodResource = {
             }
         },
         subPeriodEndDates: {
-            type: 'date',
+            isVisible: { list: true, filter: false, show: true, edit: true }
+        },
+        'subPeriodEndDates.date': {
+            type: 'date'
         },
         exchangeRates: {
             isVisible: { list: false, filter: false, show: true, edit: true }

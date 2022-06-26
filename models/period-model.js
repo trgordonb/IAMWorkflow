@@ -15,7 +15,10 @@ const PeriodSchema = new Schema({
         type: Date,
         index: true
     },
-    subPeriodEndDates: [Date],
+    subPeriodEndDates: [{
+        date: Date,
+        name: String
+    }],
     factor: Number,
     exchangeRates: [{
         currencyPair: {

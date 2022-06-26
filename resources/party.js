@@ -15,6 +15,10 @@ const PartyResource = {
         isFeeRecipient: {
             isVisible: true,
             position: 3
+        },
+        description: {
+            isVisible: true,
+            position: 4
         }
     },
     actions: {

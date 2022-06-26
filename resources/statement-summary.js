@@ -52,6 +52,9 @@ const StatementSummaryResource = {
         'details.type': {
             isVisible: false
         },
+        'details.feeCodeApplied': {
+            isVisible: false
+        },
         'details.reconcilation': {
             isVisible: false
         },

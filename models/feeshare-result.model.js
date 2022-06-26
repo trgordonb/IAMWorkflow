@@ -43,6 +43,10 @@ const FeeShareResultSchema = new Schema({
         role: {
             type: Schema.Types.ObjectId,
             ref: 'Role'
+        },
+        scheme: {
+            type: Schema.Types.ObjectId,
+            ref: 'FeeSharingScheme'
         }
     }]
 })

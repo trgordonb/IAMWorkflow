@@ -24,6 +24,10 @@ const StatementItemSchema = new Schema({
         type: String,
         enum: ['ManagementFee','RetrocessionFee']
     },
+    feeCodeApplied: {
+        type: Schema.Types.ObjectId,
+        ref: 'FeeCode'
+    },
     reconcilation: {
         completed: {
             type: Boolean

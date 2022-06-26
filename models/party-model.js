@@ -10,10 +10,14 @@ const PartySchema = new Schema({
     type: {
         type: String,
         index: true,
-        enum: ['Company','Bank','Custodian','Intermediary']
+        enum: ['Company','Bank','Custodian','Intermediary','Others']
     },
     isFeeRecipient: {
         type: Boolean,
+        index: true
+    },
+    description: {
+        type: String,
         index: true
     }
 })

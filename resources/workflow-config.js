@@ -81,7 +81,7 @@ const WorkflowConfigResource = {
                     isCurrent: true,
                     currentStage: 1,
                     stages: stages,
-                    subPeriodEndDates: period.subPeriodEndDates
+                    subPeriodEndDates: period.subPeriodEndDates.map(subPeriod => ({date: subPeriod.date, name: subPeriod.name}))
                 }
                 return request
             },
@@ -183,14 +183,15 @@ const WorkflowConfigResource = {
                                     recipient: feeRecipient.recipient.toString(),
                                     role: feeRecipient.role.toString(),
                                     amount: Math.round(100 * result.amount * (feeRecipient.percentage/100), 2)/100,
-                                    share: feeRecipient.percentage
+                                    share: feeRecipient.percentage,
+                                    scheme: share.feeSharingScheme
                                 })
                                 if (!recipientShare.hasOwnProperty(feeRecipient.recipient.toString())) {
                                     recipientShare[feeRecipient.recipient.toString()] = {
                                         recipient: feeRecipient.recipient.toString(),
                                         period: currentAdmin.period,
                                         currency: currencyHKD._id.toString(),
-                                        details: []
+                                        details: [],
                                     }
                                 }
                                 recipientShare[feeRecipient.recipient.toString()].details.push({
@@ -231,7 +232,7 @@ const WorkflowConfigResource = {
                 let feeCodeModel = mongoose.connection.models['FeeCode']
                 let statementSummaryModel = mongoose.connection.models['StatementSummary']
                 let allTags = []
-                let endDate = tmpRecord.subPeriodEndDates[currentStage-1]
+                let endDate = tmpRecord.subPeriodEndDates[2].date
                 await statementItemModel.remove({period: currentAdmin.period})
                 await statementSummaryModel.remove({period: currentAdmin.period})
                 let customerPortfolioRecords = await custodianStatementModel.find({
@@ -264,6 +265,7 @@ const WorkflowConfigResource = {
                     statementItem.currency = accountPolicy.currency
                     statementItem.type = 'ManagementFee'
                     statementItem.period = period._id
+                    statementItem.feeCodeApplied = feeCode
                     statementItem.reconcilation = { completed: false }
                     statementItem.tag = `${(period.name).replace(' ','')}-${(accountPolicy.custodian.name).replace(' ','')}-DemandNote`
                     allTags.push(statementItem.tag)
@@ -430,7 +432,7 @@ const WorkflowConfigResource = {
                 const { record, resource, currentAdmin } = context
                 let currentStage = record.params.currentStage
                 let tmpRecord = require('adminjs').flat.get(record.params)
-                let endDate = tmpRecord.subPeriodEndDates[currentStage-1]
+                let endDate = tmpRecord.subPeriodEndDates[currentStage-1].date
                 let period = require('adminjs').flat.get(record.populated.period.params)
                 let portfolioModel = mongoose.connection.models['CustomerUnitizedPerformance']
                 let customerModel = mongoose.connection.models['CustomerPortfolio']
@@ -674,8 +676,6 @@ const WorkflowConfigResource = {
                             if (!tmpStages[currentStep-1].data[taskTargetQueriesIndex].locked) {
                                 let subTotal = 0
                                 if (taskTargetItem.subPath && taskTargetItem.subPath !== '' && resultTarget.length === 1) {
-                                    console.log('1:',resultTarget[0])
-                                    console.log('2:',taskTargetItem.subPath)
                                     let tmpObj = getPropByString(resultTarget[0], taskTargetItem.subPath)
                                     console.log('3:',tmpObj)
                                     targetTotal = tmpObj.length
@@ -738,6 +738,11 @@ const WorkflowConfigResource = {
         },
         bulkDelete: {
             isAccessible: false
+        },
+        delete: {
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && currentAdmin.role === 'admin' 
+            },
         }
     }
 }

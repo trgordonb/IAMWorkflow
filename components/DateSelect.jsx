@@ -26,7 +26,7 @@ const DateSelect = (props) => {
                 })
                 if (result.request && result.request.statusText === 'OK') {
                     let subDates = flat.get(result.data.record.params).subPeriodEndDates
-                    setAllItems(subDates.map(item => ({value: item, label: moment(item).format('YYYY-MM-DD')})))
+                    setAllItems(subDates.map(item => ({value: item.date, label: moment(item.date).format('YYYY-MM-DD')})))
                     setSubPeriods(subDates)
                 }
             }

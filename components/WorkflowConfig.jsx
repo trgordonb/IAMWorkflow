@@ -14,6 +14,7 @@ const WorkflowConfig = (props) => {
     const { record: initialRecord, resource } = props
     const { record } = useRecord(initialRecord, resource.id)
     const orgRecord = flat.get(record.params)
+    console.log(orgRecord)
     const [currentStep, setCurrentStep] = React.useState(orgRecord.currentStage)
     const [currentAdmin, setCurrentAdmin] = useCurrentAdmin()
     const [stages, setStages] = React.useState(orgRecord.stages)
@@ -167,10 +168,10 @@ const WorkflowConfig = (props) => {
                             mr="default"
                             onClick={() => verifyCurrentStage(false)}
                         >
-                            Check Current Stage
+                            Check Current Task
                         </Button>
                         <Button
-                            disabled={currentStep === stages.length}
+                            disabled={!stages[currentStep-1].completed}
                             mt={15}
                             mr="default"
                             variant="primary"
@@ -185,7 +186,7 @@ const WorkflowConfig = (props) => {
                                 }
                             }}
                         >
-                            Next Step
+                            Next Stage
                         </Button>
                         { currentAdmin.role === 'admin' &&
                         <>
@@ -211,12 +212,12 @@ const WorkflowConfig = (props) => {
                             onClick={(idx) => setCurrentStep(idx)}
                             number={number}
                         >
-                            {label}
+                            {number > 3 ? label: orgRecord.subPeriodEndDates[number-1].name}
                         </Step>
                     ))}
                 </Stepper>
                 <Box mt="xxl">
-                    <CheckBox id="stageCB" checked={stages[currentStep-1].completed}/>
+                    <CheckBox disabled id="stageCB" checked={stages[currentStep-1].completed}/>
                     <Label inline htmlFor="stageCB" ml="default">Completed</Label>
                 </Box>
                 <Box mt="xxl">

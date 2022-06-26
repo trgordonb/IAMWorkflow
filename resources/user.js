@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt')
+const AdminJS = require('adminjs')
 
 const UserResource = {
     properties: {
@@ -27,7 +28,7 @@ const UserResource = {
     },
     actions: {
         new: {
-            //isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+            isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
             before: async(request) => {
                 if (request.payload.password) {
                     request.payload = {
@@ -42,9 +43,12 @@ const UserResource = {
         },
         list: {
             //isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+            component: AdminJS.bundle('../components/UserList.jsx')
         },
         edit: {
-            //isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+            isAccessible: ({ currentAdmin, record }) => {
+                return currentAdmin && (currentAdmin.role === 'admin' || (currentAdmin.role === 'user' && currentAdmin.id === record.params._id))
+            },
             before: async(request) => {
                 if (request.payload.password) {
                     request.payload = {
@@ -62,7 +66,11 @@ const UserResource = {
             showInDrawer: true
         },
         filter: {
-            //isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+            isVisible: false,
+            isAccessible: false
+        },
+        delete: {
+            isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
         }
     }
 }
