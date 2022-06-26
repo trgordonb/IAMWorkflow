@@ -345,7 +345,7 @@ const WorkflowConfigResource = {
                     pdfDoc.setFontSize(12)
                     pdfDoc.text(`${period.name}`, 14, 20)
                     pdfDoc.text(`${feeShare.recipient.name}`, 14, 30)
-                    pdfDoc.text(`Total: ${feeShare.currency.name} ${feeShare.total}`, 14, 40)
+                    pdfDoc.text(`Total: ${feeShare.currency.name} ${feeShare.total.toLocaleString()}`, 14, 40)
                     pdfDoc.autoTable({
                         styles: {
                             fontSize: 10

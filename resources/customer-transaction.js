@@ -69,7 +69,6 @@ const CustomerTransactionResource = {
                     recordEnteredBy: currentAdmin.id,
                     period: currentAdmin.period,
                     status: 'pending',
-                    currency: custAcct.currency
                 }
                 return request
             },
@@ -83,6 +82,7 @@ const CustomerTransactionResource = {
                 ['date', { ml: 'xxl' }], 
                 ['customer', { ml: 'xxl' }],
                 ['transactionType', { ml: 'xxl' }],
+                ['currency', { ml: 'xxl'}],
                 ['nominalValue', { ml: 'xxl' }],
                 ['isSeedMoney', { ml: 'xxl '}],
                 ['subscribeUnitNumber', { ml: 'xxl'}],
@@ -116,6 +116,7 @@ const CustomerTransactionResource = {
                 ['date', { ml: 'xxl' }], 
                 ['customer', { ml: 'xxl' }],
                 ['transactionType', { ml: 'xxl' }],
+                ['currency', { ml: 'xxl' }],
                 ['nominalValue', { ml: 'xxl' }],
                 ['isSeedMoney', { ml: 'xxl '}],
                 ['subscribeUnitNumber', { ml: 'xxl'}],

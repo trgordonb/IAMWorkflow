@@ -14,7 +14,6 @@ const WorkflowConfig = (props) => {
     const { record: initialRecord, resource } = props
     const { record } = useRecord(initialRecord, resource.id)
     const orgRecord = flat.get(record.params)
-    console.log(orgRecord)
     const [currentStep, setCurrentStep] = React.useState(orgRecord.currentStage)
     const [currentAdmin, setCurrentAdmin] = useCurrentAdmin()
     const [stages, setStages] = React.useState(orgRecord.stages)
@@ -24,6 +23,7 @@ const WorkflowConfig = (props) => {
     const [showPie, setShowPie] = React.useState(false)
     const [pdfUrl, setPdfUrl] = React.useState([])
     const [pieData, setPieData] = React.useState({})
+    const [disableChkBtn, setDisableChkBtn] = React.useState(false)
 
     const currentStepCheck = async () => {
         if (stages[currentStep-1].completed) {
@@ -134,6 +134,15 @@ const WorkflowConfig = (props) => {
         )
     }
 
+    React.useEffect(() => {
+        let currentTaskType = stages[currentStep-1].tasks[stages[currentStep-1].currentTaskNumber]? stages[currentStep-1].tasks[stages[currentStep-1].currentTaskNumber].type : 'action'
+        if (currentTaskType === 'action') {
+            setDisableChkBtn(true)
+        } else {
+            setDisableChkBtn(false)
+        }
+    },[stages[currentStep-1].currentTaskNumber])
+
     return (
         <>
             <Box>
@@ -166,6 +175,7 @@ const WorkflowConfig = (props) => {
                         <Button
                             mt={15}
                             mr="default"
+                            disabled={disableChkBtn}
                             onClick={() => verifyCurrentStage(false)}
                         >
                             Check Current Task
