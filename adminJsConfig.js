@@ -11,13 +11,9 @@ const CustomerTransaction = require('./models/customer-transaction.model')
 const CustomerPortfolio = require('./models/customer-portfolio.model')
 const CustomerUnitizedPerformance = require('./models/customer-unitized-performance.model')
 const BankStatementItem = require('./models/bankstatement-item.model')
-//const Custodian = require('./models/custodian.model')
-//const Bank = require('./models/bank.model')
 const Period = require('./models/period-model')
 const Role = require('./models/role.model')
-//const CompanyAccount = require('./models/company-account-model')
 const FeeCode = require('./models/fee-code.model')
-//const CounterParty = require('./models/counterparty.model')
 const FeeSharing = require('./models/fee-sharing.model')
 const FeeShareResult = require('./models/feeshare-result.model')
 const CustodianStatement = require('./models/custodian-statement-model')
@@ -26,8 +22,6 @@ const WorkflowConfig = require('./models/workflow-config.model')
 const { StatementItem } = require('./models/statement-item.model')
 const CurrencyPair = require('./models/currency-pair.model')
 const StatementSummary = require('./models/statement-summary-model')
-//const Entity = require('./models/entity.model')
-//const FeeRecipient = require('./models/fee-recipient.model')
 const RecipientFeeShare = require('./models/recipient-feeshare.model')
 const Party = require('./models/party-model')
 const UserResource = require('./resources/user')
@@ -37,13 +31,9 @@ const CustomerResource = require('./resources/customer')
 const CustomerTransactionResource = require('./resources/customer-transaction')
 const CustomerPortfolioResource = require('./resources/customer-portfolio')
 const CustomerUnitizedPerformanceResource = require('./resources/customer-unitized-performance')
-//const BankResource = require('./resources/bank')
 const PeriodResource = require('./resources/period')
 const RoleResource = require('./resources/role')
-//const CompanyAccountResource = require('./resources/company-account')
-//const CustodianResource = require('./resources/custodian')
 const FeeCodeResource = require('./resources/feecode')
-//const CounterPartyResource = require('./resources/counterparty')
 const FeeSharingResource = require('./resources/fee-sharing')
 const BankStatementItemResource = require('./resources/bank-statement-item')
 const FeeShareResultResource = require('./resources/feeshare-result')
@@ -54,8 +44,6 @@ const WorkflowConfigResource = require('./resources/workflow-config')
 const StatementItemResource = require('./resources/statement-item')
 const CurrencyPairResource = require('./resources/currency-pair')
 const StatementSummaryResource = require('./resources/statement-summary')
-//const EntityResource = require('./resources/entity')
-//const FeeRecipientResource = require('./resources/fee-recipient')
 const RecipientFeeShareResource = require('./resources/recipient-feeshare')
 const PartyResource = require('./resources/party')
 
@@ -118,7 +106,11 @@ const adminJsConfig = {
         { resource: FeeCode, options: { navigation: 'Master Module', ...FeeCodeResource } },
         { resource: FeeSharing, options: { navigation: 'Master Module', ...FeeSharingResource } },
         { resource: FeeShareResult, options: { navigation: 'Quarterly Workflow Module', ...FeeShareResultResource } },
-        { resource: BankStatementItem, options: { navigation: 'Quarterly Workflow Module', ...BankStatementItemResource } },
+        { resource: BankStatementItem, options: { navigation: 'Quarterly Workflow Module', ...BankStatementItemResource },
+            features: [
+                loggerFeature(loggerConfig), ModifiedLogger('BankStatementItem')
+            ]
+        },
         { resource: CustodianStatement, options: { navigation: 'Quarterly Workflow Module', ...CustodianStatementResource }, 
             features: [
                 loggerFeature(loggerConfig), ModifiedLogger('Custodian Statement')
@@ -128,7 +120,11 @@ const adminJsConfig = {
         { resource: WorkflowConfig, options: { navigation: 'Quarterly Workflow Module', ...WorkflowConfigResource }},
         { resource: StatementItem, options: { navigation: 'Quarterly Workflow Module', ...StatementItemResource }},
         { resource: CurrencyPair, options: { navigation: 'Master Module', ...CurrencyPairResource }},
-        { resource: StatementSummary, options: { navigation: 'Quarterly Workflow Module', ...StatementSummaryResource }},
+        { resource: StatementSummary, options: { navigation: 'Quarterly Workflow Module', ...StatementSummaryResource },
+            features: [
+                loggerFeature(loggerConfig), ModifiedLogger('StatementSummary')
+            ]
+        },
         { resource: Party, options: { navigation: 'Master Module', ...PartyResource }},
         { resource: RecipientFeeShare, options: { navigation: 'Quarterly Workflow Module', ...RecipientFeeShareResource }},
     ],

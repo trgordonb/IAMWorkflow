@@ -106,7 +106,7 @@ const StatementSummaryResource = {
             isAccessible: ({ currentAdmin }) => {
                 return currentAdmin && (
                   currentAdmin.role === 'admin' || currentAdmin.role === 'user'
-                )
+                ) && currentAdmin.period
             },
             component: AdminJS.bundle('../components/Statement.jsx'),
         },

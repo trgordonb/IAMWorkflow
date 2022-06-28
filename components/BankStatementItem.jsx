@@ -149,9 +149,11 @@ const BankStatementItem = (props) => {
                 resource={resource}
                 record={record}
             />
-            <Button variant="primary" size="lg">
-                {translateButton('save', resource.id)}
-            </Button>
+            <Box flex alignItems={'center'} justifyContent={'center'}>
+                <Button marginY={10} variant="primary" size="lg">
+                    {translateButton('save', resource.id)}
+                </Button>
+            </Box>
         </Box>
     </Box>
     </>)

@@ -27,7 +27,7 @@ const StatementItemResource = {
             isAccessible: false
         },
         new: {
-            isAccessible: false
+            isAccessible: false,
         },
         edit: {
             isAccessible: false

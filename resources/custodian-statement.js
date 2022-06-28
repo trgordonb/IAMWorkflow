@@ -92,7 +92,7 @@ const CustodianStatementResource = {
             isAccessible: ({ currentAdmin }) => {
                 return currentAdmin && (
                   currentAdmin.role === 'admin' || currentAdmin.role === 'user'
-                )
+                ) && (currentAdmin.period)
             },
             showInDrawer: false,        
             component: AdminJS.bundle('../components/CustodianStatement.jsx'),

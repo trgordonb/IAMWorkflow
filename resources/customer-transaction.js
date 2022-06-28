@@ -75,7 +75,7 @@ const CustomerTransactionResource = {
             isAccessible: ({ currentAdmin }) => {
                 return currentAdmin && (
                   currentAdmin.role === 'admin' || currentAdmin.role === 'user'
-                )
+                ) && currentAdmin.period
             },
             showInDrawer: true,
             layout: [
