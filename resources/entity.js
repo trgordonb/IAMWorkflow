@@ -16,6 +16,13 @@ const EntityResource = {
         },
         show: {
             showInDrawer: true
+        },
+        list: {
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && (
+                  currentAdmin.role === 'admin' || currentAdmin.role === 'user'
+                )
+            },
         }
     }
 }

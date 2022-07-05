@@ -13,6 +13,7 @@ const CustomerUnitizedPerformance = require('./models/customer-unitized-performa
 const BankStatementItem = require('./models/bankstatement-item.model')
 const Period = require('./models/period-model')
 const Role = require('./models/role.model')
+const Report = require('./models/report.model')
 const FeeCode = require('./models/fee-code.model')
 const FeeSharing = require('./models/fee-sharing.model')
 const FeeShareResult = require('./models/feeshare-result.model')
@@ -40,6 +41,7 @@ const FeeShareResultResource = require('./resources/feeshare-result')
 const CustodianStatementResource = require('./resources/custodian-statement')
 const MessageResource = require('./resources/message')
 const LogResource = require('./resources/log')
+const ReportResource = require('./resources/report')
 const WorkflowConfigResource = require('./resources/workflow-config')
 const StatementItemResource = require('./resources/statement-item')
 const CurrencyPairResource = require('./resources/currency-pair')
@@ -106,6 +108,7 @@ const adminJsConfig = {
         { resource: FeeCode, options: { navigation: 'Master Module', ...FeeCodeResource } },
         { resource: FeeSharing, options: { navigation: 'Master Module', ...FeeSharingResource } },
         { resource: FeeShareResult, options: { navigation: 'Quarterly Workflow Module', ...FeeShareResultResource } },
+        { resource: Report, options: { navigation: 'Master Module', ...ReportResource } },
         { resource: BankStatementItem, options: { navigation: 'Quarterly Workflow Module', ...BankStatementItemResource },
             features: [
                 loggerFeature(loggerConfig), ModifiedLogger('BankStatementItem')

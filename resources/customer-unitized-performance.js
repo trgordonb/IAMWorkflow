@@ -89,7 +89,11 @@ const CustomerUnitizedPerformanceResource = {
             isAccessible: false
         }, 
         list: {
-            isAccessible: true,
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && (
+                  currentAdmin.role === 'admin' || currentAdmin.role === 'user' || currentAdmin.role === 'reader'
+                )
+            },
             component: AdminJS.bundle('../components/CustomerUnitizedPerformanceList.jsx')
         },
         show: {

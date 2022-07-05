@@ -43,6 +43,13 @@ const PartyResource = {
                 })
                 return records.length > 0 ? records: []
             }
+        },
+        list: {
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && (
+                  currentAdmin.role === 'admin' || currentAdmin.role === 'user'
+                )
+            },
         }
     }
 }

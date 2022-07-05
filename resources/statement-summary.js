@@ -111,7 +111,11 @@ const StatementSummaryResource = {
             component: AdminJS.bundle('../components/Statement.jsx'),
         },
         list: {
-            isAccessible: true,
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && (
+                  currentAdmin.role === 'admin' || currentAdmin.role === 'user'
+                )
+            },
             component: AdminJS.bundle('../components/StatementSummaryList.jsx')
         },
         search: {

@@ -153,6 +153,11 @@ const CustodianStatementResource = {
             component: AdminJS.bundle('../components/CustodianStatementShow.jsx'),
         },
         list: {
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && (
+                  currentAdmin.role === 'admin' || currentAdmin.role === 'user' || currentAdmin.role === 'reader'
+                )
+            },
             component: AdminJS.bundle('../components/CustodianStatementList.jsx')
         },
         stat: {

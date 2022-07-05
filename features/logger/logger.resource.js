@@ -27,6 +27,12 @@ const createLoggerResource = ({resource, featureOptions}) => {
           showInDrawer: true,
           containerWidth: '700px',
         },
+        list: {
+          isAccessible: ({ currentAdmin }) => {
+            return currentAdmin && (
+              currentAdmin.role === 'admin' || currentAdmin.role === 'user'
+            )
+        },}
       },
       properties: {
         _id: {

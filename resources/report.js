@@ -1,24 +1,33 @@
 const AdminJS = require('adminjs')
-const AccountLedgerBalance = require('../models/account-ledger-balance.model')
-const FeeShareResult = require('../models/feeshare-result.model')
-const AccountPolicy = require('../models/account-policy')
-const Customer = require('../models/customer-model')
-const Currency = require('../models/currency.model')
-const Custodian = require('../models/custodian.model')
-const Statement = require('../models/statement.model')
-const Role = require('../models/role.model')
-const Payee = require('../models/company-account-model')
 const moment = require('moment')
-const { customRound } = require('../lib/utils')
 const { jsPDF } = require('jspdf/dist/jspdf.node')
-const { parse } = require('json2csv')
 
 const ReportResosurce = {
+    id: 'Report',
     actions: {
         list: {
             isAccessible: false
         },
-        export: {
+        genreport: {
+            actionType: 'resource',
+            component: false,
+            isVisible: false,
+            handler: async(request, response, context) => {
+                const { record, resource, currentAdmin } = context
+                let pdfData = null
+                let pdfDoc = null
+                const { applyPlugin } = require('../lib/jspdf.plugin.autotable')
+                applyPlugin(jsPDF)
+                pdfDoc = new jsPDF()
+                pdfDoc.setFontSize(12)
+                pdfDoc.text(`${moment().format('YYYY-MM-DD')}`, 14, 10)
+                pdfData = pdfDoc.output()
+                return { 
+                    record: new AdminJS.BaseRecord({pdfData: pdfData}, resource).toJSON(currentAdmin)
+                }
+            }
+        }
+        /**export: {
             actionType: 'record',
             icon: 'Report',
             component: AdminJS.bundle('../components/MiniExport.jsx'),
@@ -150,13 +159,13 @@ const ReportResosurce = {
                     record: new AdminJS.BaseRecord({csvData: parsed, pdfData: pdfData, reportTypes: JSON.stringify(reportTypes)}, resource).toJSON(currentAdmin)
                 }
             }
-        }
+        }*/
     },
     properties: {
         _id: {
             isVisible: { list: false, filter: false, show: false, edit: false },
         }
-    }
+    },
 }
 
 module.exports = ReportResosurce

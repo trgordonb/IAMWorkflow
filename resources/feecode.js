@@ -9,7 +9,11 @@ const FeeCodeResource = {
     },
     actions: {
         list: {
-            isAccessible: true
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && (
+                  currentAdmin.role === 'admin' || currentAdmin.role === 'user'
+                )
+            },
         },
         edit: {
             showInDrawer: true,

@@ -39,7 +39,12 @@ const RecipientFeeShareResource = {
             showInDrawer: true
         },
         list: {
-            component: AdminJS.bundle('../components/RecipientFeeShareList.jsx')
+            component: AdminJS.bundle('../components/RecipientFeeShareList.jsx'),
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && (
+                  currentAdmin.role === 'admin' || currentAdmin.role === 'user'
+                )
+            },
         }
     }
 }

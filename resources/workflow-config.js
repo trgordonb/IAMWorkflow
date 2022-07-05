@@ -718,6 +718,11 @@ const WorkflowConfigResource = {
             }
         },
         list: {
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && (
+                  currentAdmin.role === 'admin' || currentAdmin.role === 'user'
+                )
+            },
             before: async(request, context) => {
                 const { currentAdmin } = context
                 return {

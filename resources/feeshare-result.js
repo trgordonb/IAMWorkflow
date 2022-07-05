@@ -22,6 +22,11 @@ const FeeShareResultResource = {
             showInDrawer: true
         },
         list: {
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && (
+                  currentAdmin.role === 'admin' || currentAdmin.role === 'user'
+                )
+            },
             component: AdminJS.bundle('../components/FeeShareResult.jsx')
         }
     },

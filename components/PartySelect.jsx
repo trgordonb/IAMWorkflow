@@ -19,7 +19,6 @@ const PartySelect = (props) => {
                     type: type
                 }
             })
-            console.log(result)
             if (result.request && result.request.statusText === 'OK') {
                 setAllItems(result.data.map(item => ({value: item._id, label: item.name})))
             }

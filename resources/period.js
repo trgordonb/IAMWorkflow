@@ -32,7 +32,11 @@ const PeriodResource = {
     },
     actions: {
         list: {
-            isAccessible: true
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && (
+                  currentAdmin.role === 'admin' || currentAdmin.role === 'user'
+                )
+            },
         },
         new: {
             showInDrawer: true,

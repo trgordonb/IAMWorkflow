@@ -34,7 +34,11 @@ const BankStatementItemResource = {
             component: AdminJS.bundle('../components/BankStatementItem.jsx')
         },
         list: {
-            isAccessible: true
+            isAccessible: ({ currentAdmin }) => {
+                return currentAdmin && (
+                  currentAdmin.role === 'admin' || currentAdmin.role === 'user'
+                )
+            },
         },
         show: {
             showInDrawer: true
