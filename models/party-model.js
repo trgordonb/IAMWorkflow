@@ -19,7 +19,13 @@ const PartySchema = new Schema({
     description: {
         type: String,
         index: true
-    }
+    },
+    contactPerson: {
+        title: String,
+        firstName: String,
+        lastName: String,
+    },
+    address: String,
 })
 
 const Party = mongoose.model('Party', PartySchema, 'Parties')

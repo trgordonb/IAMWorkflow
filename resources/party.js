@@ -19,7 +19,20 @@ const PartyResource = {
         description: {
             isVisible: true,
             position: 4
-        }
+        },
+        'contactPerson.title': {
+            isVisible: { list: false, filter: false, show: true, edit: true },
+        },
+        'contactPerson.firstName': {
+            isVisible: { list: false, filter: false, show: true, edit: true },
+        },
+        'contactPerson.lastName': {
+            isVisible: { list: false, filter: false, show: true, edit: true },
+        },
+        address: {
+            isVisible: { list: false, filter: false, show: true, edit: true },
+            type: 'richtext'
+        },
     },
     actions: {
         new: {

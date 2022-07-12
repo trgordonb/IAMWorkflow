@@ -36,6 +36,7 @@
     "json2csv": "^5.0.7",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.5.23",
+    "jspdf-html2canvas": "^1.4.9",
     "moment": "^2.29.1",
     "mongoose": "^6.3.1",
     "mongoose-plugin-autoinc-fix": "^1.2.1",

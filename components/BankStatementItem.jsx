@@ -18,12 +18,23 @@ const BankStatementItem = (props) => {
     const history = useHistory()
     const { translateButton } = useTranslation()
     let initialGross = 0
+    let charge = 0
     if (initialRecord && initialRecord.params && initialRecord.params.grossAmount) {
         initialGross = initialRecord.params.grossAmount
     }
+    if (initialRecord  && initialRecord.params && initialRecord.params.itemCharge) {
+        charge = initialRecord.params.itemCharge
+    }
     const [total, setTotal] = React.useState(initialGross)
+    const [netAmount, setNetAmount] = React.useState(0)
+    const [grossRecord, setGrossRecord] = React.useState(initialGross)
+    const [chargeRecord, setChargeRecord] = React.useState(charge)
     const [currency, setCurrency] = React.useState('')
     const sendNotice = useNotice()
+
+    React.useEffect(() => {
+        setNetAmount(grossRecord - chargeRecord)
+    },[chargeRecord, grossRecord])
 
     const submit = event => {
         event.preventDefault()
@@ -51,6 +62,14 @@ const BankStatementItem = (props) => {
         } else {
             return false
         }      
+    }
+
+    const chargeChange = async (propertyRecord, value) => {
+        if (propertyRecord === 'grossAmount') {
+            setGrossRecord(parseFloat(value))
+        } else if (propertyRecord === 'itemCharge') {
+            setChargeRecord(parseFloat(value))
+        }
     }
 
     const customChange = async (propertyRecord, value, selectedRecord) => {
@@ -126,22 +145,25 @@ const BankStatementItem = (props) => {
                 record={record}
             />
             <Box marginBottom={20} alignSelf='auto'>
-                <Text>{`Statement Item Amount: ${total}`}</Text>
+                <Text>{`Statement Item Gross Amount: ${total}`}</Text>
             </Box>
             <BasePropertyComponent
                 where="edit"
-                onChange={handleChange}
+                onChange={chargeChange}
                 property={resource.properties.grossAmount}
                 resource={resource}
                 record={record}
             />
             <BasePropertyComponent
                 where="edit"
-                onChange={handleChange}
+                onChange={chargeChange}
                 property={resource.properties.itemCharge}
                 resource={resource}
                 record={record}
             />
+            <Box marginBottom={20} alignSelf='auto'>
+                <Text>{`Statement Item Net Amount: ${netAmount}`}</Text>
+            </Box>
             <BasePropertyComponent
                 where="edit"
                 onChange={handleChange}

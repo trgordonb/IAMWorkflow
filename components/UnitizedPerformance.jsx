@@ -1,4 +1,5 @@
 import { Box, Button, H4 } from '@adminjs/design-system'
+import { colors } from 'admin-bro-theme-dark';
 import { useRecord, BasePropertyComponent, useTranslation, ApiClient } from 'adminjs'
 import {
     Chart as ChartJS,
@@ -34,7 +35,7 @@ const UnitizedPerformance = (props) => {
     const [graphData1, setGraphData1] = React.useState({})
     const [graphData2, setGraphData2] = React.useState({})
     const [showGraph, setShowGraph] = React.useState(false)
-
+    
     React.useEffect(() => {
         const getData = async () => {
             const result = await api.resourceAction({
@@ -46,13 +47,17 @@ const UnitizedPerformance = (props) => {
             let filteredRecords = records.filter(item => {
                 return (item.params.customer === record.params.customer)
             })
+            const colors1 = filteredRecords.map((value) => value.params.netChange < 0 ? 'red' : 'green')
+            const colors2 = filteredRecords.map((value) => value.params.unitizedChange < 0 ? 'red' : 'green')
+
             const labels = filteredRecords.map(item => moment(item.params.currentSubPeriodDate).format('YYYY-MM-DD'))
             const data1 = {
                 labels,
                 datasets: [
                     {
                         label: 'Net NAV Change',
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: colors1,
+                        backgroundColor: colors1,
                         data: filteredRecords.map(item => item.params.netChange)
                     },
                 ]
@@ -62,7 +67,8 @@ const UnitizedPerformance = (props) => {
                 datasets: [
                     {
                         label: 'Unitized Change',
-                        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                        borderColor: colors2,
+                        backgroundColor: colors2,
                         data: filteredRecords.map(item => item.params.unitizedChange)
                     }
                 ]

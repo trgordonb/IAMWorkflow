@@ -1,5 +1,6 @@
 const AdminJS = require('adminjs')
 const moment = require('moment')
+const mongoose = require('mongoose')
 const { jsPDF } = require('jspdf/dist/jspdf.node')
 
 const ReportResosurce = {
@@ -13,14 +14,46 @@ const ReportResosurce = {
             component: false,
             isVisible: false,
             handler: async(request, response, context) => {
+                const report = request.payload.report
                 const { record, resource, currentAdmin } = context
                 let pdfData = null
                 let pdfDoc = null
                 const { applyPlugin } = require('../lib/jspdf.plugin.autotable')
                 applyPlugin(jsPDF)
                 pdfDoc = new jsPDF()
-                pdfDoc.setFontSize(12)
-                pdfDoc.text(`${moment().format('YYYY-MM-DD')}`, 14, 10)
+                if (report === 'dn') {
+                    let statementSummaryModel = mongoose.connection.models['StatementSummary']
+                    let periodModel = mongoose.connection.models['Period']
+                    const period = await periodModel.findById(currentAdmin.period)
+                    let periodEnd = period.end
+                    let statementItems = await statementSummaryModel.
+                                         find({period: period._id, type: 'ManagementFee'}).
+                                         populate({path:'currency'}).
+                                         populate({path:'custodian'}).
+                                         populate({path: 'details', populate: {path: 'custodianAccount'}})
+                    statementItems.forEach((item,idx) => {
+                        pdfDoc.setFontSize(10)
+                        pdfDoc.text(`${moment(periodEnd).format('YYYY-MM-DD')}`, 14, 10)
+                        pdfDoc.text(`${item.custodian.name}`, 14, 16)
+                        pdfDoc.text(`Attn: ${item.custodian.contactPerson.title} ${item.custodian.contactPerson.firstName} ${item.custodian.contactPerson.lastName}`, 14, 52)
+                        pdfDoc.autoTable({
+                            styles: {
+                                fontSize: 10
+                            },
+                            startY: 30,
+                            head: [['Account','Amount']],
+                            columnStyles: {
+                                3: { halign: 'left' }
+                            },
+                            body: item.details.map(record => ([record.custodianAccount.accountNumber, record.amount.toLocaleString()]))
+                        })
+                        pdfDoc.setFontSize(12)
+                        pdfDoc.text(`Total:        ${item.sum.toLocaleString()}`, 102, pdfDoc.lastAutoTable.finalY + 10)
+                        if (idx < Object.keys(statementItems).length - 1) {
+                            pdfDoc.addPage('a4')
+                        }
+                    })
+                }
                 pdfData = pdfDoc.output()
                 return { 
                     record: new AdminJS.BaseRecord({pdfData: pdfData}, resource).toJSON(currentAdmin)

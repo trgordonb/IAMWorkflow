@@ -20,14 +20,15 @@ const Dashboard = (data) => {
     },[])
 
     const allReports = [{
-        value: 'perf', label: 'Client Perfomance Report'
+        value: 'perf', label: 'Client Perfomance Report',
+        value: 'dn', label: 'Demand Notes to Custodians'
     }]
     const [selectedReport, setSelectedReport] = useState()
     const getReportData = async () => {
         const result = await api.resourceAction({
             resourceId: 'Report',
             actionName: 'genreport',
-            data: {}
+            data: {report: selectedReport.value}
         })
         const actionRecord = flat.get(result.data.record.params)
         if (actionRecord.pdfData) {

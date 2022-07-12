@@ -8,7 +8,8 @@ const PartySelect = (props) => {
     const { onChange, property, type, record } = props
     const value = record.params && record.params[property.propertyPath]
     const [allItems, setAllItems] = useState([])
-    const [selectedParty, setSelectedParty] = useState(value)
+    const [isReady, setIsReady] = useState(false)
+    const [selectedParty, setSelectedParty] = useState({})
 
     useEffect(() => {
         const fetchParties= async() => {
@@ -26,19 +27,30 @@ const PartySelect = (props) => {
         fetchParties()
     }, [])
 
+    useEffect(() => {
+        if (allItems.length > 0) {
+            const selectedItems = allItems.filter(item => {return item.value === value})
+            if (selectedItems.length === 1) {
+                setSelectedParty(selectedItems)
+            }
+        }
+        setIsReady(true)
+    },[allItems])
+
     return (
         <FormGroup style={{width:510}}>
             <Label htmlFor={property.propertyPath}>{property.label}</Label>
-            <Select
+            { isReady && <Select
                 value={selectedParty}
                 options={allItems}
                 onChange={(item) => {
                     setSelectedParty(item)
+                    console.log(item)
                     onChange(property.propertyPath, item.value)
                 }}
                 autosize={true}
                 {...property.props}
-            />
+            /> }
         </FormGroup>
     )
 }
