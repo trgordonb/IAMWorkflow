@@ -64,12 +64,13 @@ const BankStatementItem = (props) => {
         }      
     }
 
-    const chargeChange = async (propertyRecord, value) => {
+    const chargeChange = async (propertyRecord, value, selectedRecord) => {
         if (propertyRecord === 'grossAmount') {
             setGrossRecord(parseFloat(value))
         } else if (propertyRecord === 'itemCharge') {
             setChargeRecord(parseFloat(value))
         }
+        handleChange(propertyRecord, value, selectedRecord)
     }
 
     const customChange = async (propertyRecord, value, selectedRecord) => {
@@ -162,7 +163,7 @@ const BankStatementItem = (props) => {
                 record={record}
             />
             <Box marginBottom={20} alignSelf='auto'>
-                <Text>{`Statement Item Net Amount: ${netAmount}`}</Text>
+                <Text>{`Statement Item Net Amount: ${netAmount.toFixed(2)}`}</Text>
             </Box>
             <BasePropertyComponent
                 where="edit"
